@@ -1,0 +1,15 @@
+.venv/
+venv/
+.env
+.env.example
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+*.pyc
+credentials/
+*.log
+.idea/
+.vscode/settings.json
+dist/
+build/

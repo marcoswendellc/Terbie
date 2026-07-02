@@ -1,0 +1,139 @@
+import pandas as pd
+
+from app.core.config import Settings
+from app.core.exceptions import ConfigurationError, DataSourceError
+from app.executor.executor import TerbieExecutor
+from app.knowledge.models import KnowledgeContext
+from app.narrator.models import ExecuteResponse, NarratorRequest
+from app.planner.models import ExecutionPlan
+from app.services.data_service import DataService
+from app.services.narrator_service import NarratorService
+from app.services.planner_service import PlannerService
+from app.services.semantic_service import SemanticService
+
+
+class ExecutionService:
+    """Coordinates semantic resolution, planning, data loading, and execution."""
+
+    def __init__(
+        self,
+        settings: Settings,
+        semantic_service: SemanticService,
+        planner_service: PlannerService,
+        data_service: DataService,
+        executor: TerbieExecutor,
+        narrator_service: NarratorService,
+    ) -> None:
+        self._settings = settings
+        self._semantic_service = semantic_service
+        self._planner_service = planner_service
+        self._data_service = data_service
+        self._executor = executor
+        self._narrator_service = narrator_service
+
+    def execute_question(
+        self,
+        *,
+        question: str,
+        knowledge_context: KnowledgeContext,
+    ) -> ExecuteResponse:
+        semantic_resolution = self._semantic_service.resolve(question=question)
+        planner_response = self._planner_service.create_draft_plan(
+            question=question,
+            semantic_resolution=semantic_resolution,
+            knowledge_context=knowledge_context,
+        )
+        dataframes = self._load_dataframes()
+        dataframe = self._select_dataframe(
+            dataframes=dataframes,
+            plan=planner_response.plan,
+            knowledge_context=knowledge_context,
+        )
+        result = self._executor.execute(
+            dataframe=dataframe,
+            plan=planner_response.plan,
+            knowledge_context=knowledge_context,
+        )
+        enriched_result = result.model_copy(
+            update={
+                "metadata": {
+                    **result.metadata,
+                    "question": question,
+                    "selected_table": dataframe.attrs.get("table_name"),
+                },
+            },
+        )
+        narrator_response = self._narrator_service.narrate(
+            NarratorRequest(
+                question=question,
+                execution_result=enriched_result,
+                semantic_resolution=semantic_resolution,
+                execution_plan=planner_response.plan,
+            ),
+        )
+
+        return ExecuteResponse(
+            question=question,
+            answer=narrator_response.answer,
+            highlights=narrator_response.highlights,
+            data=enriched_result.data,
+            metadata={**enriched_result.metadata, **narrator_response.metadata},
+            warnings=[*enriched_result.warnings, *narrator_response.warnings],
+        )
+
+    def _load_dataframes(self) -> dict[str, pd.DataFrame]:
+        spreadsheet_id = self._settings.google_sheets_spreadsheet_id
+        if spreadsheet_id is None or spreadsheet_id.strip() == "":
+            raise ConfigurationError(
+                "Google Sheets spreadsheet ID is not configured",
+                details={"expected": "GOOGLE_SHEETS_SPREADSHEET_ID"},
+            )
+
+        return self._data_service.read_google_spreadsheet_data(spreadsheet_id=spreadsheet_id)
+
+    def _select_dataframe(
+        self,
+        *,
+        dataframes: dict[str, pd.DataFrame],
+        plan: ExecutionPlan,
+        knowledge_context: KnowledgeContext,
+    ) -> pd.DataFrame:
+        required_columns = self._required_columns(plan=plan, knowledge_context=knowledge_context)
+        for table_name, dataframe in dataframes.items():
+            if required_columns.issubset(set(dataframe.columns)):
+                selected = dataframe.copy()
+                selected.attrs["table_name"] = table_name
+                return selected
+
+        raise DataSourceError(
+            "No loaded table contains the columns required by the execution plan",
+            details={"required_columns": sorted(required_columns)},
+        )
+
+    def _required_columns(
+        self,
+        *,
+        plan: ExecutionPlan,
+        knowledge_context: KnowledgeContext,
+    ) -> set[str]:
+        columns: set[str] = set()
+        metric_names = {metric.name for metric in plan.metrics}
+        entity_names = {entity.name for entity in plan.entities}
+
+        for metric in knowledge_context.metrics:
+            if metric.name in metric_names and metric.column is not None:
+                columns.add(metric.column)
+            if metric.name == "quantidade_compras" and "ticket_medio" in metric_names:
+                columns.add(metric.column or "")
+            if metric.name == "faturamento" and "ticket_medio" in metric_names:
+                columns.add(metric.column or "")
+
+        for dimension in knowledge_context.dimensions:
+            if dimension.name in entity_names or any(
+                operation.field == dimension.name for operation in plan.operations
+            ):
+                column = dimension.column or dimension.key or dimension.derived_from
+                if column is not None:
+                    columns.add(column)
+
+        return {column for column in columns if column}

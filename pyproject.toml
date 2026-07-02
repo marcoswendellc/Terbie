@@ -1,0 +1,25 @@
+[project]
+name = "terbie"
+version = "0.1.0"
+description = "Terral BI Copilot Engine"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115.0",
+    "google-auth>=2.34.0",
+    "gspread>=6.1.0",
+    "pandas>=2.2.0",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "uvicorn[standard]>=0.30.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=0.28.0",
+    "pytest>=8.3.0",
+    "ruff>=0.5.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

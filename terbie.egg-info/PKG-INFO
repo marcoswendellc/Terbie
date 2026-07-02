@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: terbie
+Version: 0.1.0
+Summary: Terral BI Copilot Engine
+Requires-Python: >=3.13
+Requires-Dist: fastapi>=0.115.0
+Requires-Dist: google-auth>=2.34.0
+Requires-Dist: gspread>=6.1.0
+Requires-Dist: pandas>=2.2.0
+Requires-Dist: pydantic>=2.8.0
+Requires-Dist: pydantic-settings>=2.4.0
+Requires-Dist: uvicorn[standard]>=0.30.0
