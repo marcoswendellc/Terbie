@@ -11,6 +11,8 @@ from app.core.dependencies import (
     provide_execution_service,
     provide_health_service,
     provide_knowledge_service,
+    provide_logical_query_plan_builder,
+    provide_logical_query_plan_validator,
     provide_narrator_service,
     provide_planner_service,
     provide_semantic_service,
@@ -33,6 +35,9 @@ from app.models.schema import TableSchema
 from app.narrator.models import ExecuteResponse, NarratorRequest, NarratorResponse
 from app.orchestrator.terbie_orchestrator import TerbieDraftResponse, TerbieOrchestrator
 from app.planner.models import PlannerRequest, PlannerResponse
+from app.query_plan.builder import LogicalQueryPlanBuilder
+from app.query_plan.models import QueryPlanDraftResponse
+from app.query_plan.validator import LogicalQueryPlanValidator
 from app.semantic.models import SemanticResolutionRequest, SemanticResolutionResponse
 from app.services.data_service import DataService
 from app.services.execution_service import ExecutionService
@@ -218,6 +223,44 @@ def create_compiler_draft(
         question=payload.question,
         semantic_resolution=semantic_resolution,
         knowledge_context=knowledge_service.get_context(),
+    )
+
+
+@router.post(
+    "/query-plan/draft",
+    response_model=QueryPlanDraftResponse,
+    tags=["query-plan"],
+)
+def create_query_plan_draft(
+    payload: PlannerRequest,
+    knowledge_service: Annotated[KnowledgeService, Depends(provide_knowledge_service)],
+    semantic_service: Annotated[SemanticService, Depends(provide_semantic_service)],
+    planner_service: Annotated[PlannerService, Depends(provide_planner_service)],
+    builder: Annotated[
+        LogicalQueryPlanBuilder,
+        Depends(provide_logical_query_plan_builder),
+    ],
+    validator: Annotated[
+        LogicalQueryPlanValidator,
+        Depends(provide_logical_query_plan_validator),
+    ],
+) -> QueryPlanDraftResponse:
+    semantic_resolution = semantic_service.resolve(question=payload.question)
+    planner_response = planner_service.create_draft_plan(
+        question=payload.question,
+        semantic_resolution=semantic_resolution,
+        knowledge_context=knowledge_service.get_context(),
+    )
+    logical_query_plan = builder.build(planner_response.plan)
+    validation = validator.validate(logical_query_plan)
+
+    return QueryPlanDraftResponse(
+        question=payload.question,
+        execution_plan=planner_response.plan,
+        logical_query_plan=logical_query_plan.model_copy(
+            update={"is_valid": validation.is_valid},
+        ),
+        validation=validation,
     )
 
 

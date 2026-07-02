@@ -22,6 +22,8 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.parser import PlanParser
 from app.planner.planner import QueryPlanner
 from app.planner.validator import PlanValidator
+from app.query_plan.builder import LogicalQueryPlanBuilder
+from app.query_plan.validator import LogicalQueryPlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.factory import ReasoningProviderFactory
 from app.schemas.discovery import SchemaDiscovery
@@ -102,6 +104,14 @@ def provide_plan_optimizer() -> PlanOptimizer:
 
 def provide_plan_parser() -> PlanParser:
     return PlanParser()
+
+
+def provide_logical_query_plan_builder() -> LogicalQueryPlanBuilder:
+    return LogicalQueryPlanBuilder()
+
+
+def provide_logical_query_plan_validator() -> LogicalQueryPlanValidator:
+    return LogicalQueryPlanValidator()
 
 
 def provide_planner_context_composer() -> PlannerContextComposer:
