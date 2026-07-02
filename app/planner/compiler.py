@@ -45,6 +45,9 @@ class PlannerCompiler:
             knowledge_context=knowledge_context,
         )
         reasoning_result = self._reasoning_provider.generate_execution_plan(context)
+        if reasoning_result.execution_plan is None:
+            raise ValueError("Reasoning provider did not return an execution plan.")
+
         parsed_plan = self._parser.parse(reasoning_result.execution_plan.model_dump(mode="json"))
         optimized_plan = self._optimizer.optimize(parsed_plan)
         validation = self._validator.validate(optimized_plan)

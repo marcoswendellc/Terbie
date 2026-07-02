@@ -1,3 +1,4 @@
+from app.compiler.hypothesis_builder import HypothesisBuilder
 from app.planner.planner import QueryPlanner
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext, ReasoningMessage, ReasoningResult
@@ -8,8 +9,33 @@ class MockReasoningProvider(BaseReasoningProvider):
 
     def __init__(self, planner: QueryPlanner | None = None) -> None:
         self._planner = planner or QueryPlanner()
+        self._hypothesis_builder = HypothesisBuilder()
+
+    def generate_hypothesis(self, context: ReasoningContext) -> ReasoningResult:
+        hypothesis = self._hypothesis_builder.build(
+            question=context.question,
+            semantic_resolution=context.semantic_resolution,
+            knowledge_context=context.knowledge_context,
+        )
+
+        return ReasoningResult(
+            hypothesis=hypothesis,
+            raw_response=hypothesis.model_dump_json(),
+            warnings=[],
+            provider="mock",
+            model=None,
+            success=True,
+        )
 
     def generate_execution_plan(self, context: ReasoningContext) -> ReasoningResult:
+        if context.semantic_resolution is None:
+            return ReasoningResult(
+                provider="mock",
+                model=None,
+                success=False,
+                warnings=["Semantic resolution ausente para gerar ExecutionPlan."],
+            )
+
         execution_plan = self._planner.create_plan(
             question=context.question,
             semantic_resolution=context.semantic_resolution,
@@ -24,4 +50,7 @@ class MockReasoningProvider(BaseReasoningProvider):
                 ),
             ],
             raw_output=execution_plan.model_dump(mode="json"),
+            provider="mock",
+            model=None,
+            success=True,
         )

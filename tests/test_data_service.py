@@ -4,11 +4,21 @@ import pandas as pd
 
 from app.catalog.data_catalog import DataCatalog
 from app.datasources.base import BaseTabularDataSource
+from app.datasources.registry import DataSourceRegistry
 from app.schemas.discovery import SchemaDiscovery
 from app.services.data_service import DataService
 
 
 class FakeGoogleSheetsDataSource(BaseTabularDataSource):
+    def get_name(self) -> str:
+        return "google_sheets"
+
+    def list_tables(self) -> list[str]:
+        return ["vendas"]
+
+    def load_table(self, table_name: str) -> pd.DataFrame:
+        return self.read_sheet("spreadsheet-id", table_name)
+
     def read_sheet(self, spreadsheet_id: str, sheet_name: str) -> pd.DataFrame:
         return self.read_spreadsheet(spreadsheet_id, [sheet_name])[sheet_name]
 
@@ -59,3 +69,19 @@ def test_load_google_spreadsheet_discovers_and_registers_schemas() -> None:
     assert columns["data"]["data_type"] == "datetime"
     assert columns["ativo"]["data_type"] == "boolean"
     assert columns["loja"]["examples"] == ["A", "B"]
+
+
+def test_data_service_uses_default_datasource_when_name_is_not_provided() -> None:
+    catalog = DataCatalog()
+    registry = DataSourceRegistry(default_name="google_sheets")
+    registry.register("google_sheets", FakeGoogleSheetsDataSource())
+    service = DataService(
+        datasource_registry=registry,
+        schema_discovery=SchemaDiscovery(),
+        data_catalog=catalog,
+    )
+
+    schema = service.load_table(table_name="vendas")
+
+    assert schema.name == "vendas"
+    assert catalog.get_entry("vendas").datasource_name == "google_sheets"

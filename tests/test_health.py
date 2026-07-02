@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings
 from app.core.dependencies import provide_data_catalog, provide_data_service, provide_settings
+from app.datasources.models import DataSourceHealth, DataSourceInfo
 from app.main import app
 from app.models.schema import ColumnSchema, DataCatalogEntry, TableSchema
 
@@ -89,3 +90,42 @@ def test_load_google_sheets_uses_default_spreadsheet_id_from_settings() -> None:
     assert response.json()[0]["name"] == "vendas"
     assert fake_data_service.spreadsheet_id == "spreadsheet-from-env"
     assert fake_data_service.sheet_names == ["vendas"]
+
+
+def test_datasources_endpoint_returns_registered_sources() -> None:
+    class FakeDataService:
+        def list_datasources(self) -> list[DataSourceInfo]:
+            return [
+                DataSourceInfo(
+                    name="google_sheets",
+                    type="google_sheets",
+                    tables=["vendas"],
+                    healthy=True,
+                ),
+            ]
+
+    app.dependency_overrides[provide_data_service] = lambda: FakeDataService()
+    try:
+        client = TestClient(app)
+        response = client.get("/datasources")
+    finally:
+        app.dependency_overrides.pop(provide_data_service, None)
+
+    assert response.status_code == 200
+    assert response.json()[0]["name"] == "google_sheets"
+
+
+def test_datasources_health_endpoint_returns_registered_sources_health() -> None:
+    class FakeDataService:
+        def check_datasource_health(self) -> list[DataSourceHealth]:
+            return [DataSourceHealth(name="google_sheets", healthy=True)]
+
+    app.dependency_overrides[provide_data_service] = lambda: FakeDataService()
+    try:
+        client = TestClient(app)
+        response = client.get("/datasources/health")
+    finally:
+        app.dependency_overrides.pop(provide_data_service, None)
+
+    assert response.status_code == 200
+    assert response.json() == [{"name": "google_sheets", "healthy": True, "message": None}]

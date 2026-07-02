@@ -5,7 +5,7 @@ from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
 
 from app.core.config import Settings
-from app.core.exceptions import ConfigurationError, DataSourceError
+from app.core.exceptions import ConfigurationError, DataSourceError, TerbieError
 from app.datasources.base import BaseTabularDataSource
 
 if TYPE_CHECKING:
@@ -18,9 +18,29 @@ class GoogleSheetsDataSource(BaseTabularDataSource):
     """Reads raw tabular data from Google Sheets."""
 
     _SCOPES = ("https://www.googleapis.com/auth/spreadsheets.readonly",)
+    _NAME = "google_sheets"
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
+
+    def get_name(self) -> str:
+        return self._NAME
+
+    def list_tables(self) -> list[str]:
+        return self.list_sheet_names(self._default_spreadsheet_id())
+
+    def load_table(self, table_name: str) -> pd.DataFrame:
+        return self.read_sheet(
+            spreadsheet_id=self._default_spreadsheet_id(),
+            sheet_name=table_name,
+        )
+
+    def health_check(self) -> bool:
+        try:
+            self.list_tables()
+        except (TerbieError, ValueError):
+            return False
+        return True
 
     def read_sheet(self, spreadsheet_id: str, sheet_name: str) -> pd.DataFrame:
         spreadsheet = self.open_spreadsheet(spreadsheet_id)
@@ -143,3 +163,12 @@ class GoogleSheetsDataSource(BaseTabularDataSource):
             return row[:column_count]
 
         return [*row, *([""] * (column_count - len(row)))]
+
+    def _default_spreadsheet_id(self) -> str:
+        spreadsheet_id = self._settings.google_sheets_spreadsheet_id
+        if spreadsheet_id is None or spreadsheet_id.strip() == "":
+            raise ConfigurationError(
+                "Google Sheets spreadsheet ID is not configured",
+                details={"expected": "GOOGLE_SHEETS_SPREADSHEET_ID"},
+            )
+        return spreadsheet_id

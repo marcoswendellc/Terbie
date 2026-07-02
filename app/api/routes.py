@@ -17,6 +17,7 @@ from app.core.dependencies import (
     provide_settings,
     provide_terbie_orchestrator,
 )
+from app.datasources.models import DataSourceHealth, DataSourceInfo
 from app.executor.models import ExecutionRequest
 from app.knowledge.knowledge_service import KnowledgeService
 from app.knowledge.models import (
@@ -67,6 +68,48 @@ def get_table_schema(
         raise HTTPException(status_code=404, detail=f"Table '{table}' not found")
 
     return schema
+
+
+@router.get("/datasources", response_model=list[DataSourceInfo], tags=["datasources"])
+def list_datasources(
+    data_service: Annotated[DataService, Depends(provide_data_service)],
+) -> list[DataSourceInfo]:
+    return data_service.list_datasources()
+
+
+@router.get("/datasources/health", response_model=list[DataSourceHealth], tags=["datasources"])
+def get_datasources_health(
+    data_service: Annotated[DataService, Depends(provide_data_service)],
+) -> list[DataSourceHealth]:
+    return data_service.check_datasource_health()
+
+
+@router.get(
+    "/datasources/{datasource_name}/tables",
+    response_model=list[str],
+    tags=["datasources"],
+)
+def list_datasource_tables(
+    datasource_name: str,
+    data_service: Annotated[DataService, Depends(provide_data_service)],
+) -> list[str]:
+    return data_service.list_tables(datasource_name=datasource_name)
+
+
+@router.get(
+    "/datasources/{datasource_name}/schema/{table_name}",
+    response_model=TableSchema,
+    tags=["datasources"],
+)
+def get_datasource_table_schema(
+    datasource_name: str,
+    table_name: str,
+    data_service: Annotated[DataService, Depends(provide_data_service)],
+) -> TableSchema:
+    return data_service.get_table_schema(
+        datasource_name=datasource_name,
+        table_name=table_name,
+    )
 
 
 @router.get("/knowledge/context", response_model=KnowledgeContext, tags=["knowledge"])

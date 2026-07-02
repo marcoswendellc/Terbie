@@ -32,6 +32,7 @@ class DataCatalogEntry(BaseModel):
     table_name: str
     table_schema: TableSchema
     source: str
+    datasource_name: str | None = None
     loaded_at: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
 
     model_config = ConfigDict(frozen=True)

@@ -4,7 +4,9 @@ from app.compiler.compiler import TerbieCompiler
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
 from app.core.config import Settings, get_settings
+from app.datasources.factory import DataSourceFactory
 from app.datasources.google_sheets import GoogleSheetsDataSource
+from app.datasources.registry import DataSourceRegistry
 from app.executor.engine import PandasExecutionEngine
 from app.executor.executor import TerbieExecutor
 from app.executor.pipeline import PipelineExecutor
@@ -21,7 +23,7 @@ from app.planner.parser import PlanParser
 from app.planner.planner import QueryPlanner
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
-from app.reasoning.mock_provider import MockReasoningProvider
+from app.reasoning.factory import ReasoningProviderFactory
 from app.schemas.discovery import SchemaDiscovery
 from app.semantic.resolver import SemanticResolver
 from app.services.data_service import DataService
@@ -33,6 +35,7 @@ from app.services.semantic_service import SemanticService
 
 _data_catalog = DataCatalog()
 _semantic_resolver = SemanticResolver()
+_datasource_registry: DataSourceRegistry | None = None
 
 
 def provide_settings() -> Settings:
@@ -51,15 +54,25 @@ def provide_google_sheets_data_source() -> GoogleSheetsDataSource:
     return GoogleSheetsDataSource(settings=provide_settings())
 
 
+def provide_datasource_registry() -> DataSourceRegistry:
+    global _datasource_registry
+
+    if _datasource_registry is None:
+        _datasource_registry = DataSourceFactory().create_registry(settings=provide_settings())
+
+    return _datasource_registry
+
+
 def provide_schema_discovery() -> SchemaDiscovery:
     return SchemaDiscovery()
 
 
 def provide_data_service() -> DataService:
     return DataService(
-        data_source=provide_google_sheets_data_source(),
+        datasource_registry=provide_datasource_registry(),
         schema_discovery=provide_schema_discovery(),
         data_catalog=provide_data_catalog(),
+        default_datasource=provide_settings().default_datasource,
     )
 
 
@@ -96,7 +109,7 @@ def provide_planner_context_composer() -> PlannerContextComposer:
 
 
 def provide_reasoning_provider() -> BaseReasoningProvider:
-    return MockReasoningProvider(planner=provide_query_planner())
+    return ReasoningProviderFactory().create(settings=provide_settings())
 
 
 def provide_planner_compiler() -> PlannerCompiler:
@@ -128,6 +141,7 @@ def provide_terbie_compiler() -> TerbieCompiler:
         execution_plan_builder=provide_execution_plan_builder(),
         validator=provide_plan_validator(),
         optimizer=provide_plan_optimizer(),
+        reasoning_provider=provide_reasoning_provider(),
     )
 
 

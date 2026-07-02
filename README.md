@@ -13,3 +13,11 @@ Documentos principais:
 - [Visao geral da arquitetura](docs/architecture/overview.md)
 - [Planner Specification v1](docs/planner-specification-v1.md)
 - [Architecture Decision Records](docs/adr/)
+
+## Dependencias
+
+O provider Gemini usa o pacote `google-genai`.
+
+```powershell
+pip install google-genai
+```

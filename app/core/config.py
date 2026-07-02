@@ -22,6 +22,10 @@ class Settings(BaseSettings):
         default=None,
         alias="GOOGLE_SHEETS_SPREADSHEET_ID",
     )
+    gemini_api_key: SecretStr | None = Field(default=None, alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
+    reasoning_provider: str = Field(default="mock", alias="REASONING_PROVIDER")
+    default_datasource: str = Field(default="google_sheets", alias="DEFAULT_DATASOURCE")
 
     model_config = SettingsConfigDict(
         env_file=".env",

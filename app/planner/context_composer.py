@@ -22,7 +22,7 @@ class PlannerContextComposer:
             question=question,
             semantic_resolution=semantic_resolution,
             schema_context=schema,
-            data_catalog=self._catalog_context(data_catalog),
+            catalog_context=self._catalog_context(data_catalog),
             knowledge_context=knowledge_context,
         )
 
