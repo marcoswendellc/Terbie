@@ -19,12 +19,14 @@ class GeminiReasoningProvider(BaseReasoningProvider):
         *,
         api_key: SecretStr | str | None,
         model: str = "gemini-2.5-flash",
+        timeout_ms: int = 5000,
         prompt_renderer: PromptRenderer | None = None,
         client: Any | None = None,
         prompt_path: Path | None = None,
     ) -> None:
         self._api_key = api_key
         self._model = model
+        self._timeout_ms = timeout_ms
         self._prompt_renderer = prompt_renderer or PromptRenderer()
         self._client = client
         self._prompt_path = prompt_path or Path("app/prompts/gemini_hypothesis_prompt.md")
@@ -83,13 +85,17 @@ class GeminiReasoningProvider(BaseReasoningProvider):
 
     def _create_client(self) -> Any:
         from google import genai
+        from google.genai import types
 
         api_key = (
             self._api_key.get_secret_value()
             if isinstance(self._api_key, SecretStr)
             else self._api_key
         )
-        return genai.Client(api_key=api_key)
+        return genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=self._timeout_ms),
+        )
 
     def _extract_json(self, text: str) -> str:
         stripped = text.strip()

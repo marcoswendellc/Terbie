@@ -187,6 +187,16 @@ class SemanticResolver:
                     ),
                 )
 
+        for match in re.finditer(r"(?<!\w)(?P<value>20\d{2})(?!\w)", normalized_query):
+            parameters.append(
+                SemanticParameter(
+                    type="period",
+                    value=match.group("value"),
+                    term=match.group(0),
+                    confidence=1.0,
+                ),
+            )
+
         return parameters
 
     def _deduplicate_parameters(

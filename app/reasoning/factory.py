@@ -14,6 +14,7 @@ class ReasoningProviderFactory:
             return GeminiReasoningProvider(
                 api_key=settings.gemini_api_key,
                 model=settings.gemini_model,
+                timeout_ms=settings.gemini_timeout_ms,
                 prompt_renderer=PromptRenderer(),
             )
 

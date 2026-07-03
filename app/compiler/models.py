@@ -12,6 +12,7 @@ class AnalyticalHypothesis(BaseModel):
     metric: str | None = None
     time_scope: str | None = None
     filters: list[dict[str, Any]] = Field(default_factory=list)
+    comparison_entities: list[dict[str, Any]] = Field(default_factory=list)
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     warnings: list[str] = Field(default_factory=list)
 
@@ -25,6 +26,7 @@ class AnalyticalPlan(BaseModel):
     dimensions: list[str] = Field(default_factory=list)
     time_scope: str | None = None
     filters: list[dict[str, Any]] = Field(default_factory=list)
+    comparison_entities: list[dict[str, Any]] = Field(default_factory=list)
     required_operations: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 

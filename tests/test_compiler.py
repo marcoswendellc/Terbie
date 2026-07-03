@@ -48,6 +48,12 @@ def test_ranking_restaurante_faturamento_compiler_flow() -> None:
     }
     assert any(metric.name == "faturamento" for metric in response.execution_plan.metrics)
     assert any(entity.name == "restaurante" for entity in response.execution_plan.entities)
+    assert any(
+        operation.type == "filter"
+        and operation.field == "segmento"
+        and operation.parameters == {"operator": "contains", "value": "Alimentação"}
+        for operation in response.execution_plan.operations
+    )
 
 
 def test_ticket_medio_lojas_current_month_compiler_flow() -> None:

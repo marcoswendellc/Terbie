@@ -45,6 +45,18 @@ BUSINESS_SYNONYMS: dict[str, list[str]] = {
         "food court",
         "praça de alimentação",
     ],
+    "promocao": [
+        "campanha",
+        "campanhas",
+        "promoção",
+        "promocao",
+        "promoções",
+        "promocoes",
+        "ação promocional",
+        "acao promocional",
+        "ações promocionais",
+        "acoes promocionais",
+    ],
     "data": [
         "data",
         "período",

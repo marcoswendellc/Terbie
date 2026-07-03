@@ -270,9 +270,10 @@ def execute_question(
     execution_service: Annotated[ExecutionService, Depends(provide_execution_service)],
     knowledge_service: Annotated[KnowledgeService, Depends(provide_knowledge_service)],
 ) -> ExecuteResponse:
+    knowledge_context = knowledge_service.get_context()
     return execution_service.execute_question(
         question=payload.question,
-        knowledge_context=knowledge_service.get_context(),
+        knowledge_context=knowledge_context,
     )
 
 

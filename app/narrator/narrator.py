@@ -1,11 +1,14 @@
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.models import NarratorRequest, NarratorResponse
-from app.narrator.templates import (
-    EMPTY_RESULT_TEMPLATE,
-    GENERIC_RESULT_TEMPLATE,
-    RANKING_TEMPLATE,
-    WARNING_TEMPLATE,
+from app.narrator.strategies import (
+    ComparisonStrategy,
+    GenericStrategy,
+    ListingStrategy,
+    MetricStrategy,
+    RankingStrategy,
+    ResponseStrategy,
+    TrendStrategy,
 )
 
 
@@ -19,64 +22,50 @@ class TerbieNarrator:
     ) -> None:
         self._context_builder = context_builder
         self._formatter = formatter
+        self._strategies: list[ResponseStrategy] = [
+            ListingStrategy(formatter),
+            ComparisonStrategy(formatter),
+            TrendStrategy(formatter),
+            MetricStrategy(formatter),
+            RankingStrategy(formatter),
+            GenericStrategy(formatter),
+        ]
 
     def narrate(self, request: NarratorRequest) -> NarratorResponse:
         context = self._context_builder.build(request)
         if context.rows_returned == 0 or context.top_row is None:
             return NarratorResponse(
-                answer=EMPTY_RESULT_TEMPLATE,
+                answer="Não há dados suficientes para sustentar uma resposta confiável.",
                 summary=None,
                 highlights=[],
                 warnings=context.warnings,
-                metadata={"rows_returned": context.rows_returned, "columns": context.columns},
+                metadata=self._metadata(context),
             )
 
-        highlights = self._highlights(
-            context.top_row,
-            context.dimension_columns,
-            context.metric_columns,
-        )
-        answer = self._answer(
-            rows=context.rows_returned,
-            highlights=highlights,
-            warnings=context.warnings,
-        )
+        strategy = self._strategy_for(context)
+        highlights = strategy.highlights(context)
 
         return NarratorResponse(
-            answer=answer,
-            summary=GENERIC_RESULT_TEMPLATE.format(rows=context.rows_returned),
+            answer=strategy.answer(context),
+            summary=None,
             highlights=highlights,
             warnings=context.warnings,
-            metadata={"rows_returned": context.rows_returned, "columns": context.columns},
+            metadata=self._metadata(context),
         )
 
-    def _highlights(
-        self,
-        top_row: dict[str, object],
-        dimension_columns: list[str],
-        metric_columns: list[str],
-    ) -> list[str]:
-        if not dimension_columns or not metric_columns:
-            return []
+    def _strategy_for(self, context) -> ResponseStrategy:
+        for strategy in self._strategies:
+            if strategy.can_handle(context):
+                return strategy
 
-        dimension_column = dimension_columns[0]
-        metric_column = metric_columns[0]
-        dimension_value = self._formatter.value(dimension_column, top_row[dimension_column])
-        metric_value = self._formatter.value(metric_column, top_row[metric_column])
-        return [
-            self._formatter.ranking_text(
-                dimension=dimension_value,
-                metric=metric_value,
-            ),
-        ]
+        return self._strategies[-1]
 
-    def _answer(self, *, rows: int, highlights: list[str], warnings: list[str]) -> str:
-        base_answer = (
-            RANKING_TEMPLATE.format(rows=rows, highlight=highlights[0])
-            if highlights
-            else GENERIC_RESULT_TEMPLATE.format(rows=rows)
-        )
-        if not warnings:
-            return base_answer
+    def _metadata(self, context) -> dict[str, object]:
+        metadata: dict[str, object] = {
+            "rows_returned": context.rows_returned,
+            "columns": context.columns,
+        }
+        if context.warnings:
+            metadata["technical_warnings"] = context.warnings
 
-        return f"{base_answer} {WARNING_TEMPLATE.format(warnings='; '.join(warnings))}."
+        return metadata

@@ -6,6 +6,8 @@ class PlanValidator:
 
     _KNOWN_OPERATIONS = {
         "select",
+        "distinct",
+        "derived_metric",
         "filter",
         "group_by",
         "aggregate",

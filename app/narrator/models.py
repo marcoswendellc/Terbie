@@ -15,11 +15,13 @@ class NarratorRequest(BaseModel):
 class NarrativeContext(BaseModel):
     question: str
     rows_returned: int
+    data: list[dict[str, Any]] = Field(default_factory=list)
     columns: list[str] = Field(default_factory=list)
     top_row: dict[str, Any] | None = None
     metric_columns: list[str] = Field(default_factory=list)
     dimension_columns: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    intent: str | None = None
 
     model_config = ConfigDict(frozen=True)
 

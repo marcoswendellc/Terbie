@@ -7,10 +7,12 @@ from app.core.config import Settings, get_settings
 from app.datasources.factory import DataSourceFactory
 from app.datasources.google_sheets import GoogleSheetsDataSource
 from app.datasources.registry import DataSourceRegistry
+from app.entity_resolution.entity_resolver import EntityResolver
 from app.executor.engine import PandasExecutionEngine
 from app.executor.executor import TerbieExecutor
 from app.executor.pipeline import PipelineExecutor
 from app.executor.registry import OperationRegistry
+from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.knowledge_service import KnowledgeService
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
@@ -75,6 +77,8 @@ def provide_data_service() -> DataService:
         schema_discovery=provide_schema_discovery(),
         data_catalog=provide_data_catalog(),
         default_datasource=provide_settings().default_datasource,
+        default_table=provide_settings().default_table,
+        blocked_tables=provide_settings().blocked_tables,
     )
 
 
@@ -88,6 +92,14 @@ def provide_semantic_resolver() -> SemanticResolver:
 
 def provide_semantic_service() -> SemanticService:
     return SemanticService(resolver=provide_semantic_resolver())
+
+
+def provide_intent_guard() -> IntentGuard:
+    return IntentGuard()
+
+
+def provide_entity_resolver() -> EntityResolver:
+    return EntityResolver()
 
 
 def provide_query_planner() -> QueryPlanner:
@@ -152,6 +164,7 @@ def provide_terbie_compiler() -> TerbieCompiler:
         validator=provide_plan_validator(),
         optimizer=provide_plan_optimizer(),
         reasoning_provider=provide_reasoning_provider(),
+        entity_resolver=provide_entity_resolver(),
     )
 
 
@@ -202,6 +215,7 @@ def provide_execution_service() -> ExecutionService:
         data_service=provide_data_service(),
         executor=provide_terbie_executor(),
         narrator_service=provide_narrator_service(),
+        intent_guard=provide_intent_guard(),
     )
 
 
@@ -210,4 +224,5 @@ def provide_terbie_orchestrator() -> TerbieOrchestrator:
         semantic_service=provide_semantic_service(),
         planner_service=provide_planner_service(),
         knowledge_service=provide_knowledge_service(),
+        intent_guard=provide_intent_guard(),
     )

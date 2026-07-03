@@ -21,3 +21,7 @@ O provider Gemini usa o pacote `google-genai`.
 ```powershell
 pip install google-genai
 ```
+
+## Releases
+
+- [v0.1.0 — Foundation](docs/releases/v0.1.0.md)

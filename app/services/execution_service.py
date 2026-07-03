@@ -1,8 +1,12 @@
+import re
+import unicodedata
+
 import pandas as pd
 
 from app.core.config import Settings
 from app.core.exceptions import ConfigurationError, DataSourceError
 from app.executor.executor import TerbieExecutor
+from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.models import KnowledgeContext
 from app.narrator.models import ExecuteResponse, NarratorRequest
 from app.planner.models import ExecutionPlan
@@ -15,6 +19,8 @@ from app.services.semantic_service import SemanticService
 class ExecutionService:
     """Coordinates semantic resolution, planning, data loading, and execution."""
 
+    _SENSITIVE_COLUMNS = {"senha", "password", "token", "secret"}
+
     def __init__(
         self,
         settings: Settings,
@@ -23,6 +29,7 @@ class ExecutionService:
         data_service: DataService,
         executor: TerbieExecutor,
         narrator_service: NarratorService,
+        intent_guard: IntentGuard | None = None,
     ) -> None:
         self._settings = settings
         self._semantic_service = semantic_service
@@ -30,6 +37,7 @@ class ExecutionService:
         self._data_service = data_service
         self._executor = executor
         self._narrator_service = narrator_service
+        self._intent_guard = intent_guard or IntentGuard()
 
     def execute_question(
         self,
@@ -37,6 +45,13 @@ class ExecutionService:
         question: str,
         knowledge_context: KnowledgeContext,
     ) -> ExecuteResponse:
+        intent_guard_result = self._intent_guard.evaluate(question)
+        if not intent_guard_result.is_analytical:
+            return self._out_of_scope_response(
+                question,
+                response=intent_guard_result.response or "",
+            )
+
         semantic_resolution = self._semantic_service.resolve(question=question)
         planner_response = self._planner_service.create_draft_plan(
             question=question,
@@ -76,7 +91,7 @@ class ExecutionService:
             question=question,
             answer=narrator_response.answer,
             highlights=narrator_response.highlights,
-            data=enriched_result.data,
+            data=self._sanitize_rows(enriched_result.data),
             metadata={**enriched_result.metadata, **narrator_response.metadata},
             warnings=[*enriched_result.warnings, *narrator_response.warnings],
         )
@@ -89,7 +104,10 @@ class ExecutionService:
                 details={"expected": "GOOGLE_SHEETS_SPREADSHEET_ID"},
             )
 
-        return self._data_service.read_google_spreadsheet_data(spreadsheet_id=spreadsheet_id)
+        return self._data_service.read_google_spreadsheet_data(
+            spreadsheet_id=spreadsheet_id,
+            sheet_names=[self._settings.default_table],
+        )
 
     def _select_dataframe(
         self,
@@ -100,14 +118,19 @@ class ExecutionService:
     ) -> pd.DataFrame:
         required_columns = self._required_columns(plan=plan, knowledge_context=knowledge_context)
         for table_name, dataframe in dataframes.items():
+            if table_name != self._settings.default_table:
+                continue
             if required_columns.issubset(set(dataframe.columns)):
                 selected = dataframe.copy()
                 selected.attrs["table_name"] = table_name
                 return selected
 
         raise DataSourceError(
-            "No loaded table contains the columns required by the execution plan",
-            details={"required_columns": sorted(required_columns)},
+            "Default table does not contain the columns required by the execution plan",
+            details={
+                "table_name": self._settings.default_table,
+                "required_columns": sorted(required_columns),
+            },
         )
 
     def _required_columns(
@@ -136,4 +159,72 @@ class ExecutionService:
                 if column is not None:
                     columns.add(column)
 
+        for operation in plan.operations:
+            if operation.type in {"filter", "group_by"} and operation.field is not None:
+                columns.add(
+                    self._resolve_dimension_column(
+                        operation.field,
+                        knowledge_context=knowledge_context,
+                    ),
+                )
+
+            end_field = operation.parameters.get("end_field")
+            if isinstance(end_field, str):
+                columns.add(end_field)
+
+            fields = operation.parameters.get("fields", [])
+            if isinstance(fields, list):
+                columns.update(field for field in fields if isinstance(field, str))
+
+            subset = operation.parameters.get("subset", [])
+            if isinstance(subset, list):
+                columns.update(field for field in subset if isinstance(field, str))
+
+            metrics = operation.parameters.get("metrics", [])
+            if isinstance(metrics, list):
+                for metric in metrics:
+                    if isinstance(metric, dict) and isinstance(metric.get("field"), str):
+                        columns.add(metric["field"])
+
         return {column for column in columns if column}
+
+    def _resolve_dimension_column(
+        self,
+        name: str,
+        *,
+        knowledge_context: KnowledgeContext,
+    ) -> str:
+        for dimension in knowledge_context.dimensions:
+            if dimension.name == name:
+                return dimension.column or dimension.key or dimension.derived_from or name
+
+        return name
+
+    def _out_of_scope_response(self, question: str, *, response: str) -> ExecuteResponse:
+        return ExecuteResponse(
+            question=question,
+            answer=response,
+            highlights=[],
+            data=[],
+            metadata={"data_accessed": False, "response_type": "out_of_scope"},
+            warnings=[],
+        )
+
+    def _sanitize_rows(self, rows: list[dict[str, object]]) -> list[dict[str, object]]:
+        return [
+            {
+                key: value
+                for key, value in row.items()
+                if self._normalize_text(key) not in self._SENSITIVE_COLUMNS
+            }
+            for row in rows
+        ]
+
+    def _normalize_text(self, text: str) -> str:
+        without_accents = "".join(
+            char
+            for char in unicodedata.normalize("NFKD", text.lower())
+            if not unicodedata.combining(char)
+        )
+        alphanumeric_text = re.sub(r"[^a-z0-9_]+", " ", without_accents)
+        return re.sub(r"\s+", " ", alphanumeric_text).strip()

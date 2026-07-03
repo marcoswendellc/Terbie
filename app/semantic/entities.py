@@ -18,8 +18,8 @@ SEMANTIC_ENTITIES: dict[str, SemanticEntity] = {
         name="produto",
         synonyms=["produto", "produtos", "item", "itens"],
     ),
-    "campanha": SemanticEntity(
-        name="campanha",
-        synonyms=["campanha", "campanhas", "promoção", "promocao", "ação", "acao"],
+    "promocao": SemanticEntity(
+        name="promocao",
+        synonyms=BUSINESS_SYNONYMS["promocao"],
     ),
 }

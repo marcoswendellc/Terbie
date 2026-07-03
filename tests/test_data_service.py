@@ -52,6 +52,7 @@ def test_load_google_spreadsheet_discovers_and_registers_schemas() -> None:
         data_source=FakeGoogleSheetsDataSource(),
         schema_discovery=SchemaDiscovery(),
         data_catalog=catalog,
+        default_table="vendas",
     )
 
     schemas = service.load_google_spreadsheet(spreadsheet_id="spreadsheet-id")

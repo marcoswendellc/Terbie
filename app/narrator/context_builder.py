@@ -15,11 +15,13 @@ class NarrativeContextBuilder:
         return NarrativeContext(
             question=request.question,
             rows_returned=execution_result.rows_returned,
+            data=data,
             columns=columns,
             top_row=data[0] if data else None,
             metric_columns=self._metric_columns(data=data, columns=columns),
             dimension_columns=self._dimension_columns(data=data, columns=columns),
             warnings=execution_result.warnings,
+            intent=getattr(request.execution_plan, "intent", None),
         )
 
     def _metric_columns(self, *, data: list[dict[str, Any]], columns: list[str]) -> list[str]:

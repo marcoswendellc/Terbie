@@ -55,6 +55,22 @@ def test_executor_runs_ranking_restaurantes_pipeline() -> None:
     assert result.metadata["operations"] == ["group_by", "aggregate", "sort", "limit"]
 
 
+def test_executor_applies_limit_operation() -> None:
+    plan = ExecutionPlan(
+        operations=[PlanOperation(type="limit", parameters={"value": 10})],
+    )
+    dataframe = pd.DataFrame({"value": list(range(25))})
+
+    result = _executor().execute(
+        dataframe=dataframe,
+        plan=plan,
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert result.rows_returned == 10
+    assert len(result.data) == 10
+
+
 def test_executor_calculates_ticket_medio_by_loja() -> None:
     plan = ExecutionPlan(
         entities=[PlanEntity(name="loja")],
