@@ -6,6 +6,7 @@ import pandas as pd
 from app.core.config import Settings
 from app.core.exceptions import ConfigurationError, DataSourceError
 from app.executor.executor import TerbieExecutor
+from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.models import KnowledgeContext
 from app.narrator.models import ExecuteResponse, NarratorRequest
@@ -30,6 +31,7 @@ class ExecutionService:
         executor: TerbieExecutor,
         narrator_service: NarratorService,
         intent_guard: IntentGuard | None = None,
+        insight_generator: InsightGenerator | None = None,
     ) -> None:
         self._settings = settings
         self._semantic_service = semantic_service
@@ -38,6 +40,7 @@ class ExecutionService:
         self._executor = executor
         self._narrator_service = narrator_service
         self._intent_guard = intent_guard or IntentGuard()
+        self._insight_generator = insight_generator or InsightGenerator()
 
     def execute_question(
         self,
@@ -78,12 +81,18 @@ class ExecutionService:
                 },
             },
         )
+        insight_result = self._insight_generator.generate(
+            enriched_result,
+            analytical_plan=None,
+            execution_plan=planner_response.plan,
+        )
         narrator_response = self._narrator_service.narrate(
             NarratorRequest(
                 question=question,
                 execution_result=enriched_result,
                 semantic_resolution=semantic_resolution,
                 execution_plan=planner_response.plan,
+                insight_result=insight_result,
             ),
         )
 
@@ -91,6 +100,8 @@ class ExecutionService:
             question=question,
             answer=narrator_response.answer,
             highlights=narrator_response.highlights,
+            insights=narrator_response.insights,
+            recommendations=narrator_response.recommendations,
             data=self._sanitize_rows(enriched_result.data),
             metadata={**enriched_result.metadata, **narrator_response.metadata},
             warnings=[*enriched_result.warnings, *narrator_response.warnings],
@@ -205,6 +216,8 @@ class ExecutionService:
             question=question,
             answer=response,
             highlights=[],
+            insights=[],
+            recommendations=[],
             data=[],
             metadata={"data_accessed": False, "response_type": "out_of_scope"},
             warnings=[],

@@ -2,6 +2,8 @@ from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
 from app.compiler.models import AnalyticalHypothesis, CompilerRequest, CompilerResponse
+from app.context_resolution.context_resolver import ContextResolver
+from app.context_resolution.models import ResolvedContext
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.entity_resolution.models import EntityMatch
 from app.knowledge.models import KnowledgeContext
@@ -24,6 +26,7 @@ class TerbieCompiler:
         optimizer: PlanOptimizer,
         reasoning_provider: BaseReasoningProvider | None = None,
         entity_resolver: EntityResolver | None = None,
+        context_resolver: ContextResolver | None = None,
     ) -> None:
         self._hypothesis_builder = hypothesis_builder
         self._analytical_planner = analytical_planner
@@ -32,6 +35,9 @@ class TerbieCompiler:
         self._optimizer = optimizer
         self._reasoning_provider = reasoning_provider
         self._entity_resolver = entity_resolver or EntityResolver()
+        self._context_resolver = context_resolver or ContextResolver(
+            entity_resolver=self._entity_resolver,
+        )
 
     def compile(self, request: CompilerRequest) -> CompilerResponse:
         semantic_resolution = (
@@ -54,6 +60,10 @@ class TerbieCompiler:
             ),
         )
         hypothesis = self._apply_entity_resolution(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
+        hypothesis = self._apply_context_resolution(
             question=request.question,
             hypothesis=hypothesis,
         )
@@ -177,6 +187,87 @@ class TerbieCompiler:
             "source": "entity_resolution",
             "confidence": match.confidence,
         }
+
+    def _apply_context_resolution(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        if hypothesis.analysis_type == "comparison":
+            return hypothesis
+
+        resolved_context = self._context_resolver.resolve(question)
+        if not self._has_context(resolved_context):
+            return hypothesis
+
+        filters = [
+            *hypothesis.filters,
+            *[
+                {
+                    "type": "filter",
+                    "field": resolved_filter.field,
+                    "operator": resolved_filter.operator,
+                    "value": resolved_filter.value,
+                }
+                for resolved_filter in resolved_context.filters
+            ],
+        ]
+        if (
+            (resolved_context.intent or hypothesis.analysis_type) == "ranking"
+            and not any(filter_item.get("type") == "limit" for filter_item in filters)
+        ):
+            filters.append({"type": "limit", "value": 1})
+
+        dimensions = [dimension.field for dimension in resolved_context.dimensions]
+        metric = resolved_context.metrics[0].name if resolved_context.metrics else hypothesis.metric
+        metric_source = hypothesis.metric_source
+        if resolved_context.metrics and metric_source != "business_default":
+            metric_source = "explicit"
+
+        business_entity = (
+            resolved_context.dimensions[0].label
+            if resolved_context.dimensions and resolved_context.dimensions[0].label is not None
+            else hypothesis.business_entity
+        )
+
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": resolved_context.intent or hypothesis.analysis_type,
+                "business_entity": business_entity,
+                "metric": metric,
+                "metric_source": metric_source,
+                "dimensions": dimensions or hypothesis.dimensions,
+                "filters": self._deduplicate_filters(filters),
+                "warnings": [*hypothesis.warnings, *resolved_context.warnings],
+            },
+        )
+
+    def _has_context(self, resolved_context: ResolvedContext) -> bool:
+        return bool(
+            resolved_context.filters
+            or resolved_context.dimensions
+            or resolved_context.metrics
+            or resolved_context.intent
+            or resolved_context.warnings
+        )
+
+    def _deduplicate_filters(self, filters: list[dict[str, object]]) -> list[dict[str, object]]:
+        deduplicated: list[dict[str, object]] = []
+        seen: set[tuple[object, object, object]] = set()
+        for filter_item in filters:
+            key = (
+                filter_item.get("field"),
+                filter_item.get("operator"),
+                str(filter_item.get("value")),
+            )
+            if key in seen:
+                continue
+
+            deduplicated.append(filter_item)
+            seen.add(key)
+
+        return deduplicated
 
     def _apply_comparison_entity_resolution(
         self,

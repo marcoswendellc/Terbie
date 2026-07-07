@@ -3,6 +3,7 @@ from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.compiler import TerbieCompiler
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
+from app.context_resolution.context_resolver import ContextResolver
 from app.core.config import Settings, get_settings
 from app.datasources.factory import DataSourceFactory
 from app.datasources.google_sheets import GoogleSheetsDataSource
@@ -12,8 +13,10 @@ from app.executor.engine import PandasExecutionEngine
 from app.executor.executor import TerbieExecutor
 from app.executor.pipeline import PipelineExecutor
 from app.executor.registry import OperationRegistry
+from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.knowledge_service import KnowledgeService
+from app.metrics.metric_resolver import MetricResolver
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.narrator import TerbieNarrator
@@ -98,8 +101,23 @@ def provide_intent_guard() -> IntentGuard:
     return IntentGuard()
 
 
+def provide_insight_generator() -> InsightGenerator:
+    return InsightGenerator()
+
+
 def provide_entity_resolver() -> EntityResolver:
     return EntityResolver()
+
+
+def provide_metric_resolver() -> MetricResolver:
+    return MetricResolver()
+
+
+def provide_context_resolver() -> ContextResolver:
+    return ContextResolver(
+        entity_resolver=provide_entity_resolver(),
+        metric_resolver=provide_metric_resolver(),
+    )
 
 
 def provide_query_planner() -> QueryPlanner:
@@ -145,7 +163,7 @@ def provide_planner_compiler() -> PlannerCompiler:
 
 
 def provide_hypothesis_builder() -> HypothesisBuilder:
-    return HypothesisBuilder()
+    return HypothesisBuilder(metric_resolver=provide_metric_resolver())
 
 
 def provide_analytical_planner() -> AnalyticalPlanner:
@@ -165,6 +183,7 @@ def provide_terbie_compiler() -> TerbieCompiler:
         optimizer=provide_plan_optimizer(),
         reasoning_provider=provide_reasoning_provider(),
         entity_resolver=provide_entity_resolver(),
+        context_resolver=provide_context_resolver(),
     )
 
 
@@ -216,6 +235,7 @@ def provide_execution_service() -> ExecutionService:
         executor=provide_terbie_executor(),
         narrator_service=provide_narrator_service(),
         intent_guard=provide_intent_guard(),
+        insight_generator=provide_insight_generator(),
     )
 
 

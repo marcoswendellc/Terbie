@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Terbie</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="login-view" data-view="login" aria-labelledby="login-title">
+        <div class="brand-panel" aria-hidden="true">
+          <div class="brand-mark">T</div>
+          <div>
+            <p class="eyebrow">Terral BI Copilot</p>
+            <h1>Terbie</h1>
+          </div>
+          <p class="brand-copy">
+            Inteligencia de negocio em formato de conversa, pronta para transformar
+            perguntas em direcao analitica.
+          </p>
+        </div>
+
+        <form class="login-card" data-login-form>
+          <div class="form-heading">
+            <span class="mini-mark">T</span>
+            <div>
+              <p class="eyebrow">Acesso seguro</p>
+              <h2 id="login-title">Entrar no Terbie</h2>
+            </div>
+          </div>
+
+          <label>
+            <span>Usuario</span>
+            <input
+              name="username"
+              type="text"
+              autocomplete="username"
+              placeholder="Digite seu usuario"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Senha</span>
+            <input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Digite sua senha"
+              required
+            />
+          </label>
+
+          <p class="error-message" data-login-error role="alert"></p>
+          <button class="primary-button" type="submit">Entrar</button>
+        </form>
+      </section>
+
+      <section class="chat-view is-hidden" data-view="chat" aria-label="Chat Terbie">
+        <aside class="sidebar">
+          <div class="sidebar-brand">
+            <span class="mini-mark">T</span>
+            <div>
+              <strong>Terbie</strong>
+              <small>Copilot analitico</small>
+            </div>
+          </div>
+
+          <button class="new-chat-button" type="button" data-new-chat>Nova conversa</button>
+
+          <div class="sidebar-block">
+            <span>Status</span>
+            <strong>Resposta simulada</strong>
+          </div>
+        </aside>
+
+        <div class="conversation-shell">
+          <header class="chat-header">
+            <div>
+              <p class="eyebrow">Prompt conversacional</p>
+              <h2>Converse com seus dados</h2>
+            </div>
+            <button class="ghost-button" type="button" data-logout>Sair</button>
+          </header>
+
+          <div class="messages" data-messages aria-live="polite">
+            <article class="message message-app">
+              <div class="avatar">T</div>
+              <div class="message-bubble">
+                <span class="message-author">Terbie</span>
+                <p>
+                  Bom dia. Estou pronto para analisar campanhas, restaurantes,
+                  promocoes e outros indicadores do negocio.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <form class="composer" data-chat-form>
+            <textarea
+              data-message-input
+              rows="1"
+              placeholder="Pergunte algo sobre o negocio..."
+              aria-label="Mensagem"
+            ></textarea>
+            <button class="send-button" type="submit" aria-label="Enviar mensagem">
+              <span>Enviar</span>
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="/ui/app.js" defer></script>
+  </body>
+</html>

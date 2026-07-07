@@ -133,4 +133,10 @@ class EntityResolver:
                 entity_type="loja",
                 aliases=["casas bahia"],
             ),
+            EntityCandidate(
+                field="nm_empreendimento",
+                value="Buriti Shopping",
+                entity_type="empreendimento",
+                aliases=["buriti", "buriti shopping", "shopping buriti"],
+            ),
         ]

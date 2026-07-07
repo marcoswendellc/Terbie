@@ -10,6 +10,8 @@ class AnalyticalHypothesis(BaseModel):
     analysis_type: str | None = None
     business_entity: str | None = None
     metric: str | None = None
+    metric_source: str | None = None
+    dimensions: list[str] = Field(default_factory=list)
     time_scope: str | None = None
     filters: list[dict[str, Any]] = Field(default_factory=list)
     comparison_entities: list[dict[str, Any]] = Field(default_factory=list)

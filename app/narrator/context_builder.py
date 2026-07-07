@@ -22,6 +22,7 @@ class NarrativeContextBuilder:
             dimension_columns=self._dimension_columns(data=data, columns=columns),
             warnings=execution_result.warnings,
             intent=getattr(request.execution_plan, "intent", None),
+            insight_result=request.insight_result,
         )
 
     def _metric_columns(self, *, data: list[dict[str, Any]], columns: list[str]) -> list[str]:

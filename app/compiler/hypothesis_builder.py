@@ -4,11 +4,15 @@ from typing import Any
 
 from app.compiler.models import AnalyticalHypothesis
 from app.knowledge.models import KnowledgeContext
+from app.metrics.metric_resolver import MetricResolver
 from app.semantic.models import SemanticResolution
 
 
 class HypothesisBuilder:
     """Builds the first analytical hypothesis from semantic and knowledge context."""
+
+    def __init__(self, metric_resolver: MetricResolver | None = None) -> None:
+        self._metric_resolver = metric_resolver or MetricResolver()
 
     def build(
         self,
@@ -23,7 +27,11 @@ class HypothesisBuilder:
             question=question,
             semantic_resolution=semantic_resolution,
         )
-        metric = self._metric(semantic_resolution)
+        metric, metric_source = self._metric(
+            question=question,
+            analysis_type=analysis_type,
+            semantic_resolution=semantic_resolution,
+        )
         business_entity = self._business_entity(semantic_resolution)
         time_scope = self._time_scope(semantic_resolution)
 
@@ -38,8 +46,13 @@ class HypothesisBuilder:
             analysis_type=analysis_type,
             business_entity=business_entity,
             metric=metric,
+            metric_source=metric_source,
             time_scope=time_scope,
-            filters=self._filters(semantic_resolution),
+            filters=self._filters(
+                question=question,
+                analysis_type=analysis_type,
+                semantic_resolution=semantic_resolution,
+            ),
             confidence=self._confidence(
                 analysis_type=analysis_type,
                 metric=metric,
@@ -102,29 +115,65 @@ class HypothesisBuilder:
 
     def _filters(
         self,
+        *,
+        question: str,
+        analysis_type: str | None,
         semantic_resolution: SemanticResolution | None,
     ) -> list[dict[str, Any]]:
         if semantic_resolution is None:
             return []
 
-        return [
+        filters = [
             {"type": parameter.type, "value": parameter.value}
             for parameter in semantic_resolution.parameters
             if parameter.type in {"limit", "period", "comparison", "order"}
         ]
 
-    def _metric(self, semantic_resolution: SemanticResolution | None) -> str | None:
+        if analysis_type == "ranking" and self._is_best_campaign_question(question):
+            limit_filter = {"type": "limit", "value": 1}
+            if not any(filter_item.get("type") == "limit" for filter_item in filters):
+                filters.append(limit_filter)
+
+        return filters
+
+    def _metric(
+        self,
+        *,
+        question: str,
+        analysis_type: str | None,
+        semantic_resolution: SemanticResolution | None,
+    ) -> tuple[str | None, str | None]:
         if semantic_resolution is None:
-            return None
+            return None, None
+
+        resolved_metric = self._metric_resolver.resolve(question)
+        if resolved_metric.metric is not None:
+            return resolved_metric.metric, resolved_metric.source
+
+        if analysis_type == "ranking" and self._is_best_campaign_question(question):
+            return "faturamento", "business_default"
 
         metric_names = {metric.name for metric in semantic_resolution.suggested_metrics}
         if "faturamento" in metric_names:
-            return "faturamento"
+            return "faturamento", "explicit"
 
         if "ticket_medio" in metric_names:
-            return "ticket_medio"
+            return "ticket_medio", "explicit"
 
-        return None
+        if "clientes_unicos" in metric_names:
+            return "clientes_unicos", "explicit"
+
+        if "quantidade_compras" in metric_names:
+            return "quantidade_compras", "explicit"
+
+        return None, None
+
+    def _is_best_campaign_question(self, question: str) -> bool:
+        normalized_question = self._normalize_text(question)
+        return bool(
+            re.search(r"\b(melhor|maior)\s+(campanha|promocao)\b", normalized_question)
+            or re.search(r"\b(campanha|promocao)\s+(melhor|maior)\b", normalized_question)
+        )
 
     def _business_entity(self, semantic_resolution: SemanticResolution | None) -> str | None:
         if semantic_resolution is None:

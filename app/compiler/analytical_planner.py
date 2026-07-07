@@ -14,7 +14,7 @@ class AnalyticalPlanner:
     ) -> AnalyticalPlan:
         metrics = self._metrics(hypothesis)
         entities = [hypothesis.business_entity] if hypothesis.business_entity is not None else []
-        dimensions = self._dimensions(
+        dimensions = hypothesis.dimensions or self._dimensions(
             analysis_type=hypothesis.analysis_type,
             business_entity=hypothesis.business_entity,
             knowledge_context=knowledge_context,
@@ -51,6 +51,14 @@ class AnalyticalPlanner:
         if analysis_type == "comparison":
             return [*filter_operations, "group_by", "aggregate", "derived_metric", "sort"]
 
+        if analysis_type == "summary":
+            return [
+                *filter_operations,
+                "aggregate",
+                "derived_metric_purchase",
+                "derived_metric_customer",
+            ]
+
         if analysis_type == "list_distinct":
             return [*filter_operations, "select", "distinct", "sort"]
 
@@ -71,6 +79,9 @@ class AnalyticalPlanner:
         } if knowledge_context is not None else set()
 
         if analysis_type == "comparison" and business_entity == "promocao":
+            return ["nm_promocao"]
+
+        if analysis_type == "ranking" and business_entity == "promocao":
             return ["nm_promocao"]
 
         if business_entity == "restaurante":
@@ -96,6 +107,15 @@ class AnalyticalPlanner:
     def _metrics(self, hypothesis: AnalyticalHypothesis) -> list[str]:
         if hypothesis.analysis_type == "comparison" and hypothesis.business_entity == "promocao":
             return [metric.name for metric in PROMOTION_COMPARISON_METRICS]
+
+        if hypothesis.analysis_type == "summary" and hypothesis.business_entity == "promocao":
+            return [
+                "faturamento",
+                "quantidade_compras",
+                "clientes_unicos",
+                "ticket_medio_por_compra",
+                "ticket_medio_por_cliente",
+            ]
 
         return [hypothesis.metric] if hypothesis.metric is not None else []
 

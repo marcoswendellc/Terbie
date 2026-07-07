@@ -16,6 +16,13 @@ class ExecutionPlanBuilder:
         "ticket_medio": "avg",
         "quantidade_compras": "count_distinct",
         "clientes_unicos": "count_distinct",
+        "ticket_medio_por_compra": None,
+        "ticket_medio_por_cliente": None,
+    }
+
+    _METRIC_COLUMNS = {
+        "quantidade_compras": "cd_compra",
+        "clientes_unicos": "sk_cliente",
     }
 
     def build(self, analytical_plan: AnalyticalPlan) -> ExecutionPlan:
@@ -145,7 +152,7 @@ class ExecutionPlanBuilder:
             return PlanOperation(type="group_by", field=group_field)
 
         if operation_name == "aggregate":
-            if intent == "comparison":
+            if intent in {"comparison", "summary"}:
                 return PlanOperation(
                     type="aggregate",
                     parameters={
@@ -175,6 +182,7 @@ class ExecutionPlanBuilder:
             return PlanOperation(
                 type="aggregate",
                 function=metric.aggregation if metric is not None else None,
+                field=self._METRIC_COLUMNS.get(metric.name) if metric is not None else None,
                 alias=metric.name if metric is not None else None,
             )
 
@@ -185,6 +193,26 @@ class ExecutionPlanBuilder:
                 parameters={
                     "numerator": "faturamento",
                     "denominator": "quantidade_compras",
+                },
+            )
+
+        if operation_name == "derived_metric_purchase":
+            return PlanOperation(
+                type="derived_metric",
+                alias="ticket_medio_por_compra",
+                parameters={
+                    "numerator": "faturamento",
+                    "denominator": "quantidade_compras",
+                },
+            )
+
+        if operation_name == "derived_metric_customer":
+            return PlanOperation(
+                type="derived_metric",
+                alias="ticket_medio_por_cliente",
+                parameters={
+                    "numerator": "faturamento",
+                    "denominator": "clientes_unicos",
                 },
             )
 
