@@ -23,6 +23,18 @@ KB_INTENTS: list[KBIntent] = [
         priority=5,
     ),
     KBIntent(
+        name="campaign_summary",
+        operation="campaign_detail",
+        synonyms=[
+            "resumo executivo campanha",
+            "sumario campanha",
+            "panorama campanha",
+            "analise campanha",
+        ],
+        response_rule_ids=["campaign_detail_returns_complete_summary"],
+        priority=5,
+    ),
+    KBIntent(
         name="list_distinct",
         operation="distinct",
         synonyms=["quais", "listar", "liste", "mostre", "ocorreram", "existem"],

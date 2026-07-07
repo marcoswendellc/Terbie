@@ -164,6 +164,7 @@ def test_store_and_campaign_filters_are_applied_together() -> None:
         "O faturamento da loja Casas Bahia na campanha No Pelo foi de R$ 9.300,00."
     )
     assert body["highlights"] == []
+    assert body["insights"] == []
     assert body["recommendations"] == []
 
 
@@ -197,3 +198,6 @@ def test_store_enterprise_and_campaign_filters_are_applied_together() -> None:
     body = _execute("Qual o faturamento das Casas Bahia no Buriti Shopping na campanha No Pelo?")
 
     assert body["data"] == [{"faturamento": 300.0}]
+    assert body["highlights"] == []
+    assert body["insights"] == []
+    assert body["recommendations"] == []

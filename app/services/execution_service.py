@@ -114,9 +114,9 @@ class ExecutionService:
         return ExecuteResponse(
             question=question,
             answer=narrator_response.answer,
-            highlights=narrator_response.highlights,
-            insights=narrator_response.insights,
-            recommendations=narrator_response.recommendations,
+            highlights=[],
+            insights=[],
+            recommendations=[],
             data=self._sanitize_rows(enriched_result.data),
             metadata={**enriched_result.metadata, **narrator_response.metadata},
             warnings=[*enriched_result.warnings, *narrator_response.warnings],
@@ -168,7 +168,7 @@ class ExecutionService:
         columns: set[str] = set()
         metric_names = {metric.name for metric in plan.metrics}
         entity_names = {entity.name for entity in plan.entities}
-        is_campaign_detail = plan.intent == "campaign_detail"
+        is_campaign_detail = plan.intent in {"campaign_detail", "campaign_summary"}
         if is_campaign_detail:
             return set(self._REQUIRED_COLUMNS_CAMPAIGN_DETAIL)
 

@@ -34,6 +34,32 @@ KB_RESPONSE_RULES: list[KBResponseRule] = [
         priority=5,
     ),
     KBResponseRule(
+        id="campaign_summary_returns_complete_summary",
+        intent="campaign_summary",
+        entity="promocao",
+        description="Resumo executivo de campanha deve usar a mesma estrutura completa do detalhe.",
+        must_include=[
+            "faturamento_total",
+            "quantidade_compras",
+            "clientes_unicos",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente",
+            "segmento",
+            "loja",
+            "bairro",
+            "cidade",
+            "empreendimento",
+            "periodo",
+        ],
+        must_not_include=[
+            "single_metric_only",
+            "generic_recommendations_before_summary",
+            "unavailable_field_text",
+            "null_value_text",
+        ],
+        priority=5,
+    ),
+    KBResponseRule(
         id="listing_returns_items",
         intent="list_distinct",
         description="Listagens devem mostrar os itens encontrados, nao apenas a contagem.",
@@ -62,6 +88,23 @@ KB_RESPONSE_RULES: list[KBResponseRule] = [
             "unsolicited_comparisons",
         ],
         priority=30,
+    ),
+    KBResponseRule(
+        id="default_response_returns_only_answer",
+        description=(
+            "A resposta padrao do Terbie deve retornar apenas o campo answer como "
+            "conteudo conversacional. Highlights, insights e recommendations nao "
+            "devem ser gerados ou exibidos por padrao."
+        ),
+        must_include=["direct_answer"],
+        must_not_include=[
+            "default_highlights",
+            "default_insights",
+            "default_recommendations",
+            "generic_suggestions",
+            "unsolicited_extra_blocks",
+        ],
+        priority=40,
     ),
     KBResponseRule(
         id="comparison_returns_side_by_side_metrics",

@@ -244,3 +244,5 @@ def test_pipeline_expanded_questions_keep_expected_response_shape() -> None:
     assert BEST_CAMPAIGN in listing["answer"]
     assert best["answer"] == f"A melhor campanha, considerando faturamento, foi {BEST_CAMPAIGN}."
     assert best["highlights"] == []
+    assert best["insights"] == []
+    assert best["recommendations"] == []

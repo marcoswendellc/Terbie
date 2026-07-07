@@ -62,7 +62,7 @@ class AnalyticalPlanner:
             operations.append("select")
             return operations
 
-        if analysis_type == "campaign_detail":
+        if analysis_type in {"campaign_detail", "campaign_summary"}:
             return [*filter_operations, "campaign_detail"]
 
         if analysis_type == "summary":
@@ -125,7 +125,7 @@ class AnalyticalPlanner:
         if hypothesis.analysis_type == "comparison" and hypothesis.business_entity == "promocao":
             return [metric.name for metric in PROMOTION_COMPARISON_METRICS]
 
-        if hypothesis.analysis_type in {"summary", "campaign_detail"} and (
+        if hypothesis.analysis_type in {"summary", "campaign_detail", "campaign_summary"} and (
             hypothesis.business_entity == "promocao"
         ):
             return [

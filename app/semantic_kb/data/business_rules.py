@@ -20,10 +20,22 @@ KB_BUSINESS_RULES: list[KBBusinessRule] = [
             "sk_dtinicio",
             "sk_dtfim",
         ],
-        concepts=["promocao", "campaign_detail"],
-        condition={"entity": "promocao", "intent": "campaign_detail"},
+        concepts=["promocao", "campaign_detail", "campaign_summary"],
+        condition={"entity": "promocao", "intent": ["campaign_detail", "campaign_summary"]},
         effect={"operation": "campaign_detail"},
         priority=5,
+    ),
+    KBBusinessRule(
+        id="campaign_detail_rankings_ignore_blank_values",
+        description=(
+            "Rankings usados no resumo de campanha devem ignorar nulos, vazios e "
+            "valores textuais NULL, salvo pedido explicito do usuario."
+        ),
+        fields=["nm_segmento", "nm_fantasa", "bairro", "cidade"],
+        concepts=["promocao", "campaign_detail", "ranking", "not_null"],
+        condition={"intent": ["campaign_detail", "campaign_summary"]},
+        effect={"ignore_values": [None, "", "NULL", "null", "None", "nan"]},
+        priority=6,
     ),
     KBBusinessRule(
         id="purchase_date",

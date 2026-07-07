@@ -17,14 +17,14 @@ class CampaignDetailOperation(BaseOperation):
     _FIELD_LABELS = {
         "vl_compra": "faturamento total",
         "cd_compra": "quantidade de compras",
-        "sk_cliente": "clientes únicos",
+        "sk_cliente": "clientes unicos",
         "nm_segmento": "segmento",
         "nm_fantasa": "loja",
         "bairro": "bairro",
         "cidade": "cidade",
         "nm_empreendimento": "empreendimento",
-        "sk_dtinicio": "período inicial",
-        "sk_dtfim": "período final",
+        "sk_dtinicio": "periodo inicial",
+        "sk_dtfim": "periodo final",
     }
 
     def execute(
@@ -35,7 +35,7 @@ class CampaignDetailOperation(BaseOperation):
     ) -> "pd.DataFrame":
         import pandas as pd
 
-        _ = operation
+        _ = operation, context
         if dataframe.empty:
             return pd.DataFrame([])
 
@@ -46,11 +46,6 @@ class CampaignDetailOperation(BaseOperation):
             logger.info(
                 "Campaign detail optional fields are unavailable. missing_fields=%s",
                 missing_fields,
-            )
-            context.warnings.append(
-                "Alguns campos não estavam disponíveis para o detalhe da campanha: "
-                + ", ".join(self._FIELD_LABELS[field] for field in missing_fields)
-                + ".",
             )
 
         revenue = self._numeric_series(dataframe, "vl_compra")
@@ -123,6 +118,7 @@ class CampaignDetailOperation(BaseOperation):
             return None
 
         values = dataframe[column].dropna()
+        values = values[values.map(self._is_informative_value)]
         if values.empty:
             return None
 
@@ -156,12 +152,13 @@ class CampaignDetailOperation(BaseOperation):
         revenue,
     ) -> object | None:
         for column in columns:
-            if column not in dataframe.columns:
-                continue
-            if revenue is None:
+            if column not in dataframe.columns or revenue is None:
                 continue
 
             working_frame = dataframe.assign(__revenue=revenue).dropna(subset=[column])
+            working_frame = working_frame[
+                working_frame[column].map(self._is_informative_value)
+            ]
             if working_frame.empty:
                 continue
 
@@ -181,3 +178,7 @@ class CampaignDetailOperation(BaseOperation):
                 return grouped.iloc[0][column]
 
         return None
+
+    def _is_informative_value(self, value: object) -> bool:
+        text = str(value).strip()
+        return text != "" and text.casefold() not in {"null", "none", "nan"}

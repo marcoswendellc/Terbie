@@ -133,25 +133,7 @@ function appendSuggestions(lines) {
 }
 
 function formatExecuteResponse(payload) {
-  const answer = payload.answer || "Analise concluida.";
-  const lines = [answer];
-  const highlights = Array.isArray(payload.highlights)
-    ? uniqueHighlights(answer, payload.highlights)
-    : [];
-
-  if (highlights.length > 0) {
-    lines.push("", "Destaques:");
-    highlights.slice(0, 4).forEach((highlight) => lines.push(`- ${highlight}`));
-  }
-
-  if (Array.isArray(payload.recommendations) && payload.recommendations.length > 0) {
-    lines.push("", "Recomendacoes:");
-    payload.recommendations
-      .slice(0, 3)
-      .forEach((recommendation) => lines.push(`- ${recommendation}`));
-  }
-
-  return lines.join("\n");
+  return payload.answer || "Analise concluida.";
 }
 
 function formatDraftResponse(payload) {

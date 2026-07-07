@@ -188,7 +188,6 @@ def test_execute_campaign_listing_returns_distinct_promotions_without_raw_purcha
     body = response.json()
     rows = body["data"]
     answer = body["answer"]
-    highlights = body["highlights"]
     assert rows == [
         {
             "cd_promocao": "P002",
@@ -207,7 +206,9 @@ def test_execute_campaign_listing_returns_distinct_promotions_without_raw_purcha
     assert all(row["cd_promocao"] is not None for row in rows)
     assert "Natal Premiado" in answer
     assert "Volta as aulas" in answer
-    assert answer not in highlights
+    assert body["highlights"] == []
+    assert body["insights"] == []
+    assert body["recommendations"] == []
     assert all(
         not {"cd_compra", "sk_cliente", "vl_compra", "bairro", "cep", "tx_cep"}.intersection(row)
         for row in rows
