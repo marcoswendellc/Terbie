@@ -17,6 +17,8 @@ class MetricResolver:
                 "notas",
                 "compras",
                 "compras cadastradas",
+                "participacao",
+                "maior participacao",
             ),
         ),
         (

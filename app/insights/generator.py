@@ -11,6 +11,18 @@ from app.insights.trend import TrendInsightAnalyzer
 
 
 class InsightGenerator:
+    _ANALYSIS_TERMS = (
+        "analise",
+        "analisa",
+        "analisar",
+        "desempenho",
+        "resumo executivo",
+        "principais insights",
+        "insights",
+        "o que voce percebe",
+        "o que percebe",
+    )
+
     def __init__(self, factory: InsightAnalyzerFactory | None = None) -> None:
         self._factory = factory or InsightAnalyzerFactory(
             analyzers={
@@ -32,6 +44,12 @@ class InsightGenerator:
         execution_plan: object | None,
     ) -> InsightResult:
         intent = getattr(execution_plan, "intent", None)
+        question = str(execution_result.metadata.get("question", ""))
+        if intent in {"ranking", "list_distinct"} and question and not self._asks_for_analysis(
+            question,
+        ):
+            return InsightResult()
+
         analyzer = self._factory.analyzer_for(intent)
         if analyzer is not None:
             return analyzer.generate(
@@ -45,3 +63,27 @@ class InsightGenerator:
             analytical_plan=analytical_plan,
             execution_plan=execution_plan,
         )
+
+    def _asks_for_analysis(self, question: str) -> bool:
+        normalized = self._normalize_text(question)
+        return any(term in normalized for term in self._ANALYSIS_TERMS)
+
+    def _normalize_text(self, text: str) -> str:
+        replacements = {
+            "á": "a",
+            "à": "a",
+            "â": "a",
+            "ã": "a",
+            "é": "e",
+            "ê": "e",
+            "í": "i",
+            "ó": "o",
+            "ô": "o",
+            "õ": "o",
+            "ú": "u",
+            "ç": "c",
+        }
+        normalized = text.lower()
+        for source, target in replacements.items():
+            normalized = normalized.replace(source, target)
+        return normalized

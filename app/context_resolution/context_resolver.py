@@ -24,8 +24,12 @@ class ContextResolver:
 
     def resolve(self, question: str) -> ResolvedContext:
         normalized = self._normalize_text(question)
-        filters = self._filters(question=question, normalized_question=normalized)
         dimensions = self._dimensions(normalized)
+        filters = self._filters(
+            question=question,
+            normalized_question=normalized,
+            dimensions=dimensions,
+        )
         intent = self._intent(normalized)
         metrics = self._metrics(question=question, normalized_question=normalized, intent=intent)
         warnings = self._warnings(dimensions)
@@ -38,7 +42,13 @@ class ContextResolver:
             warnings=warnings,
         )
 
-    def _filters(self, *, question: str, normalized_question: str) -> list[ResolvedFilter]:
+    def _filters(
+        self,
+        *,
+        question: str,
+        normalized_question: str,
+        dimensions: list[ResolvedDimension],
+    ) -> list[ResolvedFilter]:
         filters: list[ResolvedFilter] = []
         entity_result = self._entity_resolver.resolve_many(question)
         for match in entity_result.matches:
@@ -60,22 +70,51 @@ class ContextResolver:
                 ),
             )
 
+        filters.extend(self._explicit_dimension_value_filters(question))
+        filters.extend(self._null_exclusion_filters(normalized_question, dimensions))
         return filters
 
     def _dimensions(self, normalized_question: str) -> list[ResolvedDimension]:
         patterns = (
-            ("loja", r"\b(qual|quais)\s+lojas?\b|\bloja\s+mais\b"),
+            (
+                "loja",
+                r"\b(qual|quais)\s+(foi\s+a\s+|foi\s+o\s+)?lojas?\b"
+                r"|\bloja\s+(mais|de\s+maior)\b",
+            ),
             (
                 "campanha",
                 r"\b(qual|quais)\s+campanhas?\b|\bcampanha\s+mais\b|\bmelhor\s+campanha\b",
             ),
-            ("segmento", r"\b(qual|quais)\s+segmentos?\b|\bpor\s+segmento\b|\bsegmento\s+mais\b"),
-            ("bairro", r"\b(qual|quais)\s+bairros?\b|\bpor\s+bairro\b|\bbairro\s+mais\b"),
+            (
+                "segmento",
+                r"\b(qual|quais)\s+(foi\s+o\s+)?segmentos?\b"
+                r"|\bpor\s+segmento\b|\bsegmento\s+(mais|de\s+maior)\b",
+            ),
+            (
+                "bairro",
+                r"\b(qual|quais)\s+(foi\s+o\s+)?bairros?\b"
+                r"|\bpor\s+bairro\b|\bbairro\s+(mais|de\s+maior)\b",
+            ),
+            (
+                "cidade",
+                r"\b(qual|quais)\s+(foi\s+a\s+)?cidades?\b"
+                r"|\bpor\s+cidade\b|\bcidade\s+(mais|de\s+maior)\b",
+            ),
+            (
+                "cliente",
+                r"\b(qual|quais)\s+(foi\s+o\s+)?clientes?\b"
+                r"|\bpor\s+cliente\b|\bcliente\s+(mais|de\s+maior)\b",
+            ),
             ("empreendimento", r"\bpor\s+shopping\b|\bpor\s+empreendimento\b"),
         )
         dimensions: list[ResolvedDimension] = []
         for concept_name, pattern in patterns:
             if not re.search(pattern, normalized_question):
+                continue
+            if (
+                concept_name == "cliente"
+                and re.search(r"\bticket\s+medio\s+por\s+cliente\b", normalized_question)
+            ):
                 continue
 
             concept = BUSINESS_CONCEPTS[concept_name]
@@ -89,6 +128,63 @@ class ContextResolver:
 
         return dimensions
 
+    def _null_exclusion_filters(
+        self,
+        normalized_question: str,
+        dimensions: list[ResolvedDimension],
+    ) -> list[ResolvedFilter]:
+        if not dimensions or not self._has_null_exclusion(normalized_question):
+            return []
+
+        return [
+            ResolvedFilter(
+                concept=dimension.concept,
+                field=dimension.field,
+                operator="not_null",
+                value=None,
+                label=None,
+                confidence=1.0,
+            )
+            for dimension in dimensions
+        ]
+
+    def _explicit_dimension_value_filters(self, question: str) -> list[ResolvedFilter]:
+        filters: list[ResolvedFilter] = []
+        patterns = (
+            ("segmento", r"\bsegmento\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
+            ("bairro", r"\bbairro\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
+            ("cidade", r"\bcidade\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
+        )
+        for concept_name, pattern in patterns:
+            match = re.search(pattern, question, flags=re.IGNORECASE)
+            if match is None:
+                continue
+
+            value = match.group(1).strip(" .?!,;:")
+            if not value:
+                continue
+            if self._starts_with_filter_stopword(value):
+                continue
+
+            concept = BUSINESS_CONCEPTS[concept_name]
+            filters.append(
+                ResolvedFilter(
+                    concept=concept_name,
+                    field=concept.label_fields[0],
+                    operator="equals",
+                    value=value,
+                    label=value,
+                    confidence=1.0,
+                ),
+            )
+
+        return filters
+
+    def _starts_with_filter_stopword(self, value: str) -> bool:
+        normalized = self._normalize_text(value)
+        first_token = normalized.split(maxsplit=1)[0] if normalized else ""
+        return first_token in {"com", "de", "da", "do", "que", "mais", "maior", "menor"}
+
     def _metrics(
         self,
         *,
@@ -98,7 +194,11 @@ class ContextResolver:
     ) -> list[ResolvedMetric]:
         metric = self._metric_resolver.resolve(question).metric
         if metric is None:
-            if "comprou" in normalized_question or "compraram" in normalized_question:
+            if (
+                "participacao" in normalized_question
+                or "comprou" in normalized_question
+                or "compraram" in normalized_question
+            ):
                 metric = "quantidade_compras"
             elif intent == "ranking":
                 metric = "faturamento"
@@ -126,6 +226,16 @@ class ContextResolver:
             return "ranking"
 
         return None
+
+    def _has_null_exclusion(self, normalized_question: str) -> bool:
+        null_patterns = (
+            r"\bexceto\s+null\b",
+            r"\bignorando\s+nulos\b",
+            r"\bdesconsiderando\s+nulos\b",
+            r"\bsomente\s+preenchidos\b",
+            r"\bsem\s+valores\s+vazios\b",
+        )
+        return any(re.search(pattern, normalized_question) for pattern in null_patterns)
 
     def _is_filter_context(self, concept: str, normalized_question: str) -> bool:
         if concept == "campanha":

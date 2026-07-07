@@ -1,3 +1,5 @@
+import re
+import unicodedata
 from abc import ABC, abstractmethod
 from datetime import datetime
 from decimal import Decimal
@@ -44,10 +46,8 @@ class ListingStrategy(ResponseStrategy):
         return "\n\n".join([intro, *items])
 
     def highlights(self, context: NarrativeContext) -> list[str]:
-        return [
-            self._row_label(row, context.dimension_columns)
-            for row in context.data[:3]
-        ]
+        _ = context
+        return []
 
     def _is_promotion_listing(self, context: NarrativeContext) -> bool:
         return {"cd_promocao", "nm_promocao"}.issubset(set(context.columns))
@@ -130,6 +130,27 @@ class ListingStrategy(ResponseStrategy):
 
 
 class RankingStrategy(ResponseStrategy):
+    _ANALYSIS_TERMS = (
+        "analise",
+        "analisa",
+        "analisar",
+        "desempenho",
+        "resumo executivo",
+        "principais insights",
+        "insights",
+        "o que voce percebe",
+        "o que percebe",
+    )
+    _DIMENSION_LABELS = {
+        "bairro": ("O", "bairro"),
+        "cidade": ("A", "cidade"),
+        "nm_segmento": ("O", "segmento"),
+        "nm_fantasa": ("A", "loja"),
+        "loja": ("A", "loja"),
+        "sk_cliente": ("O", "cliente"),
+        "nm_promocao": ("A", "campanha"),
+    }
+
     def can_handle(self, context: NarrativeContext) -> bool:
         return bool(context.dimension_columns and context.metric_columns)
 
@@ -140,12 +161,24 @@ class RankingStrategy(ResponseStrategy):
         dimension = self._formatter.value(dimension_column, top_row.get(dimension_column))
         metric = self._formatter.value(metric_column, top_row.get(metric_column))
 
+        if not self._asks_for_analysis(context.question):
+            return self._objective_answer(
+                context=context,
+                dimension_column=dimension_column,
+                metric_column=metric_column,
+                dimension=dimension,
+                metric=metric,
+            )
+
         if context.rows_returned == 1:
             return f"{dimension} lidera a análise, com {metric}."
 
         return f"{dimension} aparece como principal destaque, com {metric}."
 
     def highlights(self, context: NarrativeContext) -> list[str]:
+        if not self._asks_for_analysis(context.question):
+            return []
+
         if context.top_row is None or not context.dimension_columns or not context.metric_columns:
             return []
 
@@ -154,6 +187,91 @@ class RankingStrategy(ResponseStrategy):
         dimension = self._formatter.value(dimension_column, context.top_row[dimension_column])
         metric = self._formatter.value(metric_column, context.top_row[metric_column])
         return [self._formatter.ranking_text(dimension=dimension, metric=metric)]
+
+    def _objective_answer(
+        self,
+        *,
+        context: NarrativeContext,
+        dimension_column: str,
+        metric_column: str,
+        dimension: str,
+        metric: str,
+    ) -> str:
+        article, label = self._DIMENSION_LABELS.get(
+            dimension_column,
+            ("O", dimension_column.replace("_", " ")),
+        )
+        context_text = self._campaign_context(context.question)
+        objective = self._objective_phrase(metric_column)
+        metric_phrase = self._metric_phrase(metric_column=metric_column, metric=metric)
+        if self._is_best_campaign_question(context.question, dimension_column, metric_column):
+            period = self._year_from_question(context.question)
+            if period is not None:
+                return f"A melhor campanha em {period}, considerando faturamento, foi {dimension}."
+
+            return f"A melhor campanha, considerando faturamento, foi {dimension}."
+
+        return f"{article} {label} com {objective}{context_text} foi {dimension}, com {metric_phrase}."
+
+    def _objective_phrase(self, metric_column: str) -> str:
+        if metric_column == "quantidade_compras":
+            return "maior participação em volume de notas"
+        if metric_column == "faturamento":
+            return "maior faturamento"
+        if metric_column in {"ticket_medio", "ticket_medio_por_compra"}:
+            return "maior ticket médio por compra"
+        if metric_column == "ticket_medio_por_cliente":
+            return "maior ticket médio por cliente"
+        return f"maior {metric_column.replace('_', ' ')}"
+
+    def _metric_phrase(self, *, metric_column: str, metric: str) -> str:
+        if metric_column == "quantidade_compras":
+            return f"{metric} notas cadastradas"
+        return metric
+
+    def _campaign_context(self, question: str) -> str:
+        match = re.search(
+            r"\b(?:na|no|da|do)\s+campanha\s+(.+?)(?:,|\s+qual\b|\s+exceto\b|$)",
+            question,
+            flags=re.IGNORECASE,
+        )
+        if match is None:
+            return ""
+
+        campaign = match.group(1).strip(" .?!")
+        if not campaign:
+            return ""
+
+        return f" na campanha {campaign}"
+
+    def _asks_for_analysis(self, question: str) -> bool:
+        normalized = self._normalize_text(question)
+        return any(term in normalized for term in self._ANALYSIS_TERMS)
+
+    def _normalize_text(self, text: str) -> str:
+        without_accents = "".join(
+            char
+            for char in unicodedata.normalize("NFKD", text.lower())
+            if not unicodedata.combining(char)
+        )
+        return re.sub(r"\s+", " ", without_accents).strip()
+
+    def _is_best_campaign_question(
+        self,
+        question: str,
+        dimension_column: str,
+        metric_column: str,
+    ) -> bool:
+        normalized = self._normalize_text(question)
+        return (
+            dimension_column == "nm_promocao"
+            and metric_column == "faturamento"
+            and "melhor campanha" in normalized
+        )
+
+    def _year_from_question(self, question: str) -> str | None:
+        match = re.search(r"\b(20\d{2}|19\d{2})\b", question)
+        return match.group(1) if match is not None else None
 
 
 class MetricStrategy(ResponseStrategy):

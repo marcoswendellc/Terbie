@@ -158,7 +158,7 @@ class TerbieCompiler:
                 hypothesis=hypothesis,
             )
 
-        resolution = self._entity_resolver.resolve(question)
+        resolution = self._entity_resolver.resolve_many(question)
         if not resolution.matches:
             return hypothesis
 
@@ -168,9 +168,11 @@ class TerbieCompiler:
                 update={"warnings": [*hypothesis.warnings, warning]},
             )
 
-        match = resolution.matches[0]
-        filters = [*hypothesis.filters, self._entity_filter(match)]
-        business_entity = hypothesis.business_entity or match.entity_type
+        filters = [
+            *hypothesis.filters,
+            *[self._entity_filter(match) for match in resolution.matches],
+        ]
+        business_entity = hypothesis.business_entity or resolution.matches[0].entity_type
         warnings = [
             warning
             for warning in hypothesis.warnings
@@ -237,6 +239,17 @@ class TerbieCompiler:
             if resolved_context.dimensions and resolved_context.dimensions[0].label is not None
             else hypothesis.business_entity
         )
+        warnings = [*hypothesis.warnings, *resolved_context.warnings]
+        if resolved_context.metrics:
+            warnings = [
+                warning for warning in warnings if warning != "Nenhuma métrica identificada."
+            ]
+        if resolved_context.dimensions:
+            warnings = [
+                warning
+                for warning in warnings
+                if warning != "Nenhuma entidade de negócio identificada."
+            ]
 
         return hypothesis.model_copy(
             update={
@@ -246,7 +259,7 @@ class TerbieCompiler:
                 "metric_source": metric_source,
                 "dimensions": dimensions or hypothesis.dimensions,
                 "filters": self._deduplicate_filters(filters),
-                "warnings": [*hypothesis.warnings, *resolved_context.warnings],
+                "warnings": warnings,
             },
         )
 

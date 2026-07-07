@@ -22,4 +22,14 @@ KB_DISAMBIGUATION_RULES: list[KBDisambiguationRule] = [
         prefer="faturamento",
         when={"entity": "promocao", "metric": None},
     ),
+    KBDisambiguationRule(
+        id="participacao_defaults_to_purchase_volume",
+        description=(
+            "Maior participacao sem outro indicador explicito usa volume de notas "
+            "como metrica padrao."
+        ),
+        terms=["participacao", "participaÃ§Ã£o", "maior participacao", "maior participaÃ§Ã£o"],
+        prefer="quantidade_compras",
+        when={"intent": "ranking", "metric": None},
+    ),
 ]

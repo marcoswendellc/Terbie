@@ -48,6 +48,22 @@ KB_RESPONSE_RULES: list[KBResponseRule] = [
         priority=10,
     ),
     KBResponseRule(
+        id="objective_questions_answer_only_requested_result",
+        description=(
+            "Perguntas objetivas devem responder diretamente ao que foi perguntado, "
+            "sem destaques, insights, recomendacoes, comparacoes ou rankings adicionais."
+        ),
+        must_include=["direct_answer"],
+        must_not_include=[
+            "automatic_highlights",
+            "automatic_insights",
+            "generic_recommendations",
+            "extra_rankings",
+            "unsolicited_comparisons",
+        ],
+        priority=30,
+    ),
+    KBResponseRule(
         id="comparison_returns_side_by_side_metrics",
         intent="comparison",
         description="Comparacoes devem trazer itens lado a lado com metricas relevantes.",

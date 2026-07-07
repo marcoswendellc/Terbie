@@ -1,3 +1,4 @@
+import logging
 import re
 import unicodedata
 
@@ -15,6 +16,8 @@ from app.services.data_service import DataService
 from app.services.narrator_service import NarratorService
 from app.services.planner_service import PlannerService
 from app.services.semantic_service import SemanticService
+
+logger = logging.getLogger(__name__)
 
 
 class ExecutionService:
@@ -73,6 +76,11 @@ class ExecutionService:
             plan=planner_response.plan,
             knowledge_context=knowledge_context,
         )
+        self._log_composite_filter_validation(
+            question=question,
+            plan=planner_response.plan,
+            result=result,
+        )
         enriched_result = result.model_copy(
             update={
                 "metadata": {
@@ -87,6 +95,12 @@ class ExecutionService:
             analytical_plan=None,
             execution_plan=planner_response.plan,
         )
+        if (
+            not insight_result.summary
+            and not insight_result.insights
+            and not insight_result.recommendations
+        ):
+            insight_result = None
         narrator_response = self._narrator_service.narrate(
             NarratorRequest(
                 question=question,
@@ -239,6 +253,48 @@ class ExecutionService:
             }
             for row in rows
         ]
+
+    def _log_composite_filter_validation(
+        self,
+        *,
+        question: str,
+        plan: ExecutionPlan,
+        result: object,
+    ) -> None:
+        normalized_question = self._normalize_text(question)
+        expected_fields: set[str] = set()
+        if "campanha" in normalized_question or "promocao" in normalized_question:
+            expected_fields.add("nm_promocao")
+        if "loja" in normalized_question or "casas bahia" in normalized_question:
+            expected_fields.add("nm_fantasa")
+        if "segmento" in normalized_question:
+            expected_fields.add("nm_segmento")
+        if "bairro" in normalized_question:
+            expected_fields.add("bairro")
+        if "cidade" in normalized_question:
+            expected_fields.add("cidade")
+        if "shopping" in normalized_question or "empreendimento" in normalized_question:
+            expected_fields.add("nm_empreendimento")
+
+        if len(expected_fields) < 2:
+            return
+
+        applied_fields = {
+            operation.field
+            for operation in plan.operations
+            if operation.type == "filter" and operation.field is not None
+        }
+        missing_fields = expected_fields.difference(applied_fields)
+        if not missing_fields:
+            return
+
+        logger.warning(
+            "Possible composite filter loss after execution. question=%s expected=%s applied=%s rows=%s",
+            question,
+            sorted(expected_fields),
+            sorted(applied_fields),
+            getattr(result, "rows_returned", None),
+        )
 
     def _normalize_text(self, text: str) -> str:
         without_accents = "".join(

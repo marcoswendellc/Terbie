@@ -29,4 +29,12 @@ class NarrativeFormatter:
         return f"{dimension}, com {metric}"
 
     def _looks_like_money(self, column: str) -> bool:
-        return column in {"faturamento", "vl_compra", "receita", "valor", "ticket_medio"}
+        return column in {
+            "faturamento",
+            "vl_compra",
+            "receita",
+            "valor",
+            "ticket_medio",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente",
+        }

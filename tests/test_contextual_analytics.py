@@ -99,6 +99,23 @@ def test_neighborhood_ranking_with_campaign_filter() -> None:
     assert _operation(response, "group_by", "bairro") is not None
 
 
+def test_context_entity_is_filter_and_asked_dimension_is_grouping() -> None:
+    response = _compile(
+        "Na campanha No Pelo, exceto null, qual foi o bairro de maior participação "
+        "em volume de notas?",
+    )
+
+    assert response.hypothesis.analysis_type == "ranking"
+    assert response.hypothesis.dimensions == ["bairro"]
+    assert response.hypothesis.metric == "quantidade_compras"
+    assert _operation(response, "filter", "nm_promocao").parameters["value"] == NO_PELO
+    assert _operation(response, "filter", "bairro").parameters["operator"] == "not_null"
+    assert _operation(response, "group_by", "bairro") is not None
+    assert _operation(response, "group_by", "nm_promocao") is None
+    assert _operation(response, "sort", "quantidade_compras").parameters["direction"] == "desc"
+    assert _operation(response, "limit").parameters["value"] == 1
+
+
 def test_segment_ranking_with_shopping_filter() -> None:
     response = _compile("Qual segmento mais vendeu no shopping Buriti?")
 

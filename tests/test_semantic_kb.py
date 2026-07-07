@@ -76,3 +76,53 @@ def test_semantic_kb_registers_campaign_detail_rule() -> None:
     assert "cidade" in response_rule.must_include
     assert "single_metric_only" in response_rule.must_not_include
     assert example.protected is True
+
+
+def test_semantic_kb_registers_context_filter_and_objective_answer_rules() -> None:
+    kb = get_semantic_kb().knowledge_base
+
+    context_rule = next(
+        rule
+        for rule in kb.business_rules
+        if rule.id == "context_entity_becomes_filter_dimension_question_becomes_grouping"
+    )
+    composite_filter_rule = next(
+        rule
+        for rule in kb.business_rules
+        if rule.id == "all_mentioned_entities_are_accumulated_as_filters"
+    )
+    participation_rule = next(
+        rule
+        for rule in kb.business_rules
+        if rule.id == "participation_ranking_defaults_to_purchase_volume"
+    )
+    notes_rule = next(
+        rule
+        for rule in kb.business_rules
+        if rule.id == "registered_notes_are_purchase_volume"
+    )
+    null_rule = next(
+        rule
+        for rule in kb.business_rules
+        if rule.id == "null_exclusion_terms_filter_asked_dimension"
+    )
+    response_rule = next(
+        rule
+        for rule in kb.response_rules
+        if rule.id == "objective_questions_answer_only_requested_result"
+    )
+    example = next(
+        example
+        for example in kb.examples
+        if example.id == "campaign_filter_asked_neighborhood_volume_notes"
+    )
+
+    assert context_rule.effect["never_group_by_filtered_entity"] is True
+    assert composite_filter_rule.effect["accumulate_filters"] is True
+    assert composite_filter_rule.effect["never_replace_existing_filters"] is True
+    assert participation_rule.effect["metric"] == "quantidade_compras"
+    assert notes_rule.effect["metric"] == "quantidade_compras"
+    assert null_rule.effect == {"operator": "not_null", "target": "asked_dimension"}
+    assert "generic_recommendations" in response_rule.must_not_include
+    assert example.interpretation["dimension"] == "bairro"
+    assert example.protected is True

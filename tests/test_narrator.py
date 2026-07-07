@@ -39,7 +39,7 @@ def test_ranking_execution_result_highlights_first_row() -> None:
     assert "Restaurante A" in response.answer
     assert "R$ 1.234.567,89" in response.answer
     assert not response.answer.startswith("Encontrei")
-    assert response.highlights == ["Restaurante A, com R$ 1.234.567,89"]
+    assert response.highlights == []
 
 
 def test_empty_execution_result_returns_safe_answer() -> None:
@@ -80,7 +80,7 @@ def test_narrator_response_contains_required_fields() -> None:
 
     assert response.answer
     assert "Aviso teste." not in response.answer
-    assert response.highlights
+    assert response.highlights == []
     assert response.warnings == ["Aviso teste."]
     assert response.metadata["technical_warnings"] == ["Aviso teste."]
     assert response.metadata["rows_returned"] == 1

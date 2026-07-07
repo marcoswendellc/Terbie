@@ -32,7 +32,7 @@ def test_ticket_medio_lojas_current_month_plan() -> None:
     plan = response.plan
 
     assert any(
-        metric.name == "ticket_medio" and metric.aggregation == "avg"
+        metric.name == "ticket_medio_por_compra"
         for metric in plan.metrics
     )
     assert any(entity.name == "loja" for entity in plan.entities)
