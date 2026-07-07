@@ -15,10 +15,14 @@ from app.knowledge.models import (
 )
 from app.knowledge.ontology import BUSINESS_ENTITIES
 from app.knowledge.taxonomy import BUSINESS_TAXONOMIES
+from app.semantic_kb import SemanticKnowledgeBaseService, get_semantic_kb
 
 
 class KnowledgeService:
     """Provides Terral business knowledge as structured metadata."""
+
+    def __init__(self, semantic_kb: SemanticKnowledgeBaseService | None = None) -> None:
+        self._semantic_kb = semantic_kb or get_semantic_kb()
 
     def get_context(self) -> KnowledgeContext:
         return KnowledgeContext(
@@ -32,16 +36,16 @@ class KnowledgeService:
         )
 
     def get_metrics(self) -> list[BusinessMetric]:
-        return BUSINESS_METRICS
+        return self._merge_by_name(self._semantic_kb.business_metrics(), BUSINESS_METRICS)
 
     def get_dimensions(self) -> list[BusinessDimension]:
-        return BUSINESS_DIMENSIONS
+        return self._merge_by_name(self._semantic_kb.business_dimensions(), BUSINESS_DIMENSIONS)
 
     def get_rules(self) -> list[BusinessRule]:
-        return BUSINESS_RULES
+        return self._merge_by_code(self._semantic_kb.business_rules(), BUSINESS_RULES)
 
     def get_entities(self) -> list[BusinessEntity]:
-        return BUSINESS_ENTITIES
+        return self._merge_by_name(self._semantic_kb.business_entities(), BUSINESS_ENTITIES)
 
     def get_calendars(self) -> list[BusinessCalendar]:
         return BUSINESS_CALENDARS
@@ -51,3 +55,27 @@ class KnowledgeService:
 
     def get_hierarchies(self) -> list[BusinessHierarchy]:
         return BUSINESS_HIERARCHIES
+
+    def _merge_by_name(self, primary, compatibility):
+        merged = list(primary)
+        seen = {item.name for item in merged}
+        for item in compatibility:
+            if item.name in seen:
+                continue
+            merged.append(item)
+            seen.add(item.name)
+        return merged
+
+    def _merge_by_code(
+        self,
+        primary: list[BusinessRule],
+        compatibility: list[BusinessRule],
+    ) -> list[BusinessRule]:
+        merged = list(primary)
+        seen = {item.code for item in merged}
+        for item in compatibility:
+            if item.code in seen:
+                continue
+            merged.append(item)
+            seen.add(item.code)
+        return merged

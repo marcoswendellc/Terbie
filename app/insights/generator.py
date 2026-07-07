@@ -1,5 +1,6 @@
 from app.executor.models import ExecutionResult
 from app.insights.anomaly import AnomalyInsightAnalyzer
+from app.insights.campaign_detail import CampaignDetailInsightAnalyzer
 from app.insights.comparison import ComparisonInsightAnalyzer
 from app.insights.factory import InsightAnalyzerFactory
 from app.insights.listing import ListingInsightAnalyzer
@@ -14,6 +15,7 @@ class InsightGenerator:
         self._factory = factory or InsightAnalyzerFactory(
             analyzers={
                 "comparison": ComparisonInsightAnalyzer(),
+                "campaign_detail": CampaignDetailInsightAnalyzer(),
                 "ranking": RankingInsightAnalyzer(),
                 "list_distinct": ListingInsightAnalyzer(),
                 "trend": TrendInsightAnalyzer(),

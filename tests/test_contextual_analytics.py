@@ -76,7 +76,7 @@ def test_shopping_context_best_campaign_dimension() -> None:
 def test_campaign_summary_context_generates_default_metrics() -> None:
     response = _compile("Me dê um resumo da campanha arcaparque")
 
-    assert response.hypothesis.analysis_type == "summary"
+    assert response.hypothesis.analysis_type == "campaign_detail"
     assert response.hypothesis.business_entity == "promocao"
     assert _operation(response, "filter", "nm_promocao").parameters["value"] == ARCA
     assert response.analytical_plan.metrics == [
@@ -86,14 +86,7 @@ def test_campaign_summary_context_generates_default_metrics() -> None:
         "ticket_medio_por_compra",
         "ticket_medio_por_cliente",
     ]
-    assert any(
-        operation.alias == "ticket_medio_por_compra"
-        for operation in response.execution_plan.operations
-    )
-    assert any(
-        operation.alias == "ticket_medio_por_cliente"
-        for operation in response.execution_plan.operations
-    )
+    assert _operation(response, "campaign_detail") is not None
 
 
 def test_neighborhood_ranking_with_campaign_filter() -> None:

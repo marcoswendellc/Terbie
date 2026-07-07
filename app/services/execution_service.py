@@ -21,6 +21,7 @@ class ExecutionService:
     """Coordinates semantic resolution, planning, data loading, and execution."""
 
     _SENSITIVE_COLUMNS = {"senha", "password", "token", "secret"}
+    _REQUIRED_COLUMNS_CAMPAIGN_DETAIL = {"nm_promocao", "vl_compra"}
 
     def __init__(
         self,
@@ -153,6 +154,9 @@ class ExecutionService:
         columns: set[str] = set()
         metric_names = {metric.name for metric in plan.metrics}
         entity_names = {entity.name for entity in plan.entities}
+        is_campaign_detail = plan.intent == "campaign_detail"
+        if is_campaign_detail:
+            return set(self._REQUIRED_COLUMNS_CAMPAIGN_DETAIL)
 
         for metric in knowledge_context.metrics:
             if metric.name in metric_names and metric.column is not None:
@@ -183,9 +187,12 @@ class ExecutionService:
             if isinstance(end_field, str):
                 columns.add(end_field)
 
-            fields = operation.parameters.get("fields", [])
-            if isinstance(fields, list):
-                columns.update(field for field in fields if isinstance(field, str))
+            if operation.type != "campaign_detail" and not (
+                plan.intent == "metric_query" and operation.type == "select"
+            ):
+                fields = operation.parameters.get("fields", [])
+                if isinstance(fields, list):
+                    columns.update(field for field in fields if isinstance(field, str))
 
             subset = operation.parameters.get("subset", [])
             if isinstance(subset, list):

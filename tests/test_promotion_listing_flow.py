@@ -185,7 +185,10 @@ def test_execute_campaign_listing_returns_distinct_promotions_without_raw_purcha
         app.dependency_overrides.pop(provide_execution_service, None)
 
     assert response.status_code == 200
-    rows = response.json()["data"]
+    body = response.json()
+    rows = body["data"]
+    answer = body["answer"]
+    highlights = body["highlights"]
     assert rows == [
         {
             "cd_promocao": "P002",
@@ -202,6 +205,9 @@ def test_execute_campaign_listing_returns_distinct_promotions_without_raw_purcha
     ]
     assert len({(row["cd_promocao"], row["nm_promocao"]) for row in rows}) == len(rows)
     assert all(row["cd_promocao"] is not None for row in rows)
+    assert "Natal Premiado" in answer
+    assert "Volta as aulas" in answer
+    assert answer not in highlights
     assert all(
         not {"cd_compra", "sk_cliente", "vl_compra", "bairro", "cep", "tx_cep"}.intersection(row)
         for row in rows

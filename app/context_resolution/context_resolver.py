@@ -109,6 +109,15 @@ class ContextResolver:
         return [self._metric(metric)]
 
     def _intent(self, normalized_question: str) -> str | None:
+        if re.search(
+            r"\b(detalhar|detalhe|detalha|resumo|como foi)\b.*\b(campanha|promocao)\b",
+            normalized_question,
+        ) or re.search(
+            r"\b(campanha|promocao)\b.*\b(detalhar|detalhe|detalha|resumo|como foi)\b",
+            normalized_question,
+        ):
+            return "campaign_detail"
+
         if re.search(r"\b(resumo|resuma|visao geral)\b", normalized_question):
             return "summary"
 

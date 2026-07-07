@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -31,14 +31,42 @@ class SemanticParameter(BaseModel):
 class SemanticMetric(BaseModel):
     name: str
     operation: MetricOperation
+    column: str | None = None
     synonyms: list[str] = Field(default_factory=list)
+    equivalent_to: str | None = None
+    expands_to: list[str] = Field(default_factory=list)
+    ambiguity_policy: str | None = None
 
     model_config = ConfigDict(frozen=True)
 
 
 class SemanticEntity(BaseModel):
     name: str
+    column: str | None = None
+    key: str | None = None
+    date_fields: list[str] = Field(default_factory=list)
     synonyms: list[str] = Field(default_factory=list)
+
+    model_config = ConfigDict(frozen=True)
+
+
+class SemanticMappedColumn(BaseModel):
+    term: str
+    canonical: str
+    column: str | list[str]
+    role: Literal["metric", "dimension", "filter", "date"] = "dimension"
+
+    model_config = ConfigDict(frozen=True)
+
+
+class SemanticInterpretation(BaseModel):
+    intent: str | None = None
+    entity: str | None = None
+    operation: str | None = None
+    metrics: list[str] = Field(default_factory=list)
+    dimensions: list[str] = Field(default_factory=list)
+    filters: list[dict[str, Any]] = Field(default_factory=list)
+    response_rule_ids: list[str] = Field(default_factory=list)
 
     model_config = ConfigDict(frozen=True)
 
@@ -52,6 +80,8 @@ class SemanticResolution(BaseModel):
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     suggested_metrics: list[SemanticMetric] = Field(default_factory=list)
     suggested_entities: list[SemanticEntity] = Field(default_factory=list)
+    mapped_columns: list[SemanticMappedColumn] = Field(default_factory=list)
+    interpretation: SemanticInterpretation | None = None
 
     model_config = ConfigDict(frozen=True)
 

@@ -1,30 +1,30 @@
+from app.semantic.dictionary import SEMANTIC_DICTIONARY
 from app.semantic.models import SemanticMetric
-from app.semantic.synonyms import BUSINESS_SYNONYMS
 
-SEMANTIC_METRICS: dict[str, SemanticMetric] = {
-    "faturamento": SemanticMetric(
-        name="faturamento",
-        operation="sum",
-        synonyms=BUSINESS_SYNONYMS["faturamento"],
-    ),
-    "ticket_medio": SemanticMetric(
-        name="ticket_medio",
-        operation="avg",
-        synonyms=BUSINESS_SYNONYMS["ticket_medio"],
-    ),
-    "quantidade": SemanticMetric(
-        name="quantidade",
-        operation="count",
-        synonyms=["quantidade", "qtd", "total", "contagem", "número", "numero"],
-    ),
-    "clientes_unicos": SemanticMetric(
-        name="clientes_unicos",
-        operation="count_distinct",
-        synonyms=["clientes únicos", "clientes unicos", "cpfs únicos", "cpfs unicos"],
-    ),
-    "crescimento": SemanticMetric(
-        name="crescimento",
-        operation="growth",
-        synonyms=BUSINESS_SYNONYMS["crescimento"],
-    ),
-}
+
+def _build_metrics() -> dict[str, SemanticMetric]:
+    metrics: dict[str, SemanticMetric] = {}
+    metric_definitions = SEMANTIC_DICTIONARY["metrics"]
+    if not isinstance(metric_definitions, dict):
+        return metrics
+
+    for name, definition in metric_definitions.items():
+        if not isinstance(name, str) or not isinstance(definition, dict):
+            continue
+        if definition.get("operation") is None:
+            continue
+
+        metrics[name] = SemanticMetric(
+            name=name,
+            operation=definition["operation"],
+            column=definition.get("column"),
+            synonyms=list(definition.get("synonyms", [])),
+            equivalent_to=definition.get("equivalent_to"),
+            expands_to=list(definition.get("expands_to", [])),
+            ambiguity_policy=definition.get("ambiguity_policy"),
+        )
+
+    return metrics
+
+
+SEMANTIC_METRICS: dict[str, SemanticMetric] = _build_metrics()

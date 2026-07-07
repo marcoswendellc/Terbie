@@ -88,9 +88,14 @@ class ExecutionPlanBuilder:
             if operation_name == "filter":
                 continue
 
+            if operation_name == "campaign_detail":
+                operations.append(self._campaign_detail_operation())
+                continue
+
             operation = self._operation(
                 operation_name=operation_name,
                 metric=metric,
+                requested_metrics=analytical_plan.metrics,
                 group_field=group_field,
                 limit_parameter=limit_parameter,
                 select_fields=select_fields,
@@ -101,6 +106,26 @@ class ExecutionPlanBuilder:
                 operations.append(operation)
 
         return operations
+
+    def _campaign_detail_operation(self) -> PlanOperation:
+        return PlanOperation(
+            type="campaign_detail",
+            parameters={
+                "fields": [
+                    "nm_promocao",
+                    "vl_compra",
+                    "cd_compra",
+                    "sk_cliente",
+                    "nm_segmento",
+                    "nm_fantasa",
+                    "bairro",
+                    "cidade",
+                    "nm_empreendimento",
+                    "sk_dtinicio",
+                    "sk_dtfim",
+                ],
+            },
+        )
 
     def _filter_operations(self, filters: list[dict[str, object]]) -> list[PlanOperation]:
         operations: list[PlanOperation] = []
@@ -136,6 +161,7 @@ class ExecutionPlanBuilder:
         *,
         operation_name: str,
         metric: PlanMetric | None,
+        requested_metrics: list[str],
         group_field: str | None,
         limit_parameter: PlanParameter | None,
         select_fields: list[str],
@@ -152,6 +178,12 @@ class ExecutionPlanBuilder:
             return PlanOperation(type="group_by", field=group_field)
 
         if operation_name == "aggregate":
+            if intent == "metric_query":
+                return PlanOperation(
+                    type="aggregate",
+                    parameters={"metrics": self._aggregate_metrics(requested_metrics)},
+                )
+
             if intent in {"comparison", "summary"}:
                 return PlanOperation(
                     type="aggregate",
@@ -252,6 +284,9 @@ class ExecutionPlanBuilder:
         return None
 
     def _select_fields(self, analytical_plan: AnalyticalPlan) -> list[str]:
+        if analytical_plan.intent == "metric_query":
+            return analytical_plan.metrics
+
         if analytical_plan.intent == "list_distinct" and "promocao" in analytical_plan.entities:
             return ["cd_promocao", "nm_promocao", "sk_dtinicio", "sk_dtfim"]
 
@@ -262,3 +297,50 @@ class ExecutionPlanBuilder:
             return ["cd_promocao", "nm_promocao"]
 
         return []
+
+    def _aggregate_metrics(self, requested_metrics: list[str]) -> list[dict[str, str]]:
+        metrics: list[dict[str, str]] = []
+        required_metric_names: list[str] = []
+
+        for metric in requested_metrics:
+            if metric in {"ticket_medio_por_compra", "ticket_medio_por_cliente"}:
+                for dependency in ["faturamento", "quantidade_compras"]:
+                    if dependency not in required_metric_names:
+                        required_metric_names.append(dependency)
+                if (
+                    metric == "ticket_medio_por_cliente"
+                    and "clientes_unicos" not in required_metric_names
+                ):
+                    required_metric_names.append("clientes_unicos")
+                continue
+
+            if metric not in required_metric_names:
+                required_metric_names.append(metric)
+
+        definitions = {
+            "faturamento": {
+                "name": "faturamento",
+                "field": "vl_compra",
+                "function": "sum",
+                "alias": "faturamento",
+            },
+            "quantidade_compras": {
+                "name": "quantidade_compras",
+                "field": "cd_compra",
+                "function": "count_distinct",
+                "alias": "quantidade_compras",
+            },
+            "clientes_unicos": {
+                "name": "clientes_unicos",
+                "field": "sk_cliente",
+                "function": "count_distinct",
+                "alias": "clientes_unicos",
+            },
+        }
+
+        for metric_name in required_metric_names:
+            definition = definitions.get(metric_name)
+            if definition is not None:
+                metrics.append(definition)
+
+        return metrics

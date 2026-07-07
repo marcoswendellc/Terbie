@@ -33,9 +33,15 @@ class HypothesisBuilder:
             semantic_resolution=semantic_resolution,
         )
         business_entity = self._business_entity(semantic_resolution)
+        metrics = self._metrics(metric=metric, semantic_resolution=semantic_resolution)
         time_scope = self._time_scope(semantic_resolution)
 
-        if metric is None and analysis_type not in {"list_distinct", "comparison"}:
+        if not metrics and metric is None and analysis_type not in {
+            "campaign_detail",
+            "list_distinct",
+            "comparison",
+            "summary",
+        }:
             warnings.append("Nenhuma métrica identificada.")
 
         if business_entity is None:
@@ -46,6 +52,7 @@ class HypothesisBuilder:
             analysis_type=analysis_type,
             business_entity=business_entity,
             metric=metric,
+            metrics=metrics,
             metric_source=metric_source,
             time_scope=time_scope,
             filters=self._filters(
@@ -53,6 +60,7 @@ class HypothesisBuilder:
                 analysis_type=analysis_type,
                 semantic_resolution=semantic_resolution,
             ),
+            dimensions=self._dimensions(semantic_resolution),
             confidence=self._confidence(
                 analysis_type=analysis_type,
                 metric=metric,
@@ -60,6 +68,17 @@ class HypothesisBuilder:
             ),
             warnings=warnings,
         )
+
+    def _metrics(
+        self,
+        *,
+        metric: str | None,
+        semantic_resolution: SemanticResolution | None,
+    ) -> list[str]:
+        if semantic_resolution is not None and semantic_resolution.interpretation is not None:
+            return semantic_resolution.interpretation.metrics
+
+        return [metric] if metric is not None else []
 
     def _analysis_type(
         self,
@@ -69,6 +88,12 @@ class HypothesisBuilder:
     ) -> str | None:
         if semantic_resolution is None:
             return None
+
+        if (
+            semantic_resolution.interpretation is not None
+            and semantic_resolution.interpretation.intent is not None
+        ):
+            return semantic_resolution.interpretation.intent
 
         normalized_question = self._normalize_text(question)
         if self._is_comparison_question(normalized_question):
@@ -146,6 +171,12 @@ class HypothesisBuilder:
         if semantic_resolution is None:
             return None, None
 
+        if (
+            semantic_resolution.interpretation is not None
+            and semantic_resolution.interpretation.metrics
+        ):
+            return semantic_resolution.interpretation.metrics[0], "semantic_dictionary"
+
         resolved_metric = self._metric_resolver.resolve(question)
         if resolved_metric.metric is not None:
             return resolved_metric.metric, resolved_metric.source
@@ -179,6 +210,12 @@ class HypothesisBuilder:
         if semantic_resolution is None:
             return None
 
+        if (
+            semantic_resolution.interpretation is not None
+            and semantic_resolution.interpretation.entity is not None
+        ):
+            return semantic_resolution.interpretation.entity
+
         entity_names = {entity.name for entity in semantic_resolution.suggested_entities}
         normalized_query = semantic_resolution.normalized_query
         if (
@@ -197,6 +234,12 @@ class HypothesisBuilder:
             return "loja"
 
         return None
+
+    def _dimensions(self, semantic_resolution: SemanticResolution | None) -> list[str]:
+        if semantic_resolution is None or semantic_resolution.interpretation is None:
+            return []
+
+        return semantic_resolution.interpretation.dimensions
 
     def _time_scope(self, semantic_resolution: SemanticResolution | None) -> str | None:
         if semantic_resolution is None:

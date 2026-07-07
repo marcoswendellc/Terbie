@@ -1,0 +1,87 @@
+from app.semantic_kb.models import KBDimension
+
+KB_DIMENSIONS: list[KBDimension] = [
+    KBDimension(
+        name="promocao",
+        column="nm_promocao",
+        key="cd_promocao",
+        date_fields=["sk_dtinicio", "sk_dtfim"],
+        synonyms=[
+            "campanha",
+            "campanhas",
+            "promocao",
+            "promocoes",
+            "acao",
+            "acoes",
+            "acao promocional",
+            "acoes promocionais",
+            "evento promocional",
+            "eventos promocionais",
+        ],
+        contexts=["campanha", "promocao"],
+        priority=10,
+    ),
+    KBDimension(
+        name="loja",
+        column="nm_fantasa",
+        key="sk_loja",
+        synonyms=["loja", "lojas", "lojista", "lojistas", "operacao", "unidade"],
+    ),
+    KBDimension(
+        name="restaurante",
+        column="nm_fantasa",
+        key="sk_loja",
+        synonyms=[
+            "restaurante",
+            "restaurantes",
+            "alimentacao",
+            "food",
+            "food court",
+            "praca de alimentacao",
+        ],
+    ),
+    KBDimension(
+        name="cliente",
+        column="sk_cliente",
+        key="sk_cliente",
+        synonyms=["cliente", "clientes", "consumidor", "comprador"],
+    ),
+    KBDimension(
+        name="empreendimento",
+        column="nm_empreendimento",
+        key="cd_empreendimento",
+        synonyms=["shopping", "shoppings", "empreendimento", "mall"],
+    ),
+    KBDimension(
+        name="segmento",
+        column="nm_segmento",
+        synonyms=["segmento", "segmentos"],
+    ),
+    KBDimension(
+        name="categoria",
+        derived_from="nm_segmento",
+        derivation_rule='Texto antes de ">>".',
+        synonyms=["categoria", "categorias"],
+    ),
+    KBDimension(
+        name="subcategoria",
+        derived_from="nm_segmento",
+        derivation_rule='Texto depois de ">>".',
+        synonyms=["subcategoria", "subcategorias"],
+    ),
+    KBDimension(name="bairro", column="bairro", synonyms=["bairro", "bairros"]),
+    KBDimension(name="cidade", column="cidade", synonyms=["cidade", "cidades"]),
+    KBDimension(name="uf", column="uf", synonyms=["uf", "estado", "estados"]),
+    KBDimension(name="cep", column="tx_cep", synonyms=["cep", "ceps"]),
+    KBDimension(
+        name="data_compra",
+        column="dt_registro_mos",
+        synonyms=["data da compra", "data compra", "periodo da compra"],
+    ),
+    KBDimension(name="data", column="data", synonyms=["data", "periodo", "mes", "ano", "dia"]),
+    KBDimension(
+        name="produto",
+        column="produto",
+        synonyms=["produto", "produtos", "item", "itens"],
+    ),
+]

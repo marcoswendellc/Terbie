@@ -90,7 +90,7 @@ def test_listing_insights_count_distinct_items_without_repeating_rows() -> None:
 
     assert result.insights[0].title == "Quantidade encontrada"
     assert result.insights[0].value == 2
-    assert result.summary == "A listagem retornou 2 item(ns) distintos."
+    assert result.summary == "Encontrei 2 campanhas: A; B."
 
 
 def test_narrator_communicates_insight_result_without_calculating() -> None:

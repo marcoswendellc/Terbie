@@ -74,11 +74,12 @@ def test_compiler_uses_valid_reasoning_hypothesis() -> None:
     assert response.hypothesis.time_scope == "current_month"
 
 
-def test_compiler_falls_back_when_reasoning_fails() -> None:
+def test_compiler_falls_back_when_reasoning_fails(caplog) -> None:
     response = _compiler(FailingReasoningProvider()).compile(
         _request("Quais são os 10 restaurantes com maior faturamento?"),
     )
 
     assert response.hypothesis.metric == "faturamento"
     assert response.hypothesis.business_entity == "restaurante"
-    assert "ReasoningProvider falhou; fallback determinístico utilizado." in response.warnings
+    assert not any("ReasoningProvider" in warning for warning in response.warnings)
+    assert "ReasoningProvider failed; using deterministic fallback" in caplog.text

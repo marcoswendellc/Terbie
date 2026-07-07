@@ -1,3 +1,5 @@
+import logging
+
 from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
@@ -12,6 +14,8 @@ from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
 from app.semantic.models import SemanticResolution
+
+logger = logging.getLogger(__name__)
 
 
 class TerbieCompiler:
@@ -98,7 +102,6 @@ class TerbieCompiler:
         knowledge_context: KnowledgeContext | None,
         schema_context: dict[str, object] | None,
     ) -> AnalyticalHypothesis:
-        fallback_warning = "ReasoningProvider falhou; fallback determinístico utilizado."
         if self._reasoning_provider is not None:
             reasoning_result = self._reasoning_provider.generate_hypothesis(
                 ReasoningContext(
@@ -111,13 +114,17 @@ class TerbieCompiler:
             if reasoning_result.success and reasoning_result.hypothesis is not None:
                 return reasoning_result.hypothesis
 
-            hypothesis = self._fallback_hypothesis(
+            logger.warning(
+                "ReasoningProvider failed; using deterministic fallback. "
+                "provider=%s model=%s warnings=%s",
+                reasoning_result.provider,
+                reasoning_result.model,
+                reasoning_result.warnings,
+            )
+            return self._fallback_hypothesis(
                 question=question,
                 semantic_resolution=semantic_resolution,
                 knowledge_context=knowledge_context,
-            )
-            return hypothesis.model_copy(
-                update={"warnings": [*hypothesis.warnings, fallback_warning]},
             )
 
         return self._fallback_hypothesis(

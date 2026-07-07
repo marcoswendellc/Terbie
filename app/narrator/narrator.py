@@ -46,10 +46,14 @@ class TerbieNarrator:
             )
 
         strategy = self._strategy_for(context)
-        highlights = strategy.highlights(context)
+        answer = strategy.answer(context)
+        highlights = self._deduplicate_highlights(
+            answer=answer,
+            highlights=strategy.highlights(context),
+        )
 
         return NarratorResponse(
-            answer=strategy.answer(context),
+            answer=answer,
             summary=None,
             highlights=highlights,
             warnings=context.warnings,
@@ -72,7 +76,10 @@ class TerbieNarrator:
         return NarratorResponse(
             answer=answer,
             summary=getattr(insight_result, "summary", None),
-            highlights=[insight["description"] for insight in insights[:3]],
+            highlights=self._deduplicate_highlights(
+                answer=answer,
+                highlights=[str(insight["description"]) for insight in insights[:3]],
+            ),
             insights=insights,
             recommendations=recommendations,
             warnings=context.warnings,
@@ -180,3 +187,22 @@ class TerbieNarrator:
             metadata["technical_warnings"] = context.warnings
 
         return metadata
+
+    def _deduplicate_highlights(self, *, answer: str, highlights: list[str]) -> list[str]:
+        normalized_answer = self._normalize(answer)
+        deduplicated: list[str] = []
+        seen: set[str] = set()
+        for highlight in highlights:
+            normalized_highlight = self._normalize(highlight)
+            if not normalized_highlight or normalized_highlight in seen:
+                continue
+            if normalized_highlight == normalized_answer:
+                continue
+
+            deduplicated.append(highlight)
+            seen.add(normalized_highlight)
+
+        return deduplicated
+
+    def _normalize(self, text: str) -> str:
+        return " ".join(text.casefold().split())

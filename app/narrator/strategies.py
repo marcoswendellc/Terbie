@@ -75,8 +75,12 @@ class ListingStrategy(ResponseStrategy):
         return "\n\n".join([intro, *items])
 
     def _listing_intro(self, context: NarrativeContext) -> str:
-        count_text = self._count_text(context.rows_returned, singular="um item", plural="itens")
-        return f"A lista consolidada traz {count_text}:"
+        count_text = (
+            "1 item distinto"
+            if context.rows_returned == 1
+            else f"{self._formatter.integer(context.rows_returned)} itens distintos"
+        )
+        return f"Encontrei {count_text} na sua consulta:"
 
     def _row_label(self, row: dict[str, Any], dimension_columns: list[str]) -> str:
         values = [

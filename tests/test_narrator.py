@@ -127,6 +127,27 @@ def test_listing_strategy_answers_campaign_question_directly() -> None:
     assert response.metadata["technical_warnings"] == ["fallback determinístico."]
 
 
+def test_listing_strategy_uses_friendly_distinct_count() -> None:
+    execution_result = ExecutionResult(
+        data=[{"categoria": "Alimentacao"}, {"categoria": "Lazer"}],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Quais categorias existem?",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="list_distinct"),
+        ),
+    )
+
+    assert response.answer.startswith("Encontrei 2 itens distintos na sua consulta:")
+
+
 def test_execute_endpoint_returns_200() -> None:
     from app.core.dependencies import provide_execution_service
     from app.narrator.models import ExecuteResponse

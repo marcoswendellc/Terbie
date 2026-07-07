@@ -39,6 +39,12 @@ button {
   cursor: pointer;
 }
 
+button:disabled,
+textarea:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -356,6 +362,7 @@ textarea:focus {
   margin: 0.35rem 0 0;
   color: #2f3d38;
   line-height: 1.55;
+  white-space: pre-wrap;
 }
 
 .composer {

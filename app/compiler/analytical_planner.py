@@ -31,6 +31,7 @@ class AnalyticalPlanner:
             required_operations=self._required_operations(
                 analysis_type=hypothesis.analysis_type,
                 business_entity=hypothesis.business_entity,
+                metrics=metrics,
                 filters=self._filters(hypothesis),
             ),
             warnings=hypothesis.warnings,
@@ -41,6 +42,7 @@ class AnalyticalPlanner:
         *,
         analysis_type: str | None,
         business_entity: str | None,
+        metrics: list[str],
         filters: list[dict[str, object]],
     ) -> list[str]:
         filter_operations = ["filter"] if self._has_executable_filters(filters) else []
@@ -50,6 +52,18 @@ class AnalyticalPlanner:
 
         if analysis_type == "comparison":
             return [*filter_operations, "group_by", "aggregate", "derived_metric", "sort"]
+
+        if analysis_type == "metric_query":
+            operations = [*filter_operations, "aggregate"]
+            if "ticket_medio_por_compra" in metrics:
+                operations.append("derived_metric_purchase")
+            if "ticket_medio_por_cliente" in metrics:
+                operations.append("derived_metric_customer")
+            operations.append("select")
+            return operations
+
+        if analysis_type == "campaign_detail":
+            return [*filter_operations, "campaign_detail"]
 
         if analysis_type == "summary":
             return [
@@ -105,10 +119,15 @@ class AnalyticalPlanner:
         return []
 
     def _metrics(self, hypothesis: AnalyticalHypothesis) -> list[str]:
+        if hypothesis.metrics:
+            return hypothesis.metrics
+
         if hypothesis.analysis_type == "comparison" and hypothesis.business_entity == "promocao":
             return [metric.name for metric in PROMOTION_COMPARISON_METRICS]
 
-        if hypothesis.analysis_type == "summary" and hypothesis.business_entity == "promocao":
+        if hypothesis.analysis_type in {"summary", "campaign_detail"} and (
+            hypothesis.business_entity == "promocao"
+        ):
             return [
                 "faturamento",
                 "quantidade_compras",

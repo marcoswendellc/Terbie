@@ -1,98 +1,34 @@
+from typing import Any
+
+from app.semantic.dictionary import SEMANTIC_DICTIONARY
+
+
+def _synonyms(section: str) -> dict[str, list[str]]:
+    items = SEMANTIC_DICTIONARY[section]
+    if not isinstance(items, dict):
+        return {}
+
+    return {
+        canonical: list(definition.get("synonyms", []))
+        for canonical, definition in items.items()
+        if isinstance(canonical, str) and isinstance(definition, dict)
+    }
+
+
 BUSINESS_SYNONYMS: dict[str, list[str]] = {
-    "faturamento": [
-        "vendas",
-        "venda",
-        "receita",
-        "faturamento",
-        "valor vendido",
-        "valor de venda",
-        "total vendido",
-        "venderam",
-        "vendeu",
-        "vendido",
-    ],
-    "cliente": [
-        "cliente",
-        "clientes",
-        "consumidor",
-        "consumidores",
-        "comprador",
-        "compradores",
-    ],
-    "shopping": [
-        "shopping",
-        "shoppings",
-        "empreendimento",
-        "empreendimentos",
-        "mall",
-        "malls",
-    ],
-    "loja": [
-        "loja",
-        "lojas",
-        "lojista",
-        "lojistas",
-        "operação",
-        "operações",
-        "unidade",
-        "unidades",
-    ],
-    "restaurante": [
-        "restaurante",
-        "restaurantes",
-        "alimentação",
-        "food",
-        "food court",
-        "praça de alimentação",
-    ],
-    "promocao": [
-        "campanha",
-        "campanhas",
-        "promoção",
-        "promocao",
-        "promoções",
-        "promocoes",
-        "ação promocional",
-        "acao promocional",
-        "ações promocionais",
-        "acoes promocionais",
-    ],
-    "data": [
-        "data",
-        "período",
-        "periodo",
-        "mês",
-        "mes",
-        "ano",
-        "dia",
-    ],
-    "ticket_medio": [
-        "ticket médio",
-        "ticket medio",
-        "tm",
-        "valor médio",
-        "valor medio",
-        "média por compra",
-        "media por compra",
-    ],
-    "crescimento": [
-        "crescimento",
-        "variação",
-        "variacao",
-        "evolução",
-        "evolucao",
-        "aumento",
-        "queda",
-    ],
-    "ranking": [
-        "ranking",
-        "top",
-        "maior",
-        "maiores",
-        "melhor",
-        "melhores",
-        "menor",
-        "menores",
-        "mais",
-    ],
+    **_synonyms("metrics"),
+    **_synonyms("dimensions"),
+    **_synonyms("intents"),
+}
+
+USER_TERM_COLUMN_MAP: dict[str, str | list[str]] = {
+    term: column
+    for term, column in SEMANTIC_DICTIONARY.get("column_mappings", {}).items()
+    if isinstance(term, str) and isinstance(column, str | list)
+}
+
+SEMANTIC_SECTIONS: dict[str, dict[str, dict[str, Any]]] = {
+    section: value
+    for section, value in SEMANTIC_DICTIONARY.items()
+    if section in {"metrics", "dimensions", "intents"} and isinstance(value, dict)
 }
