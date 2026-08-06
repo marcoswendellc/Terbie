@@ -62,6 +62,9 @@ class AnalyticalPlanner:
             operations.append("select")
             return operations
 
+        if analysis_type == "sales_date_range":
+            return [*filter_operations, "aggregate"]
+
         if analysis_type in {"campaign_detail", "campaign_summary"}:
             return [*filter_operations, "campaign_detail"]
 
@@ -157,7 +160,13 @@ class AnalyticalPlanner:
                 "field": "cd_promocao",
                 "operator": "not_null",
             }
-            if promotion_key_filter not in filters:
+            has_named_promotion_filter = any(
+                filter_item.get("type") == "filter"
+                and filter_item.get("field") == "nm_promocao"
+                and filter_item.get("operator", "equals") == "equals"
+                for filter_item in filters
+            )
+            if promotion_key_filter not in filters and not has_named_promotion_filter:
                 filters.insert(0, promotion_key_filter)
 
             if hypothesis.time_scope is not None and hypothesis.time_scope.isdigit():

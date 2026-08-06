@@ -17,9 +17,9 @@ class LimitOperation(BaseOperation):
         operation: PlanOperation,
         context: ExecutionContext,
     ) -> "pd.DataFrame":
-        _ = context
         value = operation.parameters.get("value")
         if not isinstance(value, int) or value <= 0:
             return dataframe
 
+        context.metadata["executed_limit"] = value
         return dataframe.head(value)

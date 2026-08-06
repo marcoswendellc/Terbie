@@ -26,6 +26,29 @@ class ResponseStrategy(ABC):
         return []
 
 
+class SalesDateRangeStrategy(ResponseStrategy):
+    def can_handle(self, context: NarrativeContext) -> bool:
+        return context.intent == "sales_date_range"
+
+    def answer(self, context: NarrativeContext) -> str:
+        row = context.top_row or {}
+        start = self._date(row.get("primeira_venda"))
+        end = self._date(row.get("ultima_venda"))
+        if start is None:
+            return "Não encontrei uma data de venda válida nos dados disponíveis."
+        if end is None or end == start:
+            return f"Há vendas disponíveis a partir de {start}."
+        return f"Há vendas disponíveis de {start} até {end}."
+
+    def _date(self, value: object) -> str | None:
+        if value is None:
+            return None
+        try:
+            return datetime.fromisoformat(str(value)).strftime("%d/%m/%Y")
+        except ValueError:
+            return str(value)
+
+
 class ListingStrategy(ResponseStrategy):
     def can_handle(self, context: NarrativeContext) -> bool:
         return context.intent == "list_distinct" or (
@@ -161,6 +184,13 @@ class RankingStrategy(ResponseStrategy):
         dimension = self._formatter.value(dimension_column, top_row.get(dimension_column))
         metric = self._formatter.value(metric_column, top_row.get(metric_column))
 
+        if self._is_multi_record_ranking(context):
+            return self._ranked_list(
+                context=context,
+                dimension_column=dimension_column,
+                metric_column=metric_column,
+            )
+
         if not self._asks_for_analysis(context.question):
             return self._objective_answer(
                 context=context,
@@ -211,7 +241,109 @@ class RankingStrategy(ResponseStrategy):
 
             return f"A melhor campanha, considerando faturamento, foi {dimension}."
 
-        return f"{article} {label} com {objective}{context_text} foi {dimension}, com {metric_phrase}."
+        return (
+            f"{article} {label} com {objective}{context_text} "
+            f"foi {dimension}, com {metric_phrase}."
+        )
+
+    def _asks_for_ranked_list(self, question: str) -> bool:
+        normalized = self._normalize_text(question)
+        return bool(
+            re.search(r"\btop\s+\d+\b", normalized)
+            or re.search(r"\branking\s+\d+\b", normalized)
+            or re.search(r"\branking\s+d(?:a|e|o|os|as)\s+\d+\b", normalized)
+            or re.search(r"\b(me\s+)?liste\b", normalized)
+            or re.search(
+                r"\b(?:quais|liste|mostrar|mostre)\b.*\b\d+\b.*"
+                r"\b(?:lojas?|lojistas?|segmentos?|bairros?|cidades?|clientes?)\b",
+                normalized,
+            )
+        )
+
+    def _is_multi_record_ranking(self, context: NarrativeContext) -> bool:
+        metadata_rows = context.execution_metadata.get("rows_returned")
+        reported_rows = metadata_rows if isinstance(metadata_rows, int) else context.rows_returned
+        available_count = min(reported_rows, len(context.data))
+        if available_count <= 1:
+            return False
+
+        requested_limit = self._requested_limit(context)
+        ranking_metadata = context.execution_metadata.get("ranking", {})
+        metadata_marks_ranking = isinstance(ranking_metadata, dict) and any(
+            isinstance(ranking_metadata.get(field), int)
+            for field in ("requested_limit", "executed_limit")
+        )
+        return bool(
+            context.intent == "ranking"
+            or requested_limit is not None
+            or metadata_marks_ranking
+            or self._asks_for_ranked_list(context.question)
+        )
+
+    def _requested_limit(self, context: NarrativeContext) -> int | None:
+        ranking_metadata = context.execution_metadata.get("ranking", {})
+        if isinstance(ranking_metadata, dict):
+            for field in ("requested_limit", "executed_limit"):
+                value = ranking_metadata.get(field)
+                if isinstance(value, int) and value > 0:
+                    return value
+
+        normalized = self._normalize_text(context.question)
+        patterns = (
+            r"\btop\s+(\d+)\b",
+            r"\branking(?:\s+d(?:a|e|o|os|as))?\s+(\d+)\b",
+            r"\b(?:quais|liste|mostrar|mostre)?\b.*?\b(\d+)\s+"
+            r"(?:lojas?|lojistas?|segmentos?|bairros?|cidades?|clientes?)\b",
+        )
+        for pattern in patterns:
+            match = re.search(pattern, normalized)
+            if match is not None:
+                return int(match.group(1))
+        return None
+
+    def _ranked_list(
+        self,
+        *,
+        context: NarrativeContext,
+        dimension_column: str,
+        metric_column: str,
+    ) -> str:
+        _, singular_label = self._DIMENSION_LABELS.get(
+            dimension_column,
+            ("O", dimension_column.replace("_", " ")),
+        )
+        plural_label = {
+            "loja": "lojas",
+            "campanha": "campanhas",
+            "segmento": "segmentos",
+            "bairro": "bairros",
+            "cidade": "cidades",
+            "cliente": "clientes",
+        }.get(singular_label, f"{singular_label}s")
+        campaign_context = self._campaign_context(context.question)
+        actual_count = min(context.rows_returned, len(context.data))
+        requested_limit = self._requested_limit(context)
+        objective = self._objective_phrase(metric_column)
+        if requested_limit is not None and actual_count < requested_limit:
+            heading = (
+                f"Foram encontradas {actual_count} {plural_label} com {objective}"
+                f"{campaign_context}, de {requested_limit} solicitadas:"
+            )
+        else:
+            heading = (
+                f"As {actual_count} {plural_label} com {objective}"
+                f"{campaign_context} foram:"
+            )
+
+        lines = [
+            (
+                f"{index}. "
+                f"{self._formatter.value(dimension_column, row.get(dimension_column))} — "
+                f"{self._formatter.value(metric_column, row.get(metric_column))}"
+            )
+            for index, row in enumerate(context.data, start=1)
+        ]
+        return f"{heading}\n\n" + "\n".join(lines)
 
     def _objective_phrase(self, metric_column: str) -> str:
         if metric_column == "quantidade_compras":
@@ -294,12 +426,24 @@ class MetricStrategy(ResponseStrategy):
 
 
 class ComparisonStrategy(ResponseStrategy):
+    _METRIC_LABELS = {
+        "faturamento": "Faturamento",
+        "quantidade_compras": "Quantidade de compras",
+        "clientes_unicos": "Clientes únicos",
+        "ticket_medio": "Ticket médio",
+        "ticket_medio_por_compra": "Ticket médio por compra",
+        "ticket_medio_por_cliente": "Ticket médio por cliente",
+    }
+
     def can_handle(self, context: NarrativeContext) -> bool:
         return context.intent in {"comparison", "compare_periods"}
 
     def answer(self, context: NarrativeContext) -> str:
         if not context.data:
             return "Não há dados suficientes para sustentar uma comparação confiável."
+
+        if "tabela" in self._normalize(context.question) and len(context.data) >= 2:
+            return self._comparison_table(context)
 
         label_column = (
             context.dimension_columns[0]
@@ -339,6 +483,93 @@ class ComparisonStrategy(ResponseStrategy):
 
     def _max_row(self, rows: list[dict[str, Any]], metric: str) -> dict[str, Any]:
         return max(rows, key=lambda row: float(row.get(metric) or 0))
+
+    def _comparison_table(self, context: NarrativeContext) -> str:
+        label_column = (
+            context.dimension_columns[0]
+            if context.dimension_columns
+            else context.columns[0]
+        )
+        base_row, compared_row = context.data[:2]
+        base_label = self._cell(base_row.get(label_column))
+        compared_label = self._cell(compared_row.get(label_column))
+        metrics = [
+            metric
+            for metric in context.metric_columns
+            if isinstance(base_row.get(metric), int | float)
+            and isinstance(compared_row.get(metric), int | float)
+        ]
+        lines = [
+            "| Campanha / comparação | "
+            + " | ".join(
+                self._METRIC_LABELS.get(metric, metric.replace("_", " ").title())
+                for metric in metrics
+            )
+            + " |",
+            "|---|" + "---:|" * len(metrics),
+        ]
+
+        lines.append(self._metric_row(base_label, base_row, metrics))
+        lines.append(self._metric_row(compared_label, compared_row, metrics))
+        lines.append(
+            self._variation_row(
+                "Variação absoluta",
+                base_row,
+                compared_row,
+                metrics,
+                percentage=False,
+            ),
+        )
+        lines.append(
+            self._variation_row(
+                "Variação percentual",
+                base_row,
+                compared_row,
+                metrics,
+                percentage=True,
+            ),
+        )
+
+        return "\n".join(lines)
+
+    def _metric_row(
+        self,
+        label: str,
+        row: dict[str, Any],
+        metrics: list[str],
+    ) -> str:
+        values = [self._formatter.value(metric, row[metric]) for metric in metrics]
+        return "| " + " | ".join([label, *values]) + " |"
+
+    def _variation_row(
+        self,
+        label: str,
+        base_row: dict[str, Any],
+        compared_row: dict[str, Any],
+        metrics: list[str],
+        *,
+        percentage: bool,
+    ) -> str:
+        values: list[str] = []
+        for metric in metrics:
+            base_value = float(base_row[metric])
+            difference = float(compared_row[metric]) - base_value
+            if percentage:
+                values.append(
+                    self._formatter.percent(difference / base_value)
+                    if base_value != 0
+                    else "Não aplicável",
+                )
+            else:
+                values.append(self._formatter.value(metric, difference))
+        return "| " + " | ".join([label, *values]) + " |"
+
+    def _cell(self, value: object) -> str:
+        return str(value).replace("|", "\\|")
+
+    def _normalize(self, text: str) -> str:
+        replacements = str.maketrans("áàâãéêíóôõúç", "aaaaeeiooouc")
+        return text.lower().translate(replacements)
 
 
 class TrendStrategy(ResponseStrategy):

@@ -13,6 +13,8 @@ class MetricResolver:
             (
                 "volume de notas",
                 "quantidade de notas",
+                "quantas vendas",
+                "numero de vendas",
                 "qtd notas",
                 "notas",
                 "compras",
@@ -53,6 +55,8 @@ class MetricResolver:
             "faturamento",
             (
                 "faturamento",
+                "faturaram",
+                "faturou",
                 "receita",
                 "vendas",
             ),

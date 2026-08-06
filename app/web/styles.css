@@ -358,11 +358,81 @@ textarea:focus {
   background: #e8f4ef;
 }
 
-.message-bubble p {
+.message-content {
+  min-width: 0;
+  margin-top: 0.35rem;
+  color: #2f3d38;
+  line-height: 1.55;
+}
+
+.message-bubble > p,
+.message-content p {
   margin: 0.35rem 0 0;
   color: #2f3d38;
   line-height: 1.55;
   white-space: pre-wrap;
+}
+
+.message-content p:first-child {
+  margin-top: 0;
+}
+
+.table-scroll {
+  max-width: min(100%, 72rem);
+  margin-top: 0.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+}
+
+.analytics-table {
+  width: 100%;
+  min-width: 46rem;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.analytics-table th,
+.analytics-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.analytics-table th {
+  background: #e8f4ef;
+  color: var(--brand-deep);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.analytics-table th:first-child,
+.analytics-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+}
+
+.analytics-table th:first-child {
+  background: #e8f4ef;
+}
+
+.analytics-table td:first-child {
+  background: #fff;
+  font-weight: 700;
+}
+
+.analytics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.analytics-table tbody tr:hover td {
+  background: var(--surface-soft);
 }
 
 .composer {

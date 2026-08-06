@@ -42,3 +42,16 @@ def test_chat_frontend_does_not_render_raw_backend_warnings() -> None:
     assert response.status_code == 200
     assert "payload.warnings" not in response.text
     assert "plan.warnings" not in response.text
+
+
+def test_chat_frontend_renders_markdown_tables_safely() -> None:
+    client = TestClient(app)
+
+    js_response = client.get("/ui/app.js")
+    css_response = client.get("/ui/styles.css")
+
+    assert "isTableSeparator" in js_response.text
+    assert 'table.className = "analytics-table"' in js_response.text
+    assert "cell.textContent = value" in js_response.text
+    assert ".analytics-table" in css_response.text
+    assert ".table-scroll" in css_response.text

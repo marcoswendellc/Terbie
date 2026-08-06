@@ -2,6 +2,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from app.executor.context import ExecutionContext
+from app.executor.numeric import numeric_series
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
 
@@ -103,9 +104,7 @@ class CampaignDetailOperation(BaseOperation):
         if column not in dataframe.columns:
             return None
 
-        import pandas as pd
-
-        return pd.to_numeric(dataframe[column], errors="coerce")
+        return numeric_series(dataframe[column])
 
     def _nunique_or_none(self, dataframe: "pd.DataFrame", column: str) -> int | None:
         if column not in dataframe.columns:

@@ -18,6 +18,8 @@ class ExecutionPlanBuilder:
         "clientes_unicos": "count_distinct",
         "ticket_medio_por_compra": None,
         "ticket_medio_por_cliente": None,
+        "primeira_venda": "min",
+        "ultima_venda": "max",
     }
 
     _METRIC_COLUMNS = {
@@ -178,6 +180,27 @@ class ExecutionPlanBuilder:
             return PlanOperation(type="group_by", field=group_field)
 
         if operation_name == "aggregate":
+            if intent == "sales_date_range":
+                return PlanOperation(
+                    type="aggregate",
+                    parameters={
+                        "metrics": [
+                            {
+                                "name": "primeira_venda",
+                                "field": "dt_registro_mos",
+                                "function": "min_date",
+                                "alias": "primeira_venda",
+                            },
+                            {
+                                "name": "ultima_venda",
+                                "field": "dt_registro_mos",
+                                "function": "max_date",
+                                "alias": "ultima_venda",
+                            },
+                        ],
+                    },
+                )
+
             if intent == "metric_query":
                 return PlanOperation(
                     type="aggregate",

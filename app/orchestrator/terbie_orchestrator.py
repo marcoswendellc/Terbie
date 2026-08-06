@@ -35,10 +35,10 @@ class TerbieOrchestrator:
 
     def create_draft(self, *, question: str) -> TerbieDraftResponse:
         intent_guard_result = self._intent_guard.evaluate(question)
-        if not intent_guard_result.is_analytical:
+        if intent_guard_result.should_stop:
             return TerbieDraftResponse(
                 question=question,
-                status="out_of_scope",
+                status=intent_guard_result.intent,
                 response=intent_guard_result.response,
             )
 

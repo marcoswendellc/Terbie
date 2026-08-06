@@ -55,6 +55,13 @@ Regras:
   dimensão perguntada.
 - Em rankings, "maior participação" sem outro indicador explícito significa
   volume de notas/compras (`quantidade_compras`), não faturamento.
+- Em pedidos de "lojas que mais venderam", "maiores lojas", "ranking de lojas"
+  ou "top lojas", a dimensão é `loja` (`nm_fantasa`). "Mais venderam" significa
+  `faturamento`, calculado por `SUM(vl_compra)`.
+- Uma campanha mencionada em um ranking de lojas é somente filtro em
+  `nm_promocao`; nunca agrupe por `nm_promocao` nesse contexto.
+- Extraia a quantidade pedida e preserve o mesmo valor como top e limit.
+  Ordene a métrica em ordem decrescente.
 
 Contexto seguro:
 

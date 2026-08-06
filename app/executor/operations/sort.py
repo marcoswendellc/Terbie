@@ -23,4 +23,6 @@ class SortOperation(BaseOperation):
             return dataframe
 
         direction = operation.parameters.get("direction", "desc")
+        context.metadata["order"] = direction
+        context.metadata["order_by"] = field
         return dataframe.sort_values(by=field, ascending=direction == "asc")

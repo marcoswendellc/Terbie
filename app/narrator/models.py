@@ -24,6 +24,7 @@ class NarrativeContext(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     intent: str | None = None
     insight_result: Any | None = None
+    execution_metadata: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(frozen=True)
 

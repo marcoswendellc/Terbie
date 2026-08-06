@@ -1,4 +1,5 @@
 import logging
+import re
 
 from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
@@ -63,6 +64,14 @@ class TerbieCompiler:
                 request.schema_context if isinstance(request.schema_context, dict) else None
             ),
         )
+        hypothesis = self._normalize_explicit_comparison(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
+        hypothesis = self._normalize_campaign_collection_summary(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
         hypothesis = self._apply_entity_resolution(
             question=request.question,
             hypothesis=hypothesis,
@@ -70,6 +79,18 @@ class TerbieCompiler:
         hypothesis = self._apply_context_resolution(
             question=request.question,
             hypothesis=hypothesis,
+        )
+        hypothesis = self._normalize_multi_metric_query(
+            hypothesis=hypothesis,
+            semantic_resolution=semantic_resolution,
+        )
+        hypothesis = self._normalize_sales_date_range_question(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
+        hypothesis = self._normalize_explicit_ranking_limit(
+            hypothesis=hypothesis,
+            semantic_resolution=semantic_resolution,
         )
         analytical_plan = self._analytical_planner.build(
             hypothesis=hypothesis,
@@ -116,10 +137,11 @@ class TerbieCompiler:
 
             logger.warning(
                 "ReasoningProvider failed; using deterministic fallback. "
-                "provider=%s model=%s warnings=%s",
+                "provider=%s model=%s warnings=%s diagnostic=%s",
                 reasoning_result.provider,
                 reasoning_result.model,
                 reasoning_result.warnings,
+                (reasoning_result.raw_response or "unavailable")[:500],
             )
             return self._fallback_hypothesis(
                 question=question,
@@ -131,6 +153,50 @@ class TerbieCompiler:
             question=question,
             semantic_resolution=semantic_resolution,
             knowledge_context=knowledge_context,
+        )
+
+    def _normalize_explicit_comparison(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        patterns = (
+            r"\bcomparar\b",
+            r"\bcompare\b",
+            r"\bcomparativ[oa]s?\b",
+            r"\bversus\b",
+            r"\bvs\b",
+            r"\bcontra\b",
+            r"\bem relacao a\b",
+        )
+        if not any(re.search(pattern, normalized) for pattern in patterns):
+            return hypothesis
+
+        return hypothesis.model_copy(update={"analysis_type": "comparison"})
+
+    def _normalize_campaign_collection_summary(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        has_summary_request = bool(
+            re.search(r"\b(resumo|resuma|resumir|detalhe|detalhar)\b", normalized),
+        )
+        has_plural_campaigns = bool(
+            re.search(r"\b(campanhas|promocoes)\b", normalized),
+        )
+        if not (has_summary_request and has_plural_campaigns):
+            return hypothesis
+
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": "comparison",
+                "business_entity": hypothesis.business_entity or "promocao",
+            },
         )
 
     def _fallback_hypothesis(
@@ -226,7 +292,7 @@ class TerbieCompiler:
             (resolved_context.intent or hypothesis.analysis_type) == "ranking"
             and not any(filter_item.get("type") == "limit" for filter_item in filters)
         ):
-            filters.append({"type": "limit", "value": 1})
+            filters.append({"type": "limit", "value": self._default_ranking_limit(question)})
 
         dimensions = [dimension.field for dimension in resolved_context.dimensions]
         metric = resolved_context.metrics[0].name if resolved_context.metrics else hypothesis.metric
@@ -259,6 +325,130 @@ class TerbieCompiler:
                 "metric_source": metric_source,
                 "dimensions": dimensions or hypothesis.dimensions,
                 "filters": self._deduplicate_filters(filters),
+                "warnings": warnings,
+            },
+        )
+
+    def _default_ranking_limit(self, question: str) -> int:
+        normalized = self._context_resolver._normalize_text(question)
+        singular_patterns = (
+            r"\bqual\s+(foi\s+a\s+|foi\s+o\s+)?loja\b",
+            r"\bqual\s+(foi\s+o\s+)?segmento\b",
+            r"\bqual\s+(foi\s+o\s+)?bairro\b",
+            r"\bqual\s+(foi\s+a\s+)?cidade\b",
+            r"\bqual\s+(foi\s+a\s+|foi\s+o\s+)?campanha\b",
+        )
+        if any(re.search(pattern, normalized) for pattern in singular_patterns):
+            return 1
+
+        return 10
+
+    def _normalize_explicit_ranking_limit(
+        self,
+        *,
+        hypothesis: AnalyticalHypothesis,
+        semantic_resolution: SemanticResolution | None,
+    ) -> AnalyticalHypothesis:
+        if hypothesis.analysis_type != "ranking" or semantic_resolution is None:
+            return hypothesis
+
+        requested_limit = next(
+            (
+                parameter.value
+                for parameter in semantic_resolution.parameters
+                if parameter.type == "limit" and isinstance(parameter.value, int)
+            ),
+            None,
+        )
+        if requested_limit is None:
+            return hypothesis
+
+        filters = [
+            filter_item
+            for filter_item in hypothesis.filters
+            if filter_item.get("type") != "limit"
+        ]
+        filters.append({"type": "limit", "value": requested_limit})
+        return hypothesis.model_copy(update={"filters": filters})
+
+    def _normalize_sales_date_range_question(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        patterns = (
+            r"\bvendas?\s+a\s+partir\s+de\s+que\s+data\b",
+            r"\ba\s+partir\s+de\s+que\s+data.*\bvendas?\b",
+            r"\bdesde\s+quando.*\b(vendas?|compras?|dados)\b",
+            r"\bqual\s+(?:e\s+)?o\s+periodo.*\b(vendas?|compras?|dados)\b",
+            r"\bprimeira\s+(venda|compra)\b",
+        )
+        if not any(re.search(pattern, normalized) for pattern in patterns):
+            return hypothesis
+
+        warnings = [
+            warning
+            for warning in hypothesis.warnings
+            if warning
+            not in {
+                "Nenhuma métrica identificada.",
+                "Nenhuma entidade de negócio identificada.",
+            }
+        ]
+        return hypothesis.model_copy(
+            update={
+                "goal": "identificar o período disponível de vendas",
+                "analysis_type": "sales_date_range",
+                "business_entity": None,
+                "metric": "primeira_venda",
+                "metrics": ["primeira_venda", "ultima_venda"],
+                "metric_source": "business_rule",
+                "dimensions": [],
+                "warnings": warnings,
+            },
+        )
+
+    def _normalize_multi_metric_query(
+        self,
+        *,
+        hypothesis: AnalyticalHypothesis,
+        semantic_resolution: SemanticResolution | None,
+    ) -> AnalyticalHypothesis:
+        if hypothesis.analysis_type in {
+            "comparison",
+            "ranking",
+            "summary",
+            "campaign_detail",
+            "campaign_summary",
+            "sales_date_range",
+        }:
+            return hypothesis
+        semantic_metrics = (
+            semantic_resolution.interpretation.metrics
+            if semantic_resolution is not None
+            and semantic_resolution.interpretation is not None
+            else []
+        )
+        metrics = semantic_metrics or hypothesis.metrics
+        if len(metrics) < 2:
+            return hypothesis
+
+        warnings = [
+            warning
+            for warning in hypothesis.warnings
+            if warning
+            not in {
+                "Nenhuma métrica identificada.",
+                "Nenhuma entidade de negócio identificada.",
+            }
+        ]
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": "metric_query",
+                "metric": metrics[0],
+                "metrics": metrics,
                 "warnings": warnings,
             },
         )
@@ -302,6 +492,9 @@ class TerbieCompiler:
                 update={"warnings": [*hypothesis.warnings, warning]},
             )
 
+        if not resolution.matches:
+            return hypothesis
+
         if len(resolution.matches) < 2:
             return hypothesis.model_copy(
                 update={
@@ -333,6 +526,15 @@ class TerbieCompiler:
             }
             for match in resolution.matches
         ]
+        comparison_field = resolution.matches[0].field
+        filters = [
+            filter_item
+            for filter_item in hypothesis.filters
+            if not (
+                filter_item.get("type") == "filter"
+                and filter_item.get("field") == comparison_field
+            )
+        ]
         business_entity = hypothesis.business_entity or resolution.matches[0].entity_type
         warnings = [
             warning
@@ -347,6 +549,7 @@ class TerbieCompiler:
         return hypothesis.model_copy(
             update={
                 "business_entity": business_entity,
+                "filters": filters,
                 "comparison_entities": comparison_entities,
                 "warnings": warnings,
             },

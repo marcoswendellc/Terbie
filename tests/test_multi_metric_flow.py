@@ -33,9 +33,9 @@ class MultiMetricDataService:
         return {
             "Dados_copiloto": pd.DataFrame(
                 [
-                    {"vl_compra": 100.0, "cd_compra": "n1", "sk_cliente": "c1"},
-                    {"vl_compra": 50.0, "cd_compra": "n2", "sk_cliente": "c1"},
-                    {"vl_compra": 150.0, "cd_compra": "n3", "sk_cliente": "c2"},
+                    {"vl_compra": "100,00", "cd_compra": "n1", "sk_cliente": "c1"},
+                    {"vl_compra": "50,00", "cd_compra": "n2", "sk_cliente": "c1"},
+                    {"vl_compra": "150,00", "cd_compra": "n3", "sk_cliente": "c2"},
                 ],
             ),
         }
@@ -94,6 +94,22 @@ def test_two_metrics_are_interpreted_and_calculated() -> None:
     assert "indicador quantidade compras foi calculado" not in response.answer.lower()
 
 
+def test_sales_value_and_count_are_both_resolved() -> None:
+    question = "Qual valor das vendas e quantas vendas?"
+    resolution = SemanticResolver().resolve(question)
+
+    assert resolution.interpretation is not None
+    assert resolution.interpretation.metrics == ["faturamento", "quantidade_compras"]
+
+    response = _execution_service().execute_question(
+        question=question,
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert response.data == [{"faturamento": 300.0, "quantidade_compras": 3}]
+    assert "Nenhuma entidade de negócio identificada." not in response.warnings
+
+
 def test_three_metrics_are_interpreted_and_calculated() -> None:
     response = _execution_service().execute_question(
         question="Qual foi o faturamento, ticket médio e clientes únicos?",
@@ -132,4 +148,3 @@ def test_four_metrics_are_interpreted_and_calculated() -> None:
     assert "ticket médio por compra" in response.answer.lower()
     assert "clientes únicos" in response.answer.lower()
     assert "volume de notas cadastradas" in response.answer.lower()
-

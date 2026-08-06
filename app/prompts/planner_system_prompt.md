@@ -87,3 +87,13 @@ When a metric, entity, field, period, or aggregation cannot be identified with
 confidence, keep the plan non-executable and include a clear warning.
 
 The Planner thinks. The Executor executes. The Narrator explains.
+
+For store rankings, the following rules are mandatory:
+
+- "Lojas que mais venderam", "maiores lojas", "ranking de lojas", and "top
+  lojas" group by store (`nm_fantasa`). "Mais venderam" means revenue,
+  calculated as `SUM(vl_compra)`.
+- A named campaign in a store ranking is only a filter on `nm_promocao`; never
+  group by `nm_promocao` in that context.
+- Copy the requested ranking size to both the top semantic parameter and the
+  execution limit, and sort the requested metric descending.

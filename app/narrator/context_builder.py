@@ -23,6 +23,13 @@ class NarrativeContextBuilder:
             warnings=execution_result.warnings,
             intent=getattr(request.execution_plan, "intent", None),
             insight_result=request.insight_result,
+            execution_metadata={
+                **execution_result.metadata,
+                "rows_returned": execution_result.metadata.get(
+                    "rows_returned",
+                    execution_result.rows_returned,
+                ),
+            },
         )
 
     def _metric_columns(self, *, data: list[dict[str, Any]], columns: list[str]) -> list[str]:

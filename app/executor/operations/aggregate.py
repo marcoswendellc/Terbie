@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from app.executor.context import ExecutionContext
+from app.executor.numeric import numeric_series
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
 
@@ -52,8 +53,8 @@ class AggregateOperation(BaseOperation):
 
             return pd.DataFrame([{alias: dataframe[metric_column].nunique()}])
 
-        numeric_series = pd.to_numeric(dataframe[metric_column], errors="coerce")
-        working_frame = dataframe.assign(**{metric_column: numeric_series})
+        metric_values = numeric_series(dataframe[metric_column])
+        working_frame = dataframe.assign(**{metric_column: metric_values})
 
         if context.group_by_fields:
             return (
@@ -62,7 +63,7 @@ class AggregateOperation(BaseOperation):
                 .reset_index(name=alias)
             )
 
-        return pd.DataFrame([{alias: numeric_series.sum()}])
+        return pd.DataFrame([{alias: metric_values.sum()}])
 
     def _ticket_medio(
         self,
@@ -85,7 +86,7 @@ class AggregateOperation(BaseOperation):
             return dataframe
 
         working_frame = dataframe.assign(
-            **{value_column: pd.to_numeric(dataframe[value_column], errors="coerce")},
+            **{value_column: numeric_series(dataframe[value_column])},
         )
 
         if context.group_by_fields:
@@ -127,10 +128,36 @@ class AggregateOperation(BaseOperation):
                 continue
 
             if function == "sum":
-                numeric_columns[field] = pd.to_numeric(dataframe[field], errors="coerce")
+                numeric_columns[field] = numeric_series(dataframe[field])
                 aggregations[alias] = (field, "sum")
             elif function == "count_distinct":
                 aggregations[alias] = (field, "nunique")
+            elif function in {"min_date", "max_date"}:
+                raw_dates = dataframe[field].astype("string").str.strip()
+                iso_mask = raw_dates.str.match(r"^\d{4}[-/]\d{1,2}[-/]\d{1,2}", na=False)
+                date_series = pd.Series(pd.NaT, index=dataframe.index, dtype="datetime64[ns]")
+                date_series.loc[iso_mask] = pd.to_datetime(
+                    raw_dates.loc[iso_mask],
+                    errors="coerce",
+                    format="mixed",
+                    dayfirst=False,
+                )
+                date_series.loc[~iso_mask] = pd.to_datetime(
+                    raw_dates.loc[~iso_mask],
+                    errors="coerce",
+                    format="mixed",
+                    dayfirst=True,
+                )
+                valid_dates = date_series.dropna()
+                if valid_dates.empty:
+                    context.warnings.append(f"Nenhuma data válida encontrada em: {field}.")
+                    continue
+                value = valid_dates.min() if function == "min_date" else valid_dates.max()
+                numeric_columns[alias] = pd.Series(
+                    [value.strftime("%Y-%m-%d")] * len(dataframe),
+                    index=dataframe.index,
+                )
+                aggregations[alias] = (alias, "first")
             else:
                 context.warnings.append(f"Agregação não suportada: {function}.")
 
@@ -149,7 +176,11 @@ class AggregateOperation(BaseOperation):
                     alias: (
                         working_frame[field].sum()
                         if function == "sum"
-                        else working_frame[field].nunique()
+                        else (
+                            working_frame[field].nunique()
+                            if function == "nunique"
+                            else working_frame[field].iloc[0]
+                        )
                     )
                     for alias, (field, function) in aggregations.items()
                 },

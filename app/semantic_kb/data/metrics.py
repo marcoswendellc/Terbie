@@ -13,6 +13,8 @@ KB_METRICS: list[KBMetric] = [
             "valor vendido",
             "valor de venda",
             "total vendido",
+            "faturaram",
+            "faturou",
             "venderam",
             "vendeu",
             "vendido",
@@ -26,6 +28,9 @@ KB_METRICS: list[KBMetric] = [
         synonyms=[
             "quantidade de notas",
             "quantidade de compras",
+            "quantas vendas",
+            "numero de vendas",
+            "número de vendas",
             "qtd notas",
             "notas",
             "notas cadastradas",

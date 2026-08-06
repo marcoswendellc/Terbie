@@ -29,6 +29,88 @@ function scrollConversation() {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function markdownCells(line) {
+  const trimmed = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  return trimmed.split("|").map((cell) => cell.trim());
+}
+
+function isTableSeparator(line) {
+  const cells = markdownCells(line);
+  return cells.length > 1 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+}
+
+function buildTable(headerLine, bodyLines) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "table-scroll";
+
+  const table = document.createElement("table");
+  table.className = "analytics-table";
+  const head = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  markdownCells(headerLine).forEach((value) => {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = value;
+    headerRow.appendChild(cell);
+  });
+  head.appendChild(headerRow);
+
+  const body = document.createElement("tbody");
+  bodyLines.forEach((line) => {
+    const row = document.createElement("tr");
+    markdownCells(line).forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    body.appendChild(row);
+  });
+
+  table.append(head, body);
+  wrapper.appendChild(table);
+  return wrapper;
+}
+
+function renderMessageContent(container, text, role) {
+  container.replaceChildren();
+  if (role === "user") {
+    container.textContent = text;
+    return;
+  }
+
+  const lines = String(text || "").split(/\r?\n/);
+  let paragraphLines = [];
+  const flushParagraph = () => {
+    if (!paragraphLines.length) return;
+    const paragraph = document.createElement("p");
+    paragraph.textContent = paragraphLines.join("\n").trim();
+    if (paragraph.textContent) container.appendChild(paragraph);
+    paragraphLines = [];
+  };
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const hasTable =
+      lines[index].includes("|") &&
+      index + 1 < lines.length &&
+      isTableSeparator(lines[index + 1]);
+    if (!hasTable) {
+      paragraphLines.push(lines[index]);
+      continue;
+    }
+
+    flushParagraph();
+    const bodyLines = [];
+    index += 2;
+    while (index < lines.length && lines[index].includes("|")) {
+      if (lines[index].trim()) bodyLines.push(lines[index]);
+      index += 1;
+    }
+    container.appendChild(buildTable(lines[index - bodyLines.length - 2], bodyLines));
+    index -= 1;
+  }
+  flushParagraph();
+}
+
 function createMessage(role, text) {
   const article = document.createElement("article");
   article.className = `message message-${role}`;
@@ -44,10 +126,11 @@ function createMessage(role, text) {
   author.className = "message-author";
   author.textContent = role === "user" ? "Voce" : "Terbie";
 
-  const paragraph = document.createElement("p");
-  paragraph.textContent = text;
+  const content = document.createElement("div");
+  content.className = "message-content";
+  renderMessageContent(content, text, role);
 
-  bubble.append(author, paragraph);
+  bubble.append(author, content);
   article.append(avatar, bubble);
   return article;
 }
@@ -60,8 +143,8 @@ function appendMessage(role, text) {
 }
 
 function updateMessage(message, text) {
-  const paragraph = message.querySelector("p");
-  paragraph.textContent = text;
+  const content = message.querySelector(".message-content");
+  renderMessageContent(content, text, "app");
   scrollConversation();
 }
 

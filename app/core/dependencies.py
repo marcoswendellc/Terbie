@@ -19,6 +19,7 @@ from app.knowledge.knowledge_service import KnowledgeService
 from app.metrics.metric_resolver import MetricResolver
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
+from app.narrator.intelligence import GeminiNarrativeProvider
 from app.narrator.narrator import TerbieNarrator
 from app.orchestrator.terbie_orchestrator import TerbieOrchestrator
 from app.planner.compiler import PlannerCompiler
@@ -216,9 +217,18 @@ def provide_narrative_formatter() -> NarrativeFormatter:
 
 
 def provide_terbie_narrator() -> TerbieNarrator:
+    settings = provide_settings()
+    intelligent_provider = None
+    if settings.reasoning_provider.strip().lower() == "gemini":
+        intelligent_provider = GeminiNarrativeProvider(
+            api_key=settings.gemini_api_key,
+            model=settings.gemini_model,
+            timeout_ms=settings.gemini_timeout_ms,
+        )
     return TerbieNarrator(
         context_builder=provide_narrative_context_builder(),
         formatter=provide_narrative_formatter(),
+        intelligent_provider=intelligent_provider,
     )
 
 

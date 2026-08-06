@@ -1,5 +1,6 @@
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
+from app.narrator.intelligence import BaseNarrativeProvider
 from app.narrator.models import NarratorRequest, NarratorResponse
 from app.narrator.strategies import (
     ComparisonStrategy,
@@ -8,6 +9,7 @@ from app.narrator.strategies import (
     MetricStrategy,
     RankingStrategy,
     ResponseStrategy,
+    SalesDateRangeStrategy,
     TrendStrategy,
 )
 
@@ -19,10 +21,13 @@ class TerbieNarrator:
         self,
         context_builder: NarrativeContextBuilder,
         formatter: NarrativeFormatter,
+        intelligent_provider: BaseNarrativeProvider | None = None,
     ) -> None:
         self._context_builder = context_builder
         self._formatter = formatter
+        self._intelligent_provider = intelligent_provider
         self._strategies: list[ResponseStrategy] = [
+            SalesDateRangeStrategy(formatter),
             ListingStrategy(formatter),
             ComparisonStrategy(formatter),
             TrendStrategy(formatter),
@@ -33,9 +38,6 @@ class TerbieNarrator:
 
     def narrate(self, request: NarratorRequest) -> NarratorResponse:
         context = self._context_builder.build(request)
-        if context.insight_result is not None:
-            return self._narrate_insights(context)
-
         if context.rows_returned == 0 or context.top_row is None:
             return NarratorResponse(
                 answer="Não há dados suficientes para sustentar uma resposta confiável.",
@@ -44,6 +46,43 @@ class TerbieNarrator:
                 warnings=context.warnings,
                 metadata=self._metadata(context),
             )
+
+        if context.intent == "sales_date_range":
+            strategy = self._strategy_for(context)
+            return NarratorResponse(
+                answer=strategy.answer(context),
+                summary=None,
+                highlights=[],
+                warnings=context.warnings,
+                metadata=self._metadata(context),
+            )
+
+        if self._requires_comparison_table(context):
+            strategy = self._strategy_for(context)
+            return NarratorResponse(
+                answer=strategy.answer(context),
+                summary=None,
+                highlights=[],
+                warnings=context.warnings,
+                metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
+            )
+
+        if self._intelligent_provider is not None:
+            intelligent = self._intelligent_provider.generate(context)
+            if intelligent is not None:
+                return NarratorResponse(
+                    answer=intelligent.answer,
+                    summary=intelligent.summary,
+                    highlights=self._deduplicate_highlights(
+                        answer=intelligent.answer,
+                        highlights=intelligent.highlights,
+                    ),
+                    warnings=context.warnings,
+                    metadata={**self._metadata(context), "narrative_provider": "gemini"},
+                )
+
+        if context.insight_result is not None:
+            return self._narrate_insights(context)
 
         strategy = self._strategy_for(context)
         answer = strategy.answer(context)
@@ -177,6 +216,11 @@ class TerbieNarrator:
                 return strategy
 
         return self._strategies[-1]
+
+    def _requires_comparison_table(self, context) -> bool:
+        return context.intent in {"comparison", "compare_periods"} and (
+            "tabela" in self._normalize(context.question)
+        )
 
     def _metadata(self, context) -> dict[str, object]:
         metadata: dict[str, object] = {

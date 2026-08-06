@@ -246,3 +246,14 @@ def test_pipeline_expanded_questions_keep_expected_response_shape() -> None:
     assert best["highlights"] == []
     assert best["insights"] == []
     assert best["recommendations"] == []
+
+
+def test_plural_campaign_summary_returns_one_calculated_row_per_campaign() -> None:
+    body = _execute("Me resuma as campanhas de 2026")
+
+    assert len(body["data"]) == 3
+    assert {row["nm_promocao"] for row in body["data"]} == {
+        ARCAPARQUE,
+        NO_PELO,
+        BEST_CAMPAIGN,
+    }

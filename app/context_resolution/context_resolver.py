@@ -79,25 +79,37 @@ class ContextResolver:
             (
                 "loja",
                 r"\b(qual|quais)\s+(foi\s+a\s+|foi\s+o\s+)?lojas?\b"
-                r"|\bloja\s+(mais|de\s+maior)\b",
+                r"|\bquais\s+foram\s+as\s+(\d+\s+)?lojas?\b"
+                r"|\bloja\s+(mais|de\s+maior)\b"
+                r"|\blojas?\s+(que\s+)?mais\b"
+                r"|\blojas?\s+com\s+mais\b"
+                r"|\b(top|ranking)(\s+\d+)?\s+(de\s+)?lojas?\b"
+                r"|\b(liste|listar)(\s+as?)?(\s+\d+)?\s+lojas?\b"
+                r"|\b(top|ranking)(\s+\d+)?\s+(de\s+)?lojistas?\b"
+                r"|\blojas?\s+por\b",
             ),
             (
                 "campanha",
-                r"\b(qual|quais)\s+campanhas?\b|\bcampanha\s+mais\b|\bmelhor\s+campanha\b",
+                r"\b(qual|quais)\s+(foi\s+a\s+|foram\s+as\s+)?campanhas?\b"
+                r"|\bcampanhas?\s+(com\s+|que\s+)?mais\b"
+                r"|\bmelhor\s+campanha\b",
             ),
             (
                 "segmento",
                 r"\b(qual|quais)\s+(foi\s+o\s+)?segmentos?\b"
+                r"|\bsegmentos?\s+(com\s+|que\s+)?mais\b"
                 r"|\bpor\s+segmento\b|\bsegmento\s+(mais|de\s+maior)\b",
             ),
             (
                 "bairro",
                 r"\b(qual|quais)\s+(foi\s+o\s+)?bairros?\b"
+                r"|\bbairros?\s+(com\s+|que\s+)?mais\b"
                 r"|\bpor\s+bairro\b|\bbairro\s+(mais|de\s+maior)\b",
             ),
             (
                 "cidade",
                 r"\b(qual|quais)\s+(foi\s+a\s+)?cidades?\b"
+                r"|\bcidades?\s+(com\s+|que\s+)?mais\b"
                 r"|\bpor\s+cidade\b|\bcidade\s+(mais|de\s+maior)\b",
             ),
             (
@@ -105,7 +117,11 @@ class ContextResolver:
                 r"\b(qual|quais)\s+(foi\s+o\s+)?clientes?\b"
                 r"|\bpor\s+cliente\b|\bcliente\s+(mais|de\s+maior)\b",
             ),
-            ("empreendimento", r"\bpor\s+shopping\b|\bpor\s+empreendimento\b"),
+            (
+                "empreendimento",
+                r"\bpor\s+(shopping|empreendimento)\b"
+                r"|\b(shoppings?|empreendimentos?)\s+(com\s+|que\s+)?mais\b",
+            ),
         )
         dimensions: list[ResolvedDimension] = []
         for concept_name, pattern in patterns:
@@ -151,7 +167,11 @@ class ContextResolver:
     def _explicit_dimension_value_filters(self, question: str) -> list[ResolvedFilter]:
         filters: list[ResolvedFilter] = []
         patterns = (
-            ("segmento", r"\bsegmento\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
+            (
+                "segmento",
+                r"\bsegmento\s+(?:de\s+)?(.+?)"
+                r"(?=\s+(?:por|na|no|da|do|em)\b|$)",
+            ),
             ("bairro", r"\bbairro\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
             ("cidade", r"\bcidade\s+(.+?)(?=\s+(?:na|no|da|do|em)\b|$)"),
         )
@@ -183,7 +203,18 @@ class ContextResolver:
     def _starts_with_filter_stopword(self, value: str) -> bool:
         normalized = self._normalize_text(value)
         first_token = normalized.split(maxsplit=1)[0] if normalized else ""
-        return first_token in {"com", "de", "da", "do", "que", "mais", "maior", "menor"}
+        return first_token in {
+            "com",
+            "de",
+            "da",
+            "do",
+            "que",
+            "mais",
+            "maior",
+            "menor",
+            "teve",
+            "tiveram",
+        }
 
     def _metrics(
         self,
@@ -210,10 +241,12 @@ class ContextResolver:
 
     def _intent(self, normalized_question: str) -> str | None:
         if re.search(
-            r"\b(detalhar|detalhe|detalha|resumo|como foi)\b.*\b(campanha|promocao)\b",
+            r"\b(detalhar|detalhe|detalha|resumo|resuma|resumir|como foi)\b"
+            r".*\b(campanha|promocao)\b",
             normalized_question,
         ) or re.search(
-            r"\b(campanha|promocao)\b.*\b(detalhar|detalhe|detalha|resumo|como foi)\b",
+            r"\b(campanha|promocao)\b.*"
+            r"\b(detalhar|detalhe|detalha|resumo|resuma|resumir|como foi)\b",
             normalized_question,
         ):
             return "campaign_detail"
@@ -221,8 +254,23 @@ class ContextResolver:
         if re.search(r"\b(resumo|resuma|visao geral)\b", normalized_question):
             return "summary"
 
-        ranking_pattern = r"\b(melhor|maior|mais vendeu|mais comprou|top|ranking)\b"
+        ranking_pattern = (
+            r"\b(melhor|maior|top|ranking)\b"
+            r"|\bmais\s+(vendeu|venderam|vende|vendem|comprou|compraram)\b"
+        )
         if re.search(ranking_pattern, normalized_question):
+            return "ranking"
+        if re.search(
+            r"\b(liste|listar)\b.*"
+            r"\b(lojas?|segmentos?|bairros?|cidades?|clientes?)\b.*\bpor\b",
+            normalized_question,
+        ):
+            return "ranking"
+        if re.search(
+            r"\b(lojas?|segmentos?|campanhas?|promocoes?|bairros?|cidades?|"
+            r"clientes?|shoppings?|empreendimentos?)\b.*\bmais\b",
+            normalized_question,
+        ):
             return "ranking"
 
         return None
@@ -241,7 +289,7 @@ class ContextResolver:
         if concept == "campanha":
             return bool(
                 re.search(
-                    r"\b(na|no|da|do|para a|para o)\s+campanha\b",
+                    r"\b(na|no|da|do|para a|para o|durante a)\s+campanha\b",
                     normalized_question,
                 ),
             )

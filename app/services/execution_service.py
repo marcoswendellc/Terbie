@@ -12,6 +12,8 @@ from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.models import KnowledgeContext
 from app.narrator.models import ExecuteResponse, NarratorRequest
 from app.planner.models import ExecutionPlan
+from app.query_plan.models import MultiQueryPlan, QueryPlan
+from app.query_plan.multi import MultiQueryPlanner
 from app.services.data_service import DataService
 from app.services.narrator_service import NarratorService
 from app.services.planner_service import PlannerService
@@ -53,10 +55,21 @@ class ExecutionService:
         knowledge_context: KnowledgeContext,
     ) -> ExecuteResponse:
         intent_guard_result = self._intent_guard.evaluate(question)
-        if not intent_guard_result.is_analytical:
-            return self._out_of_scope_response(
+        if intent_guard_result.should_stop:
+            return self._routed_response(
                 question,
                 response=intent_guard_result.response or "",
+                response_type=intent_guard_result.intent,
+            )
+
+        multi_query_plan = MultiQueryPlanner(
+            semantic_service=self._semantic_service,
+            planner_service=self._planner_service,
+        ).build(question=question, knowledge_context=knowledge_context)
+        if multi_query_plan is not None:
+            return self._execute_multi_query(
+                multi_query_plan=multi_query_plan,
+                knowledge_context=knowledge_context,
             )
 
         semantic_resolution = self._semantic_service.resolve(question=question)
@@ -76,6 +89,11 @@ class ExecutionService:
             plan=planner_response.plan,
             knowledge_context=knowledge_context,
         )
+        ranking_metadata = self._ranking_metadata(
+            semantic_resolution=semantic_resolution,
+            plan=planner_response.plan,
+            execution_metadata=result.metadata,
+        )
         self._log_composite_filter_validation(
             question=question,
             plan=planner_response.plan,
@@ -87,6 +105,7 @@ class ExecutionService:
                     **result.metadata,
                     "question": question,
                     "selected_table": dataframe.attrs.get("table_name"),
+                    **({"ranking": ranking_metadata} if ranking_metadata else {}),
                 },
             },
         )
@@ -119,8 +138,170 @@ class ExecutionService:
             recommendations=[],
             data=self._sanitize_rows(enriched_result.data),
             metadata={**enriched_result.metadata, **narrator_response.metadata},
-            warnings=[*enriched_result.warnings, *narrator_response.warnings],
+            warnings=list(
+                dict.fromkeys([*enriched_result.warnings, *narrator_response.warnings]),
+            ),
         )
+
+    def _execute_multi_query(
+        self,
+        *,
+        multi_query_plan: MultiQueryPlan,
+        knowledge_context: KnowledgeContext,
+    ) -> ExecuteResponse:
+        result_items: list[dict[str, object]] = []
+        answer_sections: list[str] = []
+        warnings: list[str] = []
+
+        for query_plan in multi_query_plan.plans:
+            try:
+                response = self._execute_compiled_query(
+                    query_plan=query_plan,
+                    knowledge_context=knowledge_context,
+                )
+            except Exception:  # Each independent plan is a partial-failure boundary.
+                message = f"{query_plan.title}: não foi possível responder esta parte."
+                logger.exception("MultiQueryPlan item failed: %s", query_plan.id)
+                warnings.append(message)
+                result_items.append(
+                    {
+                        "id": query_plan.id,
+                        "title": query_plan.title,
+                        "status": "failed",
+                        "data": [],
+                        "filters": query_plan.filters,
+                    },
+                )
+                answer_sections.append(f"{query_plan.title}\n{message}")
+                continue
+
+            filters = self._visible_filters(query_plan)
+            result_items.append(
+                {
+                    "id": query_plan.id,
+                    "title": query_plan.title,
+                    "status": "success",
+                    "data": response.data,
+                    "filters": query_plan.filters,
+                    "warnings": response.warnings,
+                },
+            )
+            section = f"{query_plan.title}\n{response.answer}"
+            if filters:
+                section += f"\nFiltros considerados: {filters}."
+            answer_sections.append(section)
+            warnings.extend(response.warnings)
+
+        return ExecuteResponse(
+            question=multi_query_plan.question,
+            answer="\n\n".join(answer_sections),
+            data=result_items,
+            metadata={
+                "response_type": "multi_query",
+                "multi_query_plan": multi_query_plan.model_dump(mode="json"),
+                "successful_plans": sum(
+                    item["status"] == "success" for item in result_items
+                ),
+                "failed_plans": sum(item["status"] == "failed" for item in result_items),
+            },
+            warnings=warnings,
+        )
+
+    def _execute_compiled_query(
+        self,
+        *,
+        query_plan: QueryPlan,
+        knowledge_context: KnowledgeContext,
+    ) -> ExecuteResponse:
+        semantic_resolution = self._semantic_service.resolve(question=query_plan.question)
+        plan = query_plan.execution_plan
+        dataframes = self._load_dataframes()
+        dataframe = self._select_dataframe(
+            dataframes=dataframes,
+            plan=plan,
+            knowledge_context=knowledge_context,
+        )
+        result = self._executor.execute(
+            dataframe=dataframe,
+            plan=plan,
+            knowledge_context=knowledge_context,
+        )
+        enriched_result = result.model_copy(
+            update={
+                "metadata": {
+                    **result.metadata,
+                    "question": query_plan.question,
+                    "selected_table": dataframe.attrs.get("table_name"),
+                    "query_plan_id": query_plan.id,
+                    "query_plan_title": query_plan.title,
+                },
+            },
+        )
+        narrator_response = self._narrator_service.narrate(
+            NarratorRequest(
+                question=query_plan.question,
+                execution_result=enriched_result,
+                semantic_resolution=semantic_resolution,
+                execution_plan=plan,
+            ),
+        )
+        return ExecuteResponse(
+            question=query_plan.question,
+            answer=narrator_response.answer,
+            data=self._sanitize_rows(enriched_result.data),
+            metadata={**enriched_result.metadata, **narrator_response.metadata},
+            warnings=list(
+                dict.fromkeys([*enriched_result.warnings, *narrator_response.warnings]),
+            ),
+        )
+
+    def _visible_filters(self, query_plan: QueryPlan) -> str:
+        labels = {
+            "nm_promocao": "campanha",
+            "nm_segmento": "segmento",
+            "nm_fantasa": "loja",
+            "nm_empreendimento": "shopping",
+        }
+        parts = [
+            f"{labels.get(str(item.get('field')), item.get('field'))} = {item.get('value')}"
+            for item in query_plan.filters
+            if item.get("operator") == "equals" and item.get("value") is not None
+        ]
+        return ", ".join(parts)
+
+    def _ranking_metadata(
+        self,
+        *,
+        semantic_resolution: object,
+        plan: ExecutionPlan,
+        execution_metadata: dict[str, object],
+    ) -> dict[str, object]:
+        if plan.intent != "ranking":
+            return {}
+
+        requested_limit = next(
+            (
+                parameter.value
+                for parameter in getattr(semantic_resolution, "parameters", [])
+                if parameter.type == "limit" and isinstance(parameter.value, int)
+            ),
+            None,
+        )
+        planned_limit = next(
+            (
+                operation.parameters.get("value")
+                for operation in plan.operations
+                if operation.type == "limit"
+            ),
+            None,
+        )
+        return {
+            "requested_limit": requested_limit,
+            "planned_limit": planned_limit,
+            "executed_limit": execution_metadata.get("executed_limit"),
+            "order": execution_metadata.get("order"),
+            "order_by": execution_metadata.get("order_by"),
+        }
 
     def _load_dataframes(self) -> dict[str, pd.DataFrame]:
         spreadsheet_id = self._settings.google_sheets_spreadsheet_id
@@ -232,7 +413,13 @@ class ExecutionService:
 
         return name
 
-    def _out_of_scope_response(self, question: str, *, response: str) -> ExecuteResponse:
+    def _routed_response(
+        self,
+        question: str,
+        *,
+        response: str,
+        response_type: str,
+    ) -> ExecuteResponse:
         return ExecuteResponse(
             question=question,
             answer=response,
@@ -240,7 +427,7 @@ class ExecutionService:
             insights=[],
             recommendations=[],
             data=[],
-            metadata={"data_accessed": False, "response_type": "out_of_scope"},
+            metadata={"data_accessed": False, "response_type": response_type},
             warnings=[],
         )
 
@@ -284,12 +471,18 @@ class ExecutionService:
             for operation in plan.operations
             if operation.type == "filter" and operation.field is not None
         }
+        applied_fields.update(
+            operation.field
+            for operation in plan.operations
+            if operation.type == "group_by" and operation.field is not None
+        )
         missing_fields = expected_fields.difference(applied_fields)
         if not missing_fields:
             return
 
         logger.warning(
-            "Possible composite filter loss after execution. question=%s expected=%s applied=%s rows=%s",
+            "Possible composite filter loss after execution. "
+            "question=%s expected=%s applied=%s rows=%s",
             question,
             sorted(expected_fields),
             sorted(applied_fields),

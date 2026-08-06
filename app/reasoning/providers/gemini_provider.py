@@ -1,14 +1,61 @@
-import json
+import logging
 import re
 from pathlib import Path
 from typing import Any
 
-from pydantic import SecretStr, ValidationError
+from pydantic import SecretStr
 
 from app.compiler.models import AnalyticalHypothesis
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext, ReasoningResult
 from app.reasoning.prompt_renderer import PromptRenderer
+
+logger = logging.getLogger(__name__)
+
+_HYPOTHESIS_RESPONSE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "goal": {"type": "string", "nullable": True},
+        "analysis_type": {"type": "string", "nullable": True},
+        "business_entity": {"type": "string", "nullable": True},
+        "metric": {"type": "string", "nullable": True},
+        "metrics": {"type": "array", "items": {"type": "string"}},
+        "metric_source": {"type": "string", "nullable": True},
+        "dimensions": {"type": "array", "items": {"type": "string"}},
+        "time_scope": {"type": "string", "nullable": True},
+        "filters": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {"type": "string"},
+                    "field": {"type": "string", "nullable": True},
+                    "operator": {"type": "string", "nullable": True},
+                    "value": {},
+                    "end_field": {"type": "string", "nullable": True},
+                    "source": {"type": "string", "nullable": True},
+                    "confidence": {"type": "number", "nullable": True},
+                },
+            },
+        },
+        "comparison_entities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "field": {"type": "string", "nullable": True},
+                    "value": {},
+                    "label": {"type": "string", "nullable": True},
+                    "entity_type": {"type": "string", "nullable": True},
+                    "confidence": {"type": "number", "nullable": True},
+                },
+            },
+        },
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "warnings": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["confidence", "warnings"],
+}
 
 
 class GeminiReasoningProvider(BaseReasoningProvider):
@@ -19,14 +66,14 @@ class GeminiReasoningProvider(BaseReasoningProvider):
         *,
         api_key: SecretStr | str | None,
         model: str = "gemini-2.5-flash",
-        timeout_ms: int = 5000,
+        timeout_ms: int = 15000,
         prompt_renderer: PromptRenderer | None = None,
         client: Any | None = None,
         prompt_path: Path | None = None,
     ) -> None:
         self._api_key = api_key
         self._model = model
-        self._timeout_ms = timeout_ms
+        self._timeout_ms = max(timeout_ms, 10000)
         self._prompt_renderer = prompt_renderer or PromptRenderer()
         self._client = client
         self._prompt_path = prompt_path or Path("app/prompts/gemini_hypothesis_prompt.md")
@@ -47,18 +94,19 @@ class GeminiReasoningProvider(BaseReasoningProvider):
             hypothesis = AnalyticalHypothesis.model_validate_json(
                 self._extract_json(response_text),
             )
-        except (
-            ValidationError,
-            ValueError,
-            RuntimeError,
-            ImportError,
-            json.JSONDecodeError,
-            Exception,
-        ) as exc:
+        except Exception as exc:
+            logger.exception(
+                "Gemini hypothesis generation failed. model=%s error_type=%s",
+                self._model,
+                type(exc).__name__,
+            )
             return ReasoningResult(
                 hypothesis=None,
-                raw_response=str(exc),
-                warnings=["Gemini não retornou uma AnalyticalHypothesis válida."],
+                raw_response=f"{type(exc).__name__}: {exc}",
+                warnings=[
+                    "Gemini não retornou uma AnalyticalHypothesis válida "
+                    f"({type(exc).__name__}).",
+                ],
                 provider="gemini",
                 model=self._model,
                 success=False,
@@ -74,9 +122,19 @@ class GeminiReasoningProvider(BaseReasoningProvider):
         )
 
     def _generate_text(self, context: ReasoningContext) -> str:
+        from google.genai import types
+
         client = self._client or self._create_client()
         prompt = self._prompt_renderer.render(template_path=self._prompt_path, context=context)
-        response = client.models.generate_content(model=self._model, contents=prompt)
+        response = client.models.generate_content(
+            model=self._model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.1,
+                response_mime_type="application/json",
+                response_schema=_HYPOTHESIS_RESPONSE_SCHEMA,
+            ),
+        )
         text = getattr(response, "text", None)
         if not isinstance(text, str) or not text.strip():
             raise RuntimeError("Gemini response text is empty.")
@@ -104,3 +162,4 @@ class GeminiReasoningProvider(BaseReasoningProvider):
             return fenced_match.group(1).strip()
 
         return stripped
+

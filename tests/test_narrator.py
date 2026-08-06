@@ -4,7 +4,12 @@ from app.executor.models import ExecutionResult
 from app.main import app
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
-from app.narrator.models import NarratorRequest
+from app.narrator.intelligence import (
+    BaseNarrativeProvider,
+    GeminiNarrativeProvider,
+    IntelligentNarrative,
+)
+from app.narrator.models import NarrativeContext, NarratorRequest
 from app.narrator.narrator import TerbieNarrator
 from app.planner.models import ExecutionPlan
 
@@ -14,6 +19,94 @@ def _narrator() -> TerbieNarrator:
         context_builder=NarrativeContextBuilder(),
         formatter=NarrativeFormatter(),
     )
+
+
+def test_gemini_prompt_requests_dynamic_comparison_table_and_variations() -> None:
+    provider = GeminiNarrativeProvider(
+        api_key="test-key",
+        model="gemini-test",
+        timeout_ms=10000,
+    )
+    context = NarrativeContext(
+        question="Resuma em uma tabela comparativa as campanhas A e B",
+        rows_returned=2,
+        data=[
+            {"campanha": "A", "faturamento": 100.0},
+            {"campanha": "B", "faturamento": 125.0},
+        ],
+        columns=["campanha", "faturamento"],
+        top_row={"campanha": "A", "faturamento": 100.0},
+        intent="comparison",
+    )
+
+    prompt = provider._prompt(context)
+
+    assert "sem depender de perguntas ou respostas predefinidas" in prompt
+    assert "tabela Markdown" in prompt
+    assert "variação absoluta e percentual" in prompt
+    assert '"faturamento": 125.0' in prompt
+
+
+class FakeIntelligentProvider(BaseNarrativeProvider):
+    def generate(self, context):
+        assert context.data == [{"loja": "A", "faturamento": 300.0}]
+        return IntelligentNarrative(
+            answer="A loja A liderou o resultado calculado, com R$ 300,00.",
+            highlights=["Loja A: R$ 300,00"],
+        )
+
+
+def test_intelligent_narrative_is_used_after_execution() -> None:
+    narrator = TerbieNarrator(
+        context_builder=NarrativeContextBuilder(),
+        formatter=NarrativeFormatter(),
+        intelligent_provider=FakeIntelligentProvider(),
+    )
+    execution_result = ExecutionResult(
+        data=[{"loja": "A", "faturamento": 300.0}],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=1,
+    )
+
+    response = narrator.narrate(
+        NarratorRequest(question="O que você percebe?", execution_result=execution_result),
+    )
+
+    assert response.answer.startswith("A loja A liderou")
+    assert response.metadata["narrative_provider"] == "gemini"
+
+
+def test_comparison_table_is_guaranteed_even_without_gemini() -> None:
+    execution_result = ExecutionResult(
+        data=[
+            {"nm_promocao": "Arcaparque", "faturamento": 100.0, "quantidade_compras": 4},
+            {"nm_promocao": "No Pelo", "faturamento": 125.0, "quantidade_compras": 5},
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Resuma em uma tabela comparativa as campanhas",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="comparison"),
+        ),
+    )
+
+    assert "| Campanha / comparação | Faturamento | Quantidade de compras |" in response.answer
+    assert "| Arcaparque | R$ 100,00 | 4 |" in response.answer
+    assert "| No Pelo | R$ 125,00 | 5 |" in response.answer
+    assert "| Variação absoluta | R$ 25,00 | 1 |" in response.answer
+    assert "| Variação percentual | 25,00% | 25,00% |" in response.answer
+    assert "vs." not in response.answer
+    assert response.metadata["narrative_provider"] == "deterministic_table"
 
 
 def test_ranking_execution_result_highlights_first_row() -> None:

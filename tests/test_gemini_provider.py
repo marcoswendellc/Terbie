@@ -19,10 +19,12 @@ class FakeGeminiResponse:
 
 
 class FakeGeminiModels:
-    def generate_content(self, *, model: str, contents: str) -> FakeGeminiResponse:
+    def generate_content(self, *, model: str, contents: str, config) -> FakeGeminiResponse:
         assert model == "gemini-test"
         assert "Você nunca deve responder ao usuário" in contents
         assert "DataFrame" not in contents
+        assert config.response_mime_type == "application/json"
+        assert config.response_schema is not None
         return FakeGeminiResponse()
 
 

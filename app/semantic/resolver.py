@@ -169,6 +169,8 @@ class SemanticResolver:
         parameters: list[SemanticParameter] = []
         patterns = [
             r"(?<!\w)top\s+(?P<value>\d+)(?!\w)",
+            r"(?<!\w)ranking\s+(?P<value>\d+)(?!\w)",
+            r"(?<!\w)ranking\s+d(?:a|e|o|os|as)\s+(?P<value>\d+)(?!\w)",
             r"(?<!\w)(?P<value>\d+)\s+(maior|maiores|melhor|melhores|menor|menores)(?!\w)",
             r"(?<!\w)(?P<value>\d+)\s+(restaurante|restaurantes|loja|lojas|cliente|clientes|shopping|shoppings)(?!\w)",
         ]
@@ -179,6 +181,29 @@ class SemanticResolver:
                     SemanticParameter(
                         type="limit",
                         value=int(match.group("value")),
+                        term=match.group(0),
+                        confidence=1.0,
+                    ),
+                )
+
+        number_words = {
+            "um": 1,
+            "uma": 1,
+            "tres": 3,
+            "cinco": 5,
+            "dez": 10,
+            "vinte": 20,
+        }
+        entities = (
+            r"(restaurante|restaurantes|loja|lojas|cliente|clientes|shopping|shoppings)"
+        )
+        for word, value in number_words.items():
+            pattern = rf"(?<!\w){word}\s+{entities}(?!\w)"
+            for match in re.finditer(pattern, normalized_query):
+                parameters.append(
+                    SemanticParameter(
+                        type="limit",
+                        value=value,
                         term=match.group(0),
                         confidence=1.0,
                     ),
@@ -333,6 +358,7 @@ class SemanticResolver:
         entity = self._primary_entity(
             suggested_entities=suggested_entities,
             normalized_query=normalized_query,
+            intent=intent,
         )
         metrics = self._resolved_metric_names(
             suggested_metrics,
@@ -368,11 +394,32 @@ class SemanticResolver:
         entities: list[SemanticEntity],
     ) -> str | None:
         has_promotion = any(entity.name == "promocao" for entity in entities)
+        if self._matches_any(
+            normalized_query,
+            [
+                r"\bcomparar\b",
+                r"\bcomparativ[oa]s?\b",
+                r"\bversus\b",
+                r"\bvs\b",
+                r"\bcontra\b",
+            ],
+        ):
+            return "comparison"
+
+        if has_promotion and self._matches_any(
+            normalized_query,
+            [
+                r"\b(resumo|resuma|resumir|detalhe|detalhar)\b.*\b(campanhas|promocoes)\b",
+                r"\b(campanhas|promocoes)\b.*\b(resumo|resuma|resumir|detalhe|detalhar)\b",
+            ],
+        ):
+            return "comparison"
+
         if has_promotion and self._matches_any(
             normalized_query,
             [
                 r"\b(detalhar|detalhe|detalha)\b",
-                r"\bresumo\b",
+                r"\b(resumo|resuma|resumir)\b",
                 r"\bcomo\s+foi\b",
             ],
         ):
@@ -380,13 +427,7 @@ class SemanticResolver:
 
         if self._matches_any(
             normalized_query,
-            [r"\bcomparar\b", r"\bcomparativo\b", r"\bversus\b", r"\bvs\b", r"\bcontra\b"],
-        ):
-            return "comparison"
-
-        if self._matches_any(
-            normalized_query,
-            [r"\bresumo\b", r"\bresumir\b", r"\bdetalhe\b", r"\bdetalhar\b"],
+            [r"\bresumo\b", r"\bresuma\b", r"\bresumir\b", r"\bdetalhe\b", r"\bdetalhar\b"],
         ):
             return "summary"
 
@@ -402,7 +443,22 @@ class SemanticResolver:
 
         if self._matches_any(
             normalized_query,
-            [r"\branking\b", r"\btop\b", r"\bmaior\b", r"\bmaiores\b", r"\bmelhor\b"],
+            [
+                r"\branking\b",
+                r"\btop\b",
+                r"\bmaior\b",
+                r"\bmaiores\b",
+                r"\bmelhor\b",
+                r"\bmais\s+(?:vendeu|venderam|vende|vendem)\b",
+                r"\b(?:lojas?|lojistas?|segmentos?|campanhas?|promocoes?|"
+                r"bairros?|cidades?|shoppings?|empreendimentos?)\b.*"
+                r"\bmais\s+(?:notas?|compras?|clientes?)\b",
+                r"\b(?:lojas?|lojistas?|segmentos?|campanhas?|promocoes?|"
+                r"bairros?|cidades?|shoppings?|empreendimentos?)\b.*"
+                r"\bmais\s+tiveram\s+(?:notas?|compras?|clientes?)\b",
+                r"\b(?:liste|listar)\b.*\bmais\b",
+                r"\b(?:liste|listar)\b.*\b(?:lojas?|segmentos?|bairros?|cidades?|clientes?)\b.*\bpor\b",
+            ],
         ):
             return "ranking"
 
@@ -448,8 +504,71 @@ class SemanticResolver:
         *,
         suggested_entities: list[SemanticEntity],
         normalized_query: str,
+        intent: str | None,
     ) -> str | None:
         entity_names = {entity.name for entity in suggested_entities}
+        if intent == "ranking":
+            ranking_objects = (
+                ("loja", r"\b(?:lojas?|lojistas?)\b"),
+                ("segmento", r"\bsegmentos?\b"),
+                ("bairro", r"\bbairros?\b"),
+                ("cidade", r"\bcidades?\b"),
+                ("cliente", r"\bclientes?\b"),
+                ("empreendimento", r"\b(?:shoppings?|empreendimentos?)\b"),
+                ("promocao", r"\b(?:campanhas?|promocoes?)\b"),
+            )
+            for entity_name, pattern in ranking_objects:
+                if entity_name in entity_names and re.search(pattern, normalized_query):
+                    return entity_name
+
+            requested_entity_patterns = (
+                (
+                    "loja",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?(?:\s+as?|\s+os?|\s+de)?"
+                    r"(?:\s+\d+)?\s+(?:lojas?|lojistas?)\b",
+                ),
+                (
+                    "segmento",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?"
+                    r"(?:\s+os?|\s+de)?(?:\s+\d+)?\s+segmentos?\b",
+                ),
+                (
+                    "bairro",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?"
+                    r"(?:\s+os?|\s+de)?(?:\s+\d+)?\s+bairros?\b",
+                ),
+                (
+                    "cidade",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?"
+                    r"(?:\s+as?|\s+de)?(?:\s+\d+)?\s+cidades?\b",
+                ),
+                (
+                    "cliente",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+os?|\s+de)?(?:\s+\d+)?\s+clientes?\b",
+                ),
+                (
+                    "promocao",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?"
+                    r"(?:\s+as?|\s+de)?(?:\s+\d+)?\s+"
+                    r"(?:campanhas?|promocoes?)\b",
+                ),
+                (
+                    "empreendimento",
+                    r"\b(?:liste|listar|ranking|top|qual|quais)?"
+                    r"(?:\s+foram)?(?:\s+os?|\s+de)?(?:\s+\d+)?\s+"
+                    r"(?:shoppings?|empreendimentos?)\b",
+                ),
+            )
+            for entity_name, pattern in requested_entity_patterns:
+                if entity_name in entity_names and re.search(pattern, normalized_query):
+                    return entity_name
+
         if "promocao" in entity_names or self._matches_any(
             normalized_query,
             [r"\bcampanha\b", r"\bcampanhas\b", r"\bpromocao\b", r"\bpromocoes\b"],

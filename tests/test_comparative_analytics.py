@@ -147,6 +147,33 @@ def test_comparison_intent_and_multiple_entities_are_detected() -> None:
     ]
 
 
+def test_comparative_table_wording_is_compiled_as_a_comparison() -> None:
+    response = _compile(
+        "me resuma em uma tabela comparativa as campanhas arcaparque e no pelo",
+    )
+
+    assert response.hypothesis.analysis_type == "comparison"
+    assert [entity["value"] for entity in response.hypothesis.comparison_entities] == [
+        ARCA,
+        NO_PELO,
+    ]
+    assert not any(
+        operation.type == "filter"
+        and operation.field == "nm_promocao"
+        and operation.parameters["operator"] == "equals"
+        for operation in response.execution_plan.operations
+    )
+
+
+def test_comparative_table_wording_returns_both_campaigns() -> None:
+    response = _execution_service().execute_question(
+        question="me resuma em uma tabela comparativa as campanhas arcaparque e no pelo",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert {row["nm_promocao"] for row in response.data} == {ARCA, NO_PELO}
+
+
 def test_comparison_plan_uses_default_campaign_metrics() -> None:
     response = _compile("compare os indicadores da campanha arcaparque com a no pelo")
 

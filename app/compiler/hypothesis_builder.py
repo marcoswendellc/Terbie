@@ -89,15 +89,15 @@ class HypothesisBuilder:
         if semantic_resolution is None:
             return None
 
+        normalized_question = self._normalize_text(question)
+        if self._is_comparison_question(normalized_question):
+            return "comparison"
+
         if (
             semantic_resolution.interpretation is not None
             and semantic_resolution.interpretation.intent is not None
         ):
             return semantic_resolution.interpretation.intent
-
-        normalized_question = self._normalize_text(question)
-        if self._is_comparison_question(normalized_question):
-            return "comparison"
 
         if self._is_promocao_list_question(normalized_question, semantic_resolution):
             return "list_distinct"
@@ -111,7 +111,7 @@ class HypothesisBuilder:
         patterns = (
             r"\bcompare\b",
             r"\bcomparar\b",
-            r"\bcomparativo\b",
+            r"\bcomparativ[oa]s?\b",
             r"\bversus\b",
             r"\bvs\b",
             r"\bcontra\b",
