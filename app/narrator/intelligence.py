@@ -93,7 +93,8 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
             "Se a pergunta pedir análise, explique apenas relações sustentadas pelos "
             "números. Preserve nomes. Formate faturamento, receita, venda e ticket em "
             "reais (R$), percentuais com %, e contagens como inteiros. Retorne JSON "
-            "compatível com o schema solicitado.\n\n"
+            "compatível com o schema solicitado. Em listagens de campanhas, não exiba "
+            "códigos internos e identifique o shopping pelo campo nm_empreendimento.\n\n"
             f"Contexto: {json.dumps(safe_context, ensure_ascii=False, default=str)}"
         )
 

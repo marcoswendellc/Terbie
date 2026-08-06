@@ -311,13 +311,13 @@ class ExecutionPlanBuilder:
             return analytical_plan.metrics
 
         if analytical_plan.intent == "list_distinct" and "promocao" in analytical_plan.entities:
-            return ["cd_promocao", "nm_promocao", "sk_dtinicio", "sk_dtfim"]
+            return ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]
 
         return []
 
     def _distinct_fields(self, analytical_plan: AnalyticalPlan) -> list[str]:
         if analytical_plan.intent == "list_distinct" and "promocao" in analytical_plan.entities:
-            return ["cd_promocao", "nm_promocao"]
+            return ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]
 
         return []
 

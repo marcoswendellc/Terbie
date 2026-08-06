@@ -38,6 +38,7 @@ class PromotionListingDataService:
             {
                 "cd_promocao": "P001",
                 "nm_promocao": "Volta as aulas",
+                "nm_empreendimento": "Arca Parque",
                 "sk_dtinicio": 20260110,
                 "sk_dtfim": 20260210,
                 "cd_compra": "c1",
@@ -49,6 +50,7 @@ class PromotionListingDataService:
             {
                 "cd_promocao": "P001",
                 "nm_promocao": "Volta as aulas",
+                "nm_empreendimento": "Arca Parque",
                 "sk_dtinicio": 20260110,
                 "sk_dtfim": 20260210,
                 "cd_compra": "c2",
@@ -60,6 +62,7 @@ class PromotionListingDataService:
             {
                 "cd_promocao": "P002",
                 "nm_promocao": "Natal Premiado",
+                "nm_empreendimento": "Buriti Shopping",
                 "sk_dtinicio": 20251215,
                 "sk_dtfim": 20260105,
                 "cd_compra": "c3",
@@ -71,6 +74,7 @@ class PromotionListingDataService:
             {
                 "cd_promocao": "P003",
                 "nm_promocao": "Campanha 2027",
+                "nm_empreendimento": "Arca Parque",
                 "sk_dtinicio": 20270101,
                 "sk_dtfim": 20270131,
                 "cd_compra": "c4",
@@ -82,6 +86,7 @@ class PromotionListingDataService:
             {
                 "cd_promocao": None,
                 "nm_promocao": "Compra sem campanha",
+                "nm_empreendimento": "Buriti Shopping",
                 "sk_dtinicio": 20260601,
                 "sk_dtfim": 20260630,
                 "cd_compra": "c5",
@@ -190,20 +195,21 @@ def test_execute_campaign_listing_returns_distinct_promotions_without_raw_purcha
     answer = body["answer"]
     assert rows == [
         {
-            "cd_promocao": "P002",
             "nm_promocao": "Natal Premiado",
+            "nm_empreendimento": "Buriti Shopping",
             "sk_dtinicio": 20251215,
             "sk_dtfim": 20260105,
         },
         {
-            "cd_promocao": "P001",
             "nm_promocao": "Volta as aulas",
+            "nm_empreendimento": "Arca Parque",
             "sk_dtinicio": 20260110,
             "sk_dtfim": 20260210,
         },
     ]
-    assert len({(row["cd_promocao"], row["nm_promocao"]) for row in rows}) == len(rows)
-    assert all(row["cd_promocao"] is not None for row in rows)
+    assert len({(row["nm_promocao"], row["nm_empreendimento"]) for row in rows}) == len(rows)
+    assert all("cd_promocao" not in row for row in rows)
+    assert all(row["nm_empreendimento"] for row in rows)
     assert "Natal Premiado" in answer
     assert "Volta as aulas" in answer
     assert body["highlights"] == []
@@ -223,7 +229,10 @@ def test_select_and_distinct_keep_only_required_promotion_columns() -> None:
 
     assert response.data
     assert all(
-        set(row) == {"cd_promocao", "nm_promocao", "sk_dtinicio", "sk_dtfim"}
+        set(row) == {"nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"}
         for row in response.data
     )
-    assert [row["cd_promocao"] for row in response.data] == ["P002", "P001"]
+    assert [row["nm_empreendimento"] for row in response.data] == [
+        "Buriti Shopping",
+        "Arca Parque",
+    ]
