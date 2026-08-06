@@ -69,5 +69,29 @@ class FilterOperation(BaseOperation):
         return dataframe[dataframe[field] == value]
 
     def _date_series(self, series: "pd.Series") -> "pd.Series":
-        normalized = series.astype("string").str.replace(r"\.0$", "", regex=True)
-        return pd.to_datetime(normalized, format="%Y%m%d", errors="coerce")
+        normalized = series.astype("string").str.strip().str.replace(r"\.0$", "", regex=True)
+        parsed = pd.Series(pd.NaT, index=series.index, dtype="datetime64[ns]")
+
+        compact_mask = normalized.str.fullmatch(r"\d{8}", na=False)
+        parsed.loc[compact_mask] = pd.to_datetime(
+            normalized.loc[compact_mask],
+            format="%Y%m%d",
+            errors="coerce",
+        )
+
+        excel_serial_mask = normalized.str.fullmatch(r"\d{5}", na=False)
+        parsed.loc[excel_serial_mask] = pd.to_datetime(
+            pd.to_numeric(normalized.loc[excel_serial_mask], errors="coerce"),
+            unit="D",
+            origin="1899-12-30",
+            errors="coerce",
+        )
+
+        remaining_mask = parsed.isna() & normalized.notna()
+        parsed.loc[remaining_mask] = pd.to_datetime(
+            normalized.loc[remaining_mask],
+            format="mixed",
+            dayfirst=True,
+            errors="coerce",
+        )
+        return parsed

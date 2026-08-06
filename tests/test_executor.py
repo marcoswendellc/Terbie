@@ -71,6 +71,50 @@ def test_executor_applies_limit_operation() -> None:
     assert len(result.data) == 10
 
 
+def test_year_ranking_accepts_real_world_promotion_date_formats() -> None:
+    dataframe = pd.DataFrame(
+        {
+            "cd_promocao": ["P1", "P2", "P3", "P4"],
+            "nm_promocao": ["Formato inteiro", "Formato BR", "Formato ISO", "Outro ano"],
+            "sk_dtinicio": [20250101, "01/02/2025", "2025-03-01", "01/01/2026"],
+            "sk_dtfim": [20250131, "28/02/2025", "2025-03-31", "31/01/2026"],
+            "vl_compra": [100.0, 300.0, 200.0, 1000.0],
+        }
+    )
+    plan = ExecutionPlan(
+        intent="ranking",
+        entities=[PlanEntity(name="promocao")],
+        metrics=[PlanMetric(name="faturamento", aggregation="sum")],
+        operations=[
+            PlanOperation(
+                type="filter",
+                field="sk_dtinicio",
+                parameters={
+                    "operator": "year_overlap",
+                    "value": 2025,
+                    "end_field": "sk_dtfim",
+                },
+            ),
+            PlanOperation(type="group_by", field="nm_promocao"),
+            PlanOperation(type="aggregate", function="sum", alias="faturamento"),
+            PlanOperation(type="sort", field="faturamento", parameters={"direction": "desc"}),
+            PlanOperation(type="limit", parameters={"value": 10}),
+        ],
+    )
+
+    result = _executor().execute(
+        dataframe=dataframe,
+        plan=plan,
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert [row["nm_promocao"] for row in result.data] == [
+        "Formato BR",
+        "Formato ISO",
+        "Formato inteiro",
+    ]
+
+
 def test_executor_calculates_ticket_medio_by_loja() -> None:
     plan = ExecutionPlan(
         entities=[PlanEntity(name="loja")],

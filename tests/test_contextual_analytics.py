@@ -88,6 +88,17 @@ def test_best_campaign_with_requested_shopping_groups_by_both_dimensions() -> No
     assert group_by.parameters["fields"] == ["nm_promocao", "nm_empreendimento"]
 
 
+def test_top_campaign_ranking_understands_limit_metric_and_year() -> None:
+    response = _compile("Qual foi o top 10 de campanhas de 2025 por faturamento?")
+
+    assert response.hypothesis.analysis_type == "ranking"
+    assert response.analytical_plan.metrics == ["faturamento"]
+    assert response.analytical_plan.dimensions == ["nm_promocao"]
+    assert response.analytical_plan.time_scope == "2025"
+    assert _operation(response, "limit").parameters["value"] == 10
+    assert _operation(response, "sort", "faturamento").parameters["direction"] == "desc"
+
+
 def test_campaign_summary_context_generates_default_metrics() -> None:
     response = _compile("Me dê um resumo da campanha arcaparque")
 
