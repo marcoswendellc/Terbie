@@ -17,15 +17,21 @@ class GroupByOperation(BaseOperation):
         operation: PlanOperation,
         context: ExecutionContext,
     ) -> "pd.DataFrame":
-        column = context.resolve_dimension_column(operation.field)
-        if column is None:
+        requested_fields = operation.parameters.get("fields")
+        fields = requested_fields if isinstance(requested_fields, list) else [operation.field]
+        columns = [context.resolve_dimension_column(field) for field in fields]
+        columns = [column for column in columns if column is not None]
+        if not columns:
             context.warnings.append("Operação group_by sem campo definido.")
             return dataframe
 
-        if column not in dataframe.columns:
-            context.warnings.append(f"Campo de agrupamento não encontrado: {column}.")
+        missing_columns = [column for column in columns if column not in dataframe.columns]
+        if missing_columns:
+            context.warnings.append(
+                f"Campo de agrupamento não encontrado: {', '.join(missing_columns)}."
+            )
             return dataframe
 
-        context.group_by_fields = [column]
+        context.group_by_fields = columns
         context.metadata["group_by_fields"] = context.group_by_fields
         return dataframe

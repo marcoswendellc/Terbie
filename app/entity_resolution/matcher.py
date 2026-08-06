@@ -21,6 +21,8 @@ class EntityMatcher:
         "promocoes",
         "segmento",
         "segmentos",
+        "shopping",
+        "shoppings",
     }
 
     def match(self, *, query: str, candidate: EntityCandidate) -> EntityMatch | None:

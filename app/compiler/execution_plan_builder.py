@@ -81,6 +81,7 @@ class ExecutionPlanBuilder:
         group_field = analytical_plan.dimensions[0] if analytical_plan.dimensions else (
             analytical_plan.entities[0] if analytical_plan.entities else None
         )
+        group_fields = analytical_plan.dimensions
         select_fields = self._select_fields(analytical_plan)
         distinct_fields = self._distinct_fields(analytical_plan)
 
@@ -99,6 +100,7 @@ class ExecutionPlanBuilder:
                 metric=metric,
                 requested_metrics=analytical_plan.metrics,
                 group_field=group_field,
+                group_fields=group_fields,
                 limit_parameter=limit_parameter,
                 select_fields=select_fields,
                 distinct_fields=distinct_fields,
@@ -165,6 +167,7 @@ class ExecutionPlanBuilder:
         metric: PlanMetric | None,
         requested_metrics: list[str],
         group_field: str | None,
+        group_fields: list[str],
         limit_parameter: PlanParameter | None,
         select_fields: list[str],
         distinct_fields: list[str],
@@ -177,7 +180,8 @@ class ExecutionPlanBuilder:
             return PlanOperation(type="distinct", parameters={"subset": distinct_fields})
 
         if operation_name == "group_by":
-            return PlanOperation(type="group_by", field=group_field)
+            parameters = {"fields": group_fields} if len(group_fields) > 1 else {}
+            return PlanOperation(type="group_by", field=group_field, parameters=parameters)
 
         if operation_name == "aggregate":
             if intent == "sales_date_range":

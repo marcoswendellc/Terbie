@@ -64,3 +64,9 @@ def test_entity_resolution_adds_full_value_filter_to_execution_plan() -> None:
         and operation.parameters["value"] == "Promoção Verão no Arca Parque 2026"
         for operation in response.execution_plan.operations
     )
+def test_generic_shopping_question_does_not_create_named_entity_filters() -> None:
+    result = EntityResolver().resolve_many(
+        "Qual foi a campanha de maior faturamento e em que shopping ocorreu?"
+    )
+
+    assert result.matches == []

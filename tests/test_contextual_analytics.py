@@ -73,6 +73,21 @@ def test_shopping_context_best_campaign_dimension() -> None:
     )
 
 
+def test_best_campaign_with_requested_shopping_groups_by_both_dimensions() -> None:
+    response = _compile(
+        "Qual foi a campanha de maior faturamento e em que shopping ocorreu?"
+    )
+
+    assert response.hypothesis.filters == [{"type": "limit", "value": 1}]
+    assert response.analytical_plan.dimensions == ["nm_promocao", "nm_empreendimento"]
+    group_by = next(
+        operation
+        for operation in response.execution_plan.operations
+        if operation.type == "group_by"
+    )
+    assert group_by.parameters["fields"] == ["nm_promocao", "nm_empreendimento"]
+
+
 def test_campaign_summary_context_generates_default_metrics() -> None:
     response = _compile("Me dê um resumo da campanha arcaparque")
 

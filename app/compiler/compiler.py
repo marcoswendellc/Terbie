@@ -80,6 +80,10 @@ class TerbieCompiler:
             question=request.question,
             hypothesis=hypothesis,
         )
+        hypothesis = self._normalize_campaign_ranking_with_shopping(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
         hypothesis = self._normalize_multi_metric_query(
             hypothesis=hypothesis,
             semantic_resolution=semantic_resolution,
@@ -197,6 +201,32 @@ class TerbieCompiler:
                 "analysis_type": "comparison",
                 "business_entity": hypothesis.business_entity or "promocao",
             },
+        )
+
+    def _normalize_campaign_ranking_with_shopping(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        asks_for_campaign_ranking = (
+            hypothesis.analysis_type == "ranking"
+            and hypothesis.business_entity == "promocao"
+            and bool(re.search(r"\b(campanha|promocao)\b", normalized))
+        )
+        asks_for_shopping = bool(
+            re.search(
+                r"\b(?:qual|que|em qual|em que)\s+(?:foi\s+o\s+)?(?:shopping|empreendimento)\b",
+                normalized,
+            )
+            or re.search(r"\b(?:shopping|empreendimento)\s+(?:ocorreu|aconteceu)\b", normalized)
+        )
+        if not (asks_for_campaign_ranking and asks_for_shopping):
+            return hypothesis
+
+        return hypothesis.model_copy(
+            update={"dimensions": ["nm_promocao", "nm_empreendimento"]},
         )
 
     def _fallback_hypothesis(
