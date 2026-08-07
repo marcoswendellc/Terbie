@@ -22,12 +22,16 @@ class PlannerService:
         schema: dict[str, Any] | None = None,
         data_catalog: DataCatalog | None = None,
         knowledge_context: KnowledgeContext | None = None,
+        conversation_summary: str = "",
+        session_state: dict[str, Any] | None = None,
     ) -> PlannerResponse:
         compiler_response = self.create_compiler_draft(
             question=question,
             semantic_resolution=semantic_resolution,
             schema=schema,
             knowledge_context=knowledge_context,
+            conversation_summary=conversation_summary,
+            session_state=session_state,
         )
         _ = data_catalog
 
@@ -48,6 +52,8 @@ class PlannerService:
         semantic_resolution: SemanticResolution,
         schema: dict[str, Any] | None = None,
         knowledge_context: KnowledgeContext | None = None,
+        conversation_summary: str = "",
+        session_state: dict[str, Any] | None = None,
     ) -> CompilerResponse:
         return self._compiler.compile(
             CompilerRequest(
@@ -55,5 +61,7 @@ class PlannerService:
                 semantic_resolution=semantic_resolution,
                 knowledge_context=knowledge_context,
                 schema_context=schema,
+                conversation_summary=conversation_summary,
+                session_state=session_state or {},
             ),
         )

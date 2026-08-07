@@ -19,6 +19,8 @@ class ReasoningMessage(BaseModel):
 
 class ReasoningContext(BaseModel):
     question: str
+    conversation_summary: str = ""
+    session_state: dict[str, Any] = Field(default_factory=dict)
     semantic_resolution: SemanticResolution | None = None
     schema_context: dict[str, Any] | None = Field(default=None, alias="schema")
     catalog_context: dict[str, Any] | None = Field(default=None, alias="data_catalog")

@@ -10,6 +10,7 @@ from app.executor.executor import TerbieExecutor
 from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.models import KnowledgeContext
+from app.memory.conversation import ConversationMemoryService
 from app.narrator.models import ExecuteResponse, NarratorRequest
 from app.planner.models import ExecutionPlan
 from app.query_plan.models import MultiQueryPlan, QueryPlan
@@ -38,6 +39,7 @@ class ExecutionService:
         narrator_service: NarratorService,
         intent_guard: IntentGuard | None = None,
         insight_generator: InsightGenerator | None = None,
+        conversation_memory: ConversationMemoryService | None = None,
     ) -> None:
         self._settings = settings
         self._semantic_service = semantic_service
@@ -47,13 +49,43 @@ class ExecutionService:
         self._narrator_service = narrator_service
         self._intent_guard = intent_guard or IntentGuard()
         self._insight_generator = insight_generator or InsightGenerator()
+        self._conversation_memory = conversation_memory
 
     def execute_question(
         self,
         *,
         question: str,
         knowledge_context: KnowledgeContext,
+        session_id: str | None = None,
     ) -> ExecuteResponse:
+        original_question = question
+        memory_context = None
+        if self._conversation_memory is not None and session_id is not None:
+            memory_context = self._conversation_memory.contextualize(
+                session_id=session_id,
+                question=question,
+            )
+            if memory_context.clarification:
+                response = self._routed_response(
+                    original_question,
+                    response=memory_context.clarification,
+                    response_type="clarification_required",
+                )
+                self._conversation_memory.record(
+                    session_id=session_id,
+                    context=memory_context,
+                    answer=response.answer,
+                )
+                return response.model_copy(
+                    update={
+                        "metadata": {
+                            **response.metadata,
+                            "session_id": session_id,
+                            "session_state": memory_context.state.model_dump(mode="json"),
+                        }
+                    }
+                )
+            question = memory_context.rewritten_question
         intent_guard_result = self._intent_guard.evaluate(question)
         if intent_guard_result.should_stop:
             return self._routed_response(
@@ -77,6 +109,8 @@ class ExecutionService:
             question=question,
             semantic_resolution=semantic_resolution,
             knowledge_context=knowledge_context,
+            conversation_summary=memory_context.summary if memory_context else "",
+            session_state=memory_context.state.model_dump(mode="json") if memory_context else {},
         )
         dataframes = self._load_dataframes()
         dataframe = self._select_dataframe(
@@ -130,8 +164,8 @@ class ExecutionService:
             ),
         )
 
-        return ExecuteResponse(
-            question=question,
+        response = ExecuteResponse(
+            question=original_question,
             answer=narrator_response.answer,
             highlights=[],
             insights=[],
@@ -142,6 +176,26 @@ class ExecutionService:
                 dict.fromkeys([*enriched_result.warnings, *narrator_response.warnings]),
             ),
         )
+        if self._conversation_memory is not None and session_id is not None and memory_context:
+            session = self._conversation_memory.record(
+                session_id=session_id,
+                context=memory_context,
+                answer=response.answer,
+                plan=planner_response.plan,
+                data=response.data,
+            )
+            response = response.model_copy(
+                update={
+                    "metadata": {
+                        **response.metadata,
+                        "session_id": session_id,
+                        "rewritten_question": question,
+                        "conversation_summary": session.summary,
+                        "session_state": session.state.model_dump(mode="json"),
+                    }
+                }
+            )
+        return response
 
     def _execute_multi_query(
         self,
@@ -199,9 +253,7 @@ class ExecutionService:
             metadata={
                 "response_type": "multi_query",
                 "multi_query_plan": multi_query_plan.model_dump(mode="json"),
-                "successful_plans": sum(
-                    item["status"] == "success" for item in result_items
-                ),
+                "successful_plans": sum(item["status"] == "success" for item in result_items),
                 "failed_plans": sum(item["status"] == "failed" for item in result_items),
             },
             warnings=warnings,

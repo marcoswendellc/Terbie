@@ -1,10 +1,12 @@
 from typing import Any
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class ExecutionRequest(BaseModel):
     question: str = Field(min_length=1)
+    session_id: str = Field(default_factory=lambda: str(uuid4()), min_length=1)
 
     model_config = ConfigDict(frozen=True)
 

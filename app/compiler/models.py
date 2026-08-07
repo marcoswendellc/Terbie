@@ -41,6 +41,8 @@ class CompilerRequest(BaseModel):
     semantic_resolution: Any | None = None
     knowledge_context: Any | None = None
     schema_context: Any | None = None
+    conversation_summary: str = ""
+    session_state: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(frozen=True)
 

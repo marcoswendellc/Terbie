@@ -16,6 +16,8 @@ from app.executor.registry import OperationRegistry
 from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.knowledge_service import KnowledgeService
+from app.memory.conversation import ConversationMemoryService
+from app.memory.in_memory import InMemorySessionStore
 from app.metrics.metric_resolver import MetricResolver
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
@@ -44,6 +46,7 @@ from app.services.semantic_service import SemanticService
 _data_catalog = DataCatalog()
 _semantic_resolver = SemanticResolver()
 _datasource_registry: DataSourceRegistry | None = None
+_conversation_store = InMemorySessionStore()
 
 
 def provide_settings() -> Settings:
@@ -119,6 +122,10 @@ def provide_context_resolver() -> ContextResolver:
         entity_resolver=provide_entity_resolver(),
         metric_resolver=provide_metric_resolver(),
     )
+
+
+def provide_conversation_memory() -> ConversationMemoryService:
+    return ConversationMemoryService(_conversation_store)
 
 
 def provide_query_planner() -> QueryPlanner:
@@ -246,6 +253,7 @@ def provide_execution_service() -> ExecutionService:
         narrator_service=provide_narrator_service(),
         intent_guard=provide_intent_guard(),
         insight_generator=provide_insight_generator(),
+        conversation_memory=provide_conversation_memory(),
     )
 
 
@@ -255,4 +263,5 @@ def provide_terbie_orchestrator() -> TerbieOrchestrator:
         planner_service=provide_planner_service(),
         knowledge_service=provide_knowledge_service(),
         intent_guard=provide_intent_guard(),
+        conversation_memory=provide_conversation_memory(),
     )

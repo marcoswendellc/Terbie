@@ -63,6 +63,8 @@ class TerbieCompiler:
             schema_context=(
                 request.schema_context if isinstance(request.schema_context, dict) else None
             ),
+            conversation_summary=request.conversation_summary,
+            session_state=request.session_state,
         )
         hypothesis = self._normalize_explicit_comparison(
             question=request.question,
@@ -126,6 +128,8 @@ class TerbieCompiler:
         semantic_resolution: SemanticResolution | None,
         knowledge_context: KnowledgeContext | None,
         schema_context: dict[str, object] | None,
+        conversation_summary: str = "",
+        session_state: dict[str, object] | None = None,
     ) -> AnalyticalHypothesis:
         if self._reasoning_provider is not None:
             reasoning_result = self._reasoning_provider.generate_hypothesis(
@@ -134,6 +138,8 @@ class TerbieCompiler:
                     semantic_resolution=semantic_resolution,
                     knowledge_context=knowledge_context,
                     schema_context=schema_context,
+                    conversation_summary=conversation_summary,
+                    session_state=session_state or {},
                 ),
             )
             if reasoning_result.success and reasoning_result.hypothesis is not None:

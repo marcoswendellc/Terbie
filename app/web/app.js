@@ -1,6 +1,7 @@
 const LOGIN_USER = "wendell";
 const LOGIN_PASSWORD = "123";
 const SESSION_KEY = "terbie.authenticated";
+const CHAT_SESSION_KEY = "terbie.chat_session_id";
 const EXECUTE_ENDPOINT = "/execute";
 const DRAFT_ENDPOINT = "/ask/draft";
 
@@ -148,13 +149,22 @@ function updateMessage(message, text) {
   scrollConversation();
 }
 
+function conversationSessionId() {
+  let sessionId = sessionStorage.getItem(CHAT_SESSION_KEY);
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem(CHAT_SESSION_KEY, sessionId);
+  }
+  return sessionId;
+}
+
 async function postQuestion(endpoint, question) {
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, session_id: conversationSessionId() }),
   });
 
   if (!response.ok) {
@@ -270,6 +280,7 @@ async function askBackend(question) {
 }
 
 function resetConversation() {
+  sessionStorage.setItem(CHAT_SESSION_KEY, crypto.randomUUID());
   messages.innerHTML = "";
   appendMessage(
     "app",

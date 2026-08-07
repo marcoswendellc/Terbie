@@ -1,3 +1,4 @@
+from inspect import signature
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -271,10 +272,10 @@ def execute_question(
     knowledge_service: Annotated[KnowledgeService, Depends(provide_knowledge_service)],
 ) -> ExecuteResponse:
     knowledge_context = knowledge_service.get_context()
-    return execution_service.execute_question(
-        question=payload.question,
-        knowledge_context=knowledge_context,
-    )
+    arguments = {"question": payload.question, "knowledge_context": knowledge_context}
+    if "session_id" in signature(execution_service.execute_question).parameters:
+        arguments["session_id"] = payload.session_id
+    return execution_service.execute_question(**arguments)
 
 
 @router.post("/narrator/draft", response_model=NarratorResponse, tags=["narrator"])
@@ -294,4 +295,4 @@ def create_orchestrated_draft(
     payload: PlannerRequest,
     orchestrator: Annotated[TerbieOrchestrator, Depends(provide_terbie_orchestrator)],
 ) -> TerbieDraftResponse:
-    return orchestrator.create_draft(question=payload.question)
+    return orchestrator.create_draft(question=payload.question, session_id=payload.session_id)
