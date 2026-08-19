@@ -343,7 +343,12 @@ class RankingStrategy(ResponseStrategy):
             )
             for index, row in enumerate(context.data, start=1)
         ]
-        return f"{heading}\n\n" + "\n".join(lines)
+        calculation_note = (
+            "\n\nContagem: notas únicas cadastradas (cd_compra distinto)."
+            if metric_column == "quantidade_compras"
+            else ""
+        )
+        return f"{heading}{calculation_note}\n\n" + "\n".join(lines)
 
     def _objective_phrase(self, metric_column: str) -> str:
         if metric_column == "quantidade_compras":

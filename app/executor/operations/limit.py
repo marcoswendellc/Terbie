@@ -22,4 +22,5 @@ class LimitOperation(BaseOperation):
             return dataframe
 
         context.metadata["executed_limit"] = value
+        context.metadata["rows_available_before_limit"] = len(dataframe)
         return dataframe.head(value)

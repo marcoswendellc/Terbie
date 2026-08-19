@@ -7,6 +7,7 @@ from app.catalog.data_catalog import DataCatalog
 from app.compiler.models import CompilerResponse
 from app.core.config import Settings
 from app.core.dependencies import (
+    provide_auth_service,
     provide_data_catalog,
     provide_data_service,
     provide_execution_service,
@@ -30,6 +31,7 @@ from app.knowledge.models import (
     BusinessRule,
     KnowledgeContext,
 )
+from app.models.auth import LoginRequest, LoginResponse
 from app.models.data_source import GoogleSheetsLoadRequest
 from app.models.health import HealthResponse
 from app.models.schema import TableSchema
@@ -40,6 +42,7 @@ from app.query_plan.builder import LogicalQueryPlanBuilder
 from app.query_plan.models import QueryPlanDraftResponse
 from app.query_plan.validator import LogicalQueryPlanValidator
 from app.semantic.models import SemanticResolutionRequest, SemanticResolutionResponse
+from app.services.auth_service import AuthService
 from app.services.data_service import DataService
 from app.services.execution_service import ExecutionService
 from app.services.health_service import HealthService
@@ -48,6 +51,14 @@ from app.services.planner_service import PlannerService
 from app.services.semantic_service import SemanticService
 
 router = APIRouter()
+
+
+@router.post("/auth/login", response_model=LoginResponse, tags=["auth"])
+def login(
+    payload: LoginRequest,
+    auth_service: Annotated[AuthService, Depends(provide_auth_service)],
+) -> LoginResponse:
+    return auth_service.authenticate(username=payload.username, password=payload.password)
 
 
 @router.get("/health", response_model=HealthResponse, tags=["health"])

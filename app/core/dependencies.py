@@ -36,6 +36,7 @@ from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.factory import ReasoningProviderFactory
 from app.schemas.discovery import SchemaDiscovery
 from app.semantic.resolver import SemanticResolver
+from app.services.auth_service import AuthService
 from app.services.data_service import DataService
 from app.services.execution_service import ExecutionService
 from app.services.health_service import HealthService
@@ -63,6 +64,13 @@ def provide_data_catalog() -> DataCatalog:
 
 def provide_google_sheets_data_source() -> GoogleSheetsDataSource:
     return GoogleSheetsDataSource(settings=provide_settings())
+
+
+def provide_auth_service() -> AuthService:
+    return AuthService(
+        settings=provide_settings(),
+        data_source=provide_google_sheets_data_source(),
+    )
 
 
 def provide_datasource_registry() -> DataSourceRegistry:

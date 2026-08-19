@@ -34,6 +34,17 @@ def test_chat_frontend_targets_backend_endpoints() -> None:
     assert 'const DRAFT_ENDPOINT = "/ask/draft";' in response.text
 
 
+def test_login_frontend_validates_credentials_with_backend() -> None:
+    client = TestClient(app)
+
+    response = client.get("/ui/app.js")
+
+    assert response.status_code == 200
+    assert 'const LOGIN_ENDPOINT = "/auth/login";' in response.text
+    assert "LOGIN_USER" not in response.text
+    assert "LOGIN_PASSWORD" not in response.text
+
+
 def test_chat_frontend_does_not_render_raw_backend_warnings() -> None:
     client = TestClient(app)
 

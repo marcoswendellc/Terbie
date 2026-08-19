@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     default_datasource: str = Field(default="google_sheets", alias="DEFAULT_DATASOURCE")
     default_table: str = Field(default="Dados_copiloto", alias="DEFAULT_TABLE")
     blocked_tables: str = Field(
-        default="Usuarios,Senhas,Credenciais,Tokens,Secrets",
+        default="Usuarios,Usuarios_Terbie,Senhas,Credenciais,Tokens,Secrets",
         alias="BLOCKED_TABLES",
     )
 

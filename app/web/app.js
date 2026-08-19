@@ -1,6 +1,5 @@
-const LOGIN_USER = "wendell";
-const LOGIN_PASSWORD = "123";
 const SESSION_KEY = "terbie.authenticated";
+const LOGIN_ENDPOINT = "/auth/login";
 const CHAT_SESSION_KEY = "terbie.chat_session_id";
 const EXECUTE_ENDPOINT = "/execute";
 const DRAFT_ENDPOINT = "/ask/draft";
@@ -288,21 +287,38 @@ function resetConversation() {
   );
 }
 
-loginForm.addEventListener("submit", (event) => {
+loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(loginForm);
   const username = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "");
 
-  if (username === LOGIN_USER && password === LOGIN_PASSWORD) {
+  const submitButton = loginForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  loginError.textContent = "";
+
+  try {
+    const response = await fetch(LOGIN_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) throw new Error("login unavailable");
+
+    const result = await response.json();
+    if (!result.authenticated) {
+      loginError.textContent = "Usuario ou senha incorretos. Confira os dados e tente novamente.";
+      return;
+    }
+
     sessionStorage.setItem(SESSION_KEY, "true");
-    loginError.textContent = "";
     loginForm.reset();
     showChat();
-    return;
+  } catch (_error) {
+    loginError.textContent = "Nao foi possivel validar o acesso agora. Tente novamente.";
+  } finally {
+    submitButton.disabled = false;
   }
-
-  loginError.textContent = "Usuario ou senha incorretos. Confira os dados e tente novamente.";
 });
 
 chatForm.addEventListener("submit", (event) => {

@@ -67,6 +67,19 @@ class TerbieNarrator:
                 metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
             )
 
+        if self._requires_exact_ranking(context):
+            strategy = self._strategy_for(context)
+            return NarratorResponse(
+                answer=strategy.answer(context),
+                summary=None,
+                highlights=[],
+                warnings=context.warnings,
+                metadata={
+                    **self._metadata(context),
+                    "narrative_provider": "deterministic_ranking",
+                },
+            )
+
         if self._intelligent_provider is not None:
             intelligent = self._intelligent_provider.generate(context)
             if intelligent is not None:
@@ -221,6 +234,10 @@ class TerbieNarrator:
         return context.intent in {"comparison", "compare_periods"} and (
             "tabela" in self._normalize(context.question)
         )
+
+    def _requires_exact_ranking(self, context) -> bool:
+        """Prevent a generative narrator from changing calculated rankings."""
+        return context.intent == "ranking" and context.rows_returned > 1
 
     def _metadata(self, context) -> dict[str, object]:
         metadata: dict[str, object] = {
