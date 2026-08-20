@@ -220,6 +220,30 @@ def test_contextual_comparison_accepts_table_modifier_and_abbreviated_second_cam
     assert response.hypothesis.items[0].context == {"shopping": "Buriti Shopping"}
 
 
+def test_contextual_comparison_applies_trailing_shopping_to_both_campaigns() -> None:
+    response = _compile(
+        "Compare a campanha de mães 2026 com a campanha de pais 2026 "
+        "do Buriti Shopping",
+    )
+
+    contexts = response.hypothesis.comparison_entities
+    assert contexts == [
+        {
+            "promotion": "de mães 2026",
+            "shopping": "Buriti Shopping",
+            "label": "de mães 2026 — Buriti Shopping",
+            "source": "contextual_campaign_comparison",
+        },
+        {
+            "promotion": "de pais 2026",
+            "shopping": "Buriti Shopping",
+            "label": "de pais 2026 — Buriti Shopping",
+            "source": "contextual_campaign_comparison",
+        },
+    ]
+    assert response.execution_plan.operations[-1].type == "campaign_context_comparison"
+
+
 def test_campaign_context_comparison_aggregates_each_shopping_separately() -> None:
     dataframe = pd.DataFrame(
         [

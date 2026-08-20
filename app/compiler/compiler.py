@@ -188,22 +188,36 @@ class TerbieCompiler:
             question,
             flags=re.IGNORECASE,
         )
-        if match is None:
-            return hypothesis
+        if match is not None:
+            pairs = [
+                (match.group(1).strip(), match.group(2).strip()),
+                (match.group(3).strip(), match.group(4).strip()),
+            ]
+        else:
+            shared_match = re.search(
+                r"\bcompare(?:\s+em\s+(?:uma\s+)?tabela)?\s+a\s+"
+                r"(?:(?:promocao|promoção|campanha)\s+)?(.+?)\s+com\s+a\s+"
+                r"(?:(?:promocao|promoção|campanha)\s+)?(.+?)\s+"
+                r"(?:do|da|no|na)\s+(.+?)\s*[?.!]*$",
+                question,
+                flags=re.IGNORECASE,
+            )
+            if shared_match is None:
+                return hypothesis
+            shopping = shared_match.group(3).strip()
+            pairs = [
+                (shared_match.group(1).strip(), shopping),
+                (shared_match.group(2).strip(), shopping),
+            ]
 
         contexts = [
             {
-                "promotion": match.group(1).strip(),
-                "shopping": match.group(2).strip(),
-                "label": f"{match.group(1).strip()} — {match.group(2).strip()}",
+                "promotion": promotion,
+                "shopping": shopping,
+                "label": f"{promotion} — {shopping}",
                 "source": "contextual_campaign_comparison",
-            },
-            {
-                "promotion": match.group(3).strip(),
-                "shopping": match.group(4).strip(),
-                "label": f"{match.group(3).strip()} — {match.group(4).strip()}",
-                "source": "contextual_campaign_comparison",
-            },
+            }
+            for promotion, shopping in pairs
         ]
         return hypothesis.model_copy(
             update={
