@@ -360,13 +360,26 @@ class SemanticResolver:
             normalized_query=normalized_query,
             intent=intent,
         )
+        is_persona_question = self._matches_any(
+            normalized_query,
+            [r"\bpersona\b", r"\bperfil\s+(?:do\s+)?publico\b"],
+        )
+        if is_persona_question:
+            entity = "genero"
         metrics = self._resolved_metric_names(
             suggested_metrics,
             normalized_query=normalized_query,
         )
+        demographic_entities = {"genero", "idade", "faixa_etaria"}
+        if entity in demographic_entities and not metrics:
+            metrics = ["clientes_unicos"]
+        if entity in demographic_entities and intent is None:
+            intent = "ranking"
         if intent is None and metrics:
             intent = "metric_query"
         dimensions = self._dimensions_for(entity=entity, intent=intent)
+        if is_persona_question:
+            dimensions = ["genero", "faixa_etaria"]
         filters = self._semantic_filters(
             entity=entity,
             parameters=parameters,
@@ -457,7 +470,11 @@ class SemanticResolver:
                 r"bairros?|cidades?|shoppings?|empreendimentos?)\b.*"
                 r"\bmais\s+tiveram\s+(?:notas?|compras?|clientes?)\b",
                 r"\b(?:liste|listar)\b.*\bmais\b",
-                r"\b(?:liste|listar)\b.*\b(?:lojas?|segmentos?|bairros?|cidades?|clientes?)\b.*\bpor\b",
+                r"\b(?:genero|sexo|faixa etaria|idade|publico)\b.*"
+                r"\b(?:visita|visitam|frequenta|frequentam|mais)\b",
+                r"\b(?:persona|perfil\s+(?:do\s+)?publico)\b",
+                r"\b(?:liste|listar)\b.*"
+                r"\b(?:lojas?|segmentos?|bairros?|cidades?|clientes?)\b.*\bpor\b",
             ],
         ):
             return "ranking"
@@ -509,6 +526,9 @@ class SemanticResolver:
         entity_names = {entity.name for entity in suggested_entities}
         if intent == "ranking":
             ranking_objects = (
+                ("genero", r"\b(?:genero|sexo)\b"),
+                ("faixa_etaria", r"\b(?:faixa etaria|publico jovem|publico adulto)\b"),
+                ("idade", r"\bidades?\b"),
                 ("loja", r"\b(?:lojas?|lojistas?)\b"),
                 ("segmento", r"\bsegmentos?\b"),
                 ("bairro", r"\bbairros?\b"),

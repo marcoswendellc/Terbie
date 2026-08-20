@@ -87,6 +87,10 @@ class ExecutionPlanBuilder:
 
         operations.extend(self._filter_operations(analytical_plan.filters))
 
+        demographic_fields = {"genero", "idade", "faixa_etaria"}
+        if demographic_fields.intersection(group_fields):
+            operations.append(PlanOperation(type="derive_demographics"))
+
         for operation_name in analytical_plan.required_operations:
             if operation_name == "filter":
                 continue

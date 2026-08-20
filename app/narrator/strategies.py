@@ -167,6 +167,9 @@ class RankingStrategy(ResponseStrategy):
     _DIMENSION_LABELS = {
         "bairro": ("O", "bairro"),
         "cidade": ("A", "cidade"),
+        "genero": ("O", "gênero"),
+        "faixa_etaria": ("A", "faixa etária"),
+        "idade": ("A", "idade"),
         "nm_segmento": ("O", "segmento"),
         "nm_fantasa": ("A", "loja"),
         "loja": ("A", "loja"),
