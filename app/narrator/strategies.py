@@ -166,12 +166,19 @@ class PersonaStrategy(ResponseStrategy):
         locality = str(row.get("localidade_predominante", "Não informado"))
         locality_share = self._percentage(row.get("percentual_localidade"))
 
-        return (
-            f"A persona predominante do {shopping} é o público do gênero {gender} "
-            f"({gender_share}), na faixa etária de {age_band} ({age_share}), "
-            f"com maior presença na localidade {locality} ({locality_share}). "
-            "Esse é o perfil que mais frequenta o shopping."
+        answer = (
+            f"No {shopping}, o público predominante é do gênero {gender} "
+            f"({gender_share}), da faixa etária de {age_band} ({age_share}) "
+            f"e da localidade {locality} ({locality_share})."
         )
+        if self._asks_for_absolute_numbers(context.question):
+            answer += (
+                " Em números absolutos: "
+                f"{self._integer(row.get('quantidade_genero'))} no gênero, "
+                f"{self._integer(row.get('quantidade_faixa_etaria'))} na faixa etária "
+                f"e {self._integer(row.get('quantidade_localidade'))} na localidade."
+            )
+        return answer
 
     def _percentage(self, value: object) -> str:
         if not isinstance(value, int | float):
@@ -185,6 +192,18 @@ class PersonaStrategy(ResponseStrategy):
             flags=re.IGNORECASE,
         )
         return match.group(1).strip() if match is not None else "shopping analisado"
+
+    def _asks_for_absolute_numbers(self, question: str) -> bool:
+        normalized = " ".join(question.casefold().split())
+        return bool(
+            re.search(
+                r"\b(quantidade|quantos|numero absoluto|números absolutos|total de pessoas)\b",
+                normalized,
+            ),
+        )
+
+    def _integer(self, value: object) -> str:
+        return self._formatter.integer(value) if isinstance(value, int | float) else "0"
 
 
 class RankingStrategy(ResponseStrategy):

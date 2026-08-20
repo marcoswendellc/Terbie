@@ -3,11 +3,13 @@ from datetime import date
 import pandas as pd
 
 from app.compiler.analytical_planner import AnalyticalPlanner
+from app.compiler.compiler import TerbieCompiler
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.models import AnalyticalHypothesis, AnalyticalPlan
 from app.executor.context import ExecutionContext
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
 from app.executor.operations.persona_profile import PersonaProfileOperation
+from app.context_resolution.context_resolver import ContextResolver
 from app.knowledge.knowledge_service import KnowledgeService
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.models import NarrativeContext
@@ -115,10 +117,13 @@ def test_persona_profile_uses_unique_visitors_and_independent_percentages() -> N
     row = result.iloc[0].to_dict()
     assert row["genero_predominante"] == "Feminino"
     assert row["percentual_genero"] == 0.75
+    assert row["quantidade_genero"] == 3
     assert row["faixa_etaria_predominante"] == "25-34"
     assert row["percentual_faixa_etaria"] == 0.5
+    assert row["quantidade_faixa_etaria"] == 2
     assert row["localidade_predominante"] == "Goiânia"
     assert row["percentual_localidade"] == 0.75
+    assert row["quantidade_localidade"] == 3
     assert row["clientes_unicos"] == 4
 
 
@@ -144,6 +149,27 @@ def test_persona_narrative_uses_requested_shopping_and_dominant_profile() -> Non
     assert "gênero Feminino (62,00%)" in answer
     assert "25-34 (41,00%)" in answer
     assert "Goiânia (55,00%)" in answer
+    assert "605" not in answer
+    assert "números absolutos" not in answer
+
+
+def test_persona_intent_overrides_external_ranking_hypothesis() -> None:
+    compiler = object.__new__(TerbieCompiler)
+    compiler._context_resolver = ContextResolver()
+    external_hypothesis = AnalyticalHypothesis(
+        analysis_type="ranking",
+        business_entity="genero",
+        metric="clientes_unicos",
+        metrics=["clientes_unicos"],
+        dimensions=["genero", "faixa_etaria"],
+    )
+
+    normalized = compiler._normalize_persona_question(
+        question="Defina uma persona do Buriti Shopping",
+        hypothesis=external_hypothesis,
+    )
+
+    assert normalized.analysis_type == "persona"
 
 
 def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:

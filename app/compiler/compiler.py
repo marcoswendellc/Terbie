@@ -70,6 +70,10 @@ class TerbieCompiler:
             question=request.question,
             hypothesis=hypothesis,
         )
+        hypothesis = self._normalize_persona_question(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
         hypothesis = self._normalize_campaign_collection_summary(
             question=request.question,
             hypothesis=hypothesis,
@@ -119,6 +123,36 @@ class TerbieCompiler:
             execution_plan=optimized_plan,
             warnings=warnings,
             status="draft_created" if not warnings else "completed_with_warnings",
+        )
+
+    def _normalize_persona_question(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        if not re.search(r"\bpersona\b|\bperfil\s+(?:do\s+)?publico\b", normalized):
+            return hypothesis
+
+        warnings = [
+            warning
+            for warning in hypothesis.warnings
+            if warning
+            not in {
+                "Nenhuma métrica identificada.",
+                "Nenhuma entidade de negócio identificada.",
+            }
+        ]
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": "persona",
+                "business_entity": "genero",
+                "metric": "clientes_unicos",
+                "metrics": ["clientes_unicos"],
+                "dimensions": ["genero", "faixa_etaria"],
+                "warnings": warnings,
+            },
         )
 
     def _build_hypothesis(

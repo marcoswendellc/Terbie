@@ -27,9 +27,9 @@ class PersonaProfileOperation(BaseOperation):
         if visitors.empty:
             return pd.DataFrame()
 
-        gender, gender_share = self._dominant(visitors.get("genero"))
-        age_band, age_share = self._dominant(visitors.get("faixa_etaria"))
-        locality, locality_share = self._dominant(visitors.get("cidade"))
+        gender, gender_share, gender_count = self._dominant(visitors.get("genero"))
+        age_band, age_share, age_count = self._dominant(visitors.get("faixa_etaria"))
+        locality, locality_share, locality_count = self._dominant(visitors.get("cidade"))
         context.metadata["persona_visitors"] = len(visitors)
 
         return pd.DataFrame(
@@ -37,23 +37,31 @@ class PersonaProfileOperation(BaseOperation):
                 {
                     "genero_predominante": gender,
                     "percentual_genero": gender_share,
+                    "quantidade_genero": gender_count,
                     "faixa_etaria_predominante": age_band,
                     "percentual_faixa_etaria": age_share,
+                    "quantidade_faixa_etaria": age_count,
                     "localidade_predominante": locality,
                     "percentual_localidade": locality_share,
+                    "quantidade_localidade": locality_count,
                     "clientes_unicos": len(visitors),
                 },
             ],
         )
 
-    def _dominant(self, series: "pd.Series | None") -> tuple[str, float]:
+    def _dominant(self, series: "pd.Series | None") -> tuple[str, float, int]:
         if series is None:
-            return "Não informado", 0.0
+            return "Não informado", 0.0, 0
 
         valid = series.astype("string").str.strip()
         valid = valid[valid.notna() & valid.ne("") & valid.ne("Não informado")]
         if valid.empty:
-            return "Não informado", 0.0
+            return "Não informado", 0.0, 0
 
         counts = valid.value_counts()
-        return str(counts.index[0]), round(float(counts.iloc[0] / counts.sum()), 4)
+        dominant_count = int(counts.iloc[0])
+        return (
+            str(counts.index[0]),
+            round(float(dominant_count / counts.sum()), 4),
+            dominant_count,
+        )
