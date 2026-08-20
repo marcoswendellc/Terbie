@@ -108,8 +108,8 @@ class ExecutionPlanBuilder:
                                 "sk_cliente",
                                 "cd_sexo",
                                 "dt_nascimento",
-                                "cidade",
                             ],
+                            "optional_fields": ["cidade", "bairro", "uf"],
                         },
                     ),
                 )

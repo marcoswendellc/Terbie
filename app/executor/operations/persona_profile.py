@@ -29,7 +29,11 @@ class PersonaProfileOperation(BaseOperation):
 
         gender, gender_share, gender_count = self._dominant(visitors.get("genero"))
         age_band, age_share, age_count = self._dominant(visitors.get("faixa_etaria"))
-        locality, locality_share, locality_count = self._dominant(visitors.get("cidade"))
+        locality_series = next(
+            (visitors[column] for column in ("cidade", "bairro", "uf") if column in visitors),
+            None,
+        )
+        locality, locality_share, locality_count = self._dominant(locality_series)
         context.metadata["persona_visitors"] = len(visitors)
 
         return pd.DataFrame(

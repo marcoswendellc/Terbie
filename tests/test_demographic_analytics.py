@@ -10,6 +10,7 @@ from app.executor.context import ExecutionContext
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
 from app.executor.operations.persona_profile import PersonaProfileOperation
 from app.context_resolution.context_resolver import ContextResolver
+from app.entity_resolution.entity_resolver import EntityResolver
 from app.knowledge.knowledge_service import KnowledgeService
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.models import NarrativeContext
@@ -170,6 +171,60 @@ def test_persona_intent_overrides_external_ranking_hypothesis() -> None:
     )
 
     assert normalized.analysis_type == "persona"
+
+
+def test_persona_for_shopping_does_not_add_campaign_name_as_a_filter() -> None:
+    compiler = object.__new__(TerbieCompiler)
+    compiler._entity_resolver = EntityResolver()
+    compiler._context_resolver = ContextResolver(entity_resolver=compiler._entity_resolver)
+
+    hypothesis = compiler._apply_entity_resolution(
+        question="Defina uma persona do Buriti Shopping",
+        hypothesis=AnalyticalHypothesis(
+            analysis_type="persona",
+            business_entity="genero",
+            metric="clientes_unicos",
+            metrics=["clientes_unicos"],
+            dimensions=["genero", "faixa_etaria"],
+        ),
+    )
+
+    assert [filter_item["field"] for filter_item in hypothesis.filters] == [
+        "nm_empreendimento",
+    ]
+
+
+def test_persona_locality_columns_are_optional_for_dataframe_selection() -> None:
+    plan = ExecutionPlanBuilder().build(
+        AnalyticalPlan(
+            intent="persona",
+            entities=["genero", "faixa_etaria"],
+            metrics=["clientes_unicos"],
+            dimensions=["genero", "faixa_etaria"],
+            filters=[
+                {
+                    "type": "filter",
+                    "field": "nm_empreendimento",
+                    "operator": "equals",
+                    "value": "Buriti Shopping",
+                },
+            ],
+            required_operations=["filter", "persona_profile"],
+        ),
+    )
+    service = object.__new__(ExecutionService)
+
+    required = service._required_columns(
+        plan=plan,
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert required == {
+        "cd_sexo",
+        "dt_nascimento",
+        "nm_empreendimento",
+        "sk_cliente",
+    }
 
 
 def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:

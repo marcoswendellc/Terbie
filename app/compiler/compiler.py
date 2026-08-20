@@ -298,6 +298,19 @@ class TerbieCompiler:
         if not resolution.matches:
             return hypothesis
 
+        matches = resolution.matches
+        normalized_question = self._context_resolver._normalize_text(question)
+        has_shopping_match = any(match.entity_type == "empreendimento" for match in matches)
+        explicitly_mentions_campaign = bool(
+            re.search(r"\b(campanha|campanhas|promocao|promocoes)\b", normalized_question),
+        )
+        if (
+            hypothesis.analysis_type == "persona"
+            and has_shopping_match
+            and not explicitly_mentions_campaign
+        ):
+            matches = [match for match in matches if match.entity_type != "promocao"]
+
         if resolution.is_ambiguous:
             warning = resolution.ambiguity_message or "Entidade ambígua."
             return hypothesis.model_copy(
@@ -306,9 +319,9 @@ class TerbieCompiler:
 
         filters = [
             *hypothesis.filters,
-            *[self._entity_filter(match) for match in resolution.matches],
+            *[self._entity_filter(match) for match in matches],
         ]
-        business_entity = hypothesis.business_entity or resolution.matches[0].entity_type
+        business_entity = hypothesis.business_entity or matches[0].entity_type
         warnings = [
             warning
             for warning in hypothesis.warnings
