@@ -152,6 +152,41 @@ class ListingStrategy(ResponseStrategy):
         return names.get(count, self._formatter.integer(count))
 
 
+class PersonaStrategy(ResponseStrategy):
+    def can_handle(self, context: NarrativeContext) -> bool:
+        return context.intent == "persona"
+
+    def answer(self, context: NarrativeContext) -> str:
+        row = context.top_row or {}
+        shopping = self._shopping_name(context.question)
+        gender = str(row.get("genero_predominante", "Não informado"))
+        gender_share = self._percentage(row.get("percentual_genero"))
+        age_band = str(row.get("faixa_etaria_predominante", "Não informado"))
+        age_share = self._percentage(row.get("percentual_faixa_etaria"))
+        locality = str(row.get("localidade_predominante", "Não informado"))
+        locality_share = self._percentage(row.get("percentual_localidade"))
+
+        return (
+            f"A persona predominante do {shopping} é o público do gênero {gender} "
+            f"({gender_share}), na faixa etária de {age_band} ({age_share}), "
+            f"com maior presença na localidade {locality} ({locality_share}). "
+            "Esse é o perfil que mais frequenta o shopping."
+        )
+
+    def _percentage(self, value: object) -> str:
+        if not isinstance(value, int | float):
+            return "0,00%"
+        return self._formatter.percent(float(value))
+
+    def _shopping_name(self, question: str) -> str:
+        match = re.search(
+            r"\b(?:do|da|no|na)\s+(.+?\s+shopping)\b",
+            question,
+            flags=re.IGNORECASE,
+        )
+        return match.group(1).strip() if match is not None else "shopping analisado"
+
+
 class RankingStrategy(ResponseStrategy):
     _ANALYSIS_TERMS = (
         "analise",

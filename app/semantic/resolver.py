@@ -409,6 +409,12 @@ class SemanticResolver:
         has_promotion = any(entity.name == "promocao" for entity in entities)
         if self._matches_any(
             normalized_query,
+            [r"\bpersona\b", r"\bperfil\s+(?:do\s+)?publico\b"],
+        ):
+            return "persona"
+
+        if self._matches_any(
+            normalized_query,
             [
                 r"\bcomparar\b",
                 r"\bcomparativ[oa]s?\b",

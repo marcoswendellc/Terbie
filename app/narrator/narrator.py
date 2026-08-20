@@ -7,6 +7,7 @@ from app.narrator.strategies import (
     GenericStrategy,
     ListingStrategy,
     MetricStrategy,
+    PersonaStrategy,
     RankingStrategy,
     ResponseStrategy,
     SalesDateRangeStrategy,
@@ -28,6 +29,7 @@ class TerbieNarrator:
         self._intelligent_provider = intelligent_provider
         self._strategies: list[ResponseStrategy] = [
             SalesDateRangeStrategy(formatter),
+            PersonaStrategy(formatter),
             ListingStrategy(formatter),
             ComparisonStrategy(formatter),
             TrendStrategy(formatter),
@@ -47,7 +49,7 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
-        if context.intent == "sales_date_range":
+        if context.intent in {"sales_date_range", "persona"}:
             strategy = self._strategy_for(context)
             return NarratorResponse(
                 answer=strategy.answer(context),

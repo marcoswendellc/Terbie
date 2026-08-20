@@ -53,6 +53,9 @@ class AnalyticalPlanner:
     ) -> list[str]:
         filter_operations = ["filter"] if self._has_executable_filters(filters) else []
 
+        if analysis_type == "persona":
+            return [*filter_operations, "persona_profile"]
+
         if analysis_type == "ranking":
             return [*filter_operations, "group_by", "aggregate", "sort", "limit"]
 

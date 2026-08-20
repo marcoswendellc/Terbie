@@ -99,6 +99,22 @@ class ExecutionPlanBuilder:
                 operations.append(self._campaign_detail_operation())
                 continue
 
+            if operation_name == "persona_profile":
+                operations.append(
+                    PlanOperation(
+                        type="persona_profile",
+                        parameters={
+                            "fields": [
+                                "sk_cliente",
+                                "cd_sexo",
+                                "dt_nascimento",
+                                "cidade",
+                            ],
+                        },
+                    ),
+                )
+                continue
+
             operation = self._operation(
                 operation_name=operation_name,
                 metric=metric,
