@@ -627,7 +627,24 @@ class TerbieCompiler:
                 if explicit_shoppings
                 else max(shopping_matches, key=lambda match: match.confidence)
             )
-            shopping_filter = self._entity_filter(selected_shopping)
+            shopping_name_match = re.search(
+                r"\b(?:campanhas|promoções|promocoes)\s+(?:do|da|no|na)\s+(.+?)\s*[?.!]*$",
+                question,
+                flags=re.IGNORECASE,
+            )
+            requested_shopping = (
+                shopping_name_match.group(1).strip()
+                if shopping_name_match is not None
+                else selected_shopping.value
+            )
+            shopping_filter = {
+                "type": "filter",
+                "field": "nm_empreendimento",
+                "operator": "entity_match",
+                "value": requested_shopping,
+                "source": "entity_resolution",
+                "confidence": selected_shopping.confidence,
+            }
             filters = self._deduplicate_filters([*hypothesis.filters, shopping_filter])
             warnings = [
                 warning

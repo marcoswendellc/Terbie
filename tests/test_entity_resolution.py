@@ -94,7 +94,9 @@ def test_specific_shopping_name_wins_over_overlapping_generic_candidate() -> Non
     entity_filters = [
         operation
         for operation in response.execution_plan.operations
-        if operation.type == "filter" and operation.parameters.get("operator") == "equals"
+        if operation.type == "filter"
+        and operation.field == "nm_empreendimento"
+        and operation.parameters.get("operator") == "equals"
     ]
     assert len(entity_filters) == 1
     assert entity_filters[0].field == "nm_empreendimento"

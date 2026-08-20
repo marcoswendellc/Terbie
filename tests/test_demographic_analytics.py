@@ -12,6 +12,7 @@ from app.executor.operations.persona_profile import (
     PersonaComparisonOperation,
     PersonaProfileOperation,
 )
+from app.executor.operations.filter import FilterOperation
 from app.context_resolution.context_resolver import ContextResolver
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.knowledge.knowledge_service import KnowledgeService
@@ -291,6 +292,38 @@ def test_persona_comparison_narrative_is_a_percentage_table() -> None:
 
     assert "| Shopping | Faixa etária | Gênero | Cidade |" in answer
     assert "| Shopping A | 25-34 (40,00%) | Feminino (70,00%) | Goiânia (60,00%) |" in answer
+
+
+def test_dynamic_shopping_filter_resolves_repeated_brand_tokens() -> None:
+    dataframe = pd.DataFrame(
+        {
+            "nm_empreendimento": [
+                "Buriti Shopping",
+                "Buriti Shopping Rio Verde",
+                "Buriti Shopping Guará",
+            ],
+            "value": [1, 2, 3],
+        },
+    )
+    context = ExecutionContext(knowledge_context=KnowledgeService().get_context())
+
+    result = FilterOperation().execute(
+        dataframe,
+        PlanOperation(
+            type="filter",
+            field="nm_empreendimento",
+            parameters={
+                "operator": "entity_match",
+                "value": "buriti shopping buriti rio verde",
+            },
+        ),
+        context,
+    )
+
+    assert result["value"].tolist() == [2]
+    assert context.metadata["resolved_entities"]["nm_empreendimento"] == (
+        "Buriti Shopping Rio Verde"
+    )
 
 
 def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:

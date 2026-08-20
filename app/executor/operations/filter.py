@@ -1,3 +1,7 @@
+import re
+import unicodedata
+from difflib import SequenceMatcher
+
 import pandas as pd
 
 from app.executor.context import ExecutionContext
@@ -42,6 +46,26 @@ class FilterOperation(BaseOperation):
                 )
             ]
 
+        if operator == "entity_match":
+            requested = self._normalize(str(value))
+            candidates = dataframe[field].dropna().astype("string").unique().tolist()
+            scored = [
+                (self._entity_similarity(requested, self._normalize(candidate)), candidate)
+                for candidate in candidates
+            ]
+            if not scored:
+                return dataframe.iloc[0:0]
+
+            score, selected = max(scored, key=lambda item: item[0])
+            if score < 0.6:
+                context.warnings.append(
+                    f"Empreendimento não encontrado para o termo informado: {value}.",
+                )
+                return dataframe.iloc[0:0]
+
+            context.metadata.setdefault("resolved_entities", {})[field] = selected
+            return dataframe[dataframe[field].astype("string") == selected]
+
         if operator == "in":
             if not isinstance(value, list):
                 context.warnings.append("Filtro in sem lista de valores.")
@@ -67,6 +91,25 @@ class FilterOperation(BaseOperation):
             ]
 
         return dataframe[dataframe[field] == value]
+
+    def _normalize(self, value: str) -> str:
+        without_accents = "".join(
+            char
+            for char in unicodedata.normalize("NFKD", value.casefold())
+            if not unicodedata.combining(char)
+        )
+        return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", without_accents)).strip()
+
+    def _entity_similarity(self, requested: str, candidate: str) -> float:
+        if requested == candidate:
+            return 1.0
+
+        requested_tokens = set(requested.split())
+        candidate_tokens = set(candidate.split())
+        union = requested_tokens | candidate_tokens
+        token_score = len(requested_tokens & candidate_tokens) / len(union) if union else 0.0
+        sequence_score = SequenceMatcher(None, requested, candidate).ratio()
+        return max(token_score, sequence_score)
 
     def _date_series(self, series: "pd.Series") -> "pd.Series":
         normalized = series.astype("string").str.strip().str.replace(r"\.0$", "", regex=True)

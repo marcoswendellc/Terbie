@@ -169,8 +169,8 @@ def test_campaign_comparison_preserves_specific_shopping_as_context_filter() -> 
     assert response.hypothesis.comparison_entities == []
     assert any(
         filter_item.get("field") == "nm_empreendimento"
-        and filter_item.get("operator") == "equals"
-        and filter_item.get("value") == "Buriti Shopping Bay Marketing"
+        and filter_item.get("operator") == "entity_match"
+        and filter_item.get("value").casefold() == "buriti shopping bay marketing"
         for filter_item in response.hypothesis.filters
     )
     assert not any(
