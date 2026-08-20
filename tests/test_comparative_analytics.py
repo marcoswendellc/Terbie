@@ -257,6 +257,46 @@ def test_campaign_context_comparison_aggregates_each_shopping_separately() -> No
     ]
 
 
+def test_contextual_comparison_preserves_a_requested_side_without_data() -> None:
+    dataframe = pd.DataFrame(
+        [
+            {
+                "nm_promocao": "Promoção Mães 2026",
+                "nm_empreendimento": "Shopping Sul",
+                "vl_compra": 200.0,
+                "cd_compra": "B1",
+                "sk_cliente": "C2",
+            },
+        ],
+    )
+    context = ExecutionContext(knowledge_context=KnowledgeService().get_context())
+    operation = PlanOperation(
+        type="campaign_context_comparison",
+        parameters={
+            "contexts": [
+                {
+                    "promotion": "mães 2026",
+                    "shopping": "Buriti Shopping",
+                    "label": "mães 2026 — Buriti Shopping",
+                },
+                {
+                    "promotion": "mães 2026",
+                    "shopping": "Shopping Sul",
+                    "label": "mães 2026 — Shopping Sul",
+                },
+            ],
+        },
+    )
+
+    result = CampaignContextComparisonOperation().execute(dataframe, operation, context)
+
+    assert len(result) == 2
+    assert result.iloc[0]["campanha_contexto"] == "mães 2026 — Buriti Shopping"
+    assert pd.isna(result.iloc[0]["faturamento"])
+    assert result.iloc[1]["faturamento"] == 200.0
+    assert "Buriti Shopping" in context.warnings[0]
+
+
 def test_comparative_table_wording_returns_both_campaigns() -> None:
     response = _execution_service().execute_question(
         question="me resuma em uma tabela comparativa as campanhas arcaparque e no pelo",

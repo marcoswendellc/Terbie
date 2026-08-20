@@ -62,6 +62,22 @@ class CampaignContextComparisonOperation(BaseOperation):
                 promotion,
             )
             if selected.empty:
+                requested_label = requested.get("label")
+                label = (
+                    requested_label
+                    if isinstance(requested_label, str) and requested_label.strip()
+                    else f"{promotion} — {shopping}"
+                )
+                rows.append(
+                    {
+                        "campanha_contexto": label,
+                        "faturamento": None,
+                        "quantidade_compras": None,
+                        "clientes_unicos": None,
+                        "ticket_medio": None,
+                    },
+                )
+                context.warnings.append(f"Não foram encontrados dados para {label}.")
                 continue
 
             revenue = float(numeric_series(selected["vl_compra"]).sum())

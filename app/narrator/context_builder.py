@@ -36,7 +36,11 @@ class NarrativeContextBuilder:
         if not data:
             return []
 
-        return [column for column in columns if isinstance(data[0].get(column), int | float)]
+        return [
+            column
+            for column in columns
+            if any(isinstance(row.get(column), int | float) for row in data)
+        ]
 
     def _dimension_columns(self, *, data: list[dict[str, Any]], columns: list[str]) -> list[str]:
         if not data:

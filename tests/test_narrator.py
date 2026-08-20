@@ -109,6 +109,40 @@ def test_comparison_table_is_guaranteed_even_without_gemini() -> None:
     assert response.metadata["narrative_provider"] == "deterministic_table"
 
 
+def test_comparison_table_keeps_missing_side_visible_without_fake_zeroes() -> None:
+    execution_result = ExecutionResult(
+        data=[
+            {
+                "campanha_contexto": "Mães 2026 — Buriti Shopping",
+                "faturamento": None,
+                "quantidade_compras": None,
+            },
+            {
+                "campanha_contexto": "Mães 2026 — Shopping Sul",
+                "faturamento": 200.0,
+                "quantidade_compras": 2,
+            },
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Compare em uma tabela as campanhas",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="comparison"),
+        ),
+    )
+
+    assert "| Mães 2026 — Buriti Shopping | Sem dados | Sem dados |" in response.answer
+    assert "| Mães 2026 — Shopping Sul | R$ 200,00 | 2 |" in response.answer
+    assert "Variação" not in response.answer
+
+
 def test_comparative_frame_lists_every_campaign_as_a_table_row() -> None:
     execution_result = ExecutionResult(
         data=[

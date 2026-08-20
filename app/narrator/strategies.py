@@ -617,8 +617,7 @@ class ComparisonStrategy(ResponseStrategy):
         metrics = [
             metric
             for metric in context.metric_columns
-            if isinstance(base_row.get(metric), int | float)
-            and isinstance(compared_row.get(metric), int | float)
+            if any(isinstance(row.get(metric), int | float) for row in context.data)
         ]
         lines = [
             "| Campanha / comparação | "
@@ -633,13 +632,19 @@ class ComparisonStrategy(ResponseStrategy):
         for row in context.data:
             lines.append(self._metric_row(self._cell(row.get(label_column)), row, metrics))
 
-        if len(context.data) == 2:
+        comparable_metrics = [
+            metric
+            for metric in metrics
+            if isinstance(base_row.get(metric), int | float)
+            and isinstance(compared_row.get(metric), int | float)
+        ]
+        if len(context.data) == 2 and comparable_metrics:
             lines.append(
                 self._variation_row(
                     "Variação absoluta",
                     base_row,
                     compared_row,
-                    metrics,
+                    comparable_metrics,
                     percentage=False,
                 ),
             )
@@ -648,7 +653,7 @@ class ComparisonStrategy(ResponseStrategy):
                     "Variação percentual",
                     base_row,
                     compared_row,
-                    metrics,
+                    comparable_metrics,
                     percentage=True,
                 ),
             )
@@ -661,7 +666,12 @@ class ComparisonStrategy(ResponseStrategy):
         row: dict[str, Any],
         metrics: list[str],
     ) -> str:
-        values = [self._formatter.value(metric, row[metric]) for metric in metrics]
+        values = [
+            self._formatter.value(metric, row.get(metric))
+            if isinstance(row.get(metric), int | float)
+            else "Sem dados"
+            for metric in metrics
+        ]
         return "| " + " | ".join([label, *values]) + " |"
 
     def _variation_row(
