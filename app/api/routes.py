@@ -87,6 +87,17 @@ def get_table_schema(
     return schema
 
 
+@router.get("/catalog/quality/{table}", response_model=dict, tags=["catalog"])
+def get_table_quality(
+    table: str,
+    data_catalog: Annotated[DataCatalog, Depends(provide_data_catalog)],
+) -> dict[str, object]:
+    profile = data_catalog.quality_profile(table)
+    if profile is None:
+        raise HTTPException(status_code=404, detail=f"Table '{table}' not found")
+    return profile
+
+
 @router.get("/datasources", response_model=list[DataSourceInfo], tags=["datasources"])
 def list_datasources(
     data_service: Annotated[DataService, Depends(provide_data_service)],

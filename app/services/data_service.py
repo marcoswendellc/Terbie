@@ -110,6 +110,7 @@ class DataService:
                 datasource_name=datasource.get_name(),
             ),
         )
+        self._register_dimension_values(table_name, data_frame)
         return schema
 
     def get_table_schema(
@@ -157,6 +158,7 @@ class DataService:
                 datasource_name="google_sheets",
             ),
         )
+        self._register_dimension_values(resolved_table_name, data_frame)
         return schema
 
     def load_google_spreadsheet(
@@ -182,9 +184,36 @@ class DataService:
                     datasource_name="google_sheets",
                 ),
             )
+            self._register_dimension_values(sheet_name, data_frame)
             schemas.append(schema)
 
         return schemas
+
+    def _register_dimension_values(self, table_name: str, data_frame: pd.DataFrame) -> None:
+        dimension_columns = {
+            "nm_promocao",
+            "nm_empreendimento",
+            "nm_fantasa",
+            "nm_segmento",
+            "cidade",
+            "bairro",
+            "uf",
+        }
+        for column in dimension_columns.intersection(data_frame.columns):
+            values = (
+                data_frame[column]
+                .dropna()
+                .astype("string")
+                .str.strip()
+                .drop_duplicates()
+                .head(10000)
+                .tolist()
+            )
+            self._data_catalog.register_dimension_values(
+                table_name=table_name,
+                column=column,
+                values=[str(value) for value in values],
+            )
 
     def read_google_spreadsheet_data(
         self,

@@ -19,6 +19,13 @@ class PlanValidator:
         "share",
         "trend",
         "outlier",
+        "campaign_detail",
+        "derive_demographics",
+        "persona_profile",
+        "persona_comparison",
+        "campaign_context_comparison",
+        "filter_group",
+        "statistics",
     }
 
     def validate(self, plan: ExecutionPlan) -> PlanValidationResult:
@@ -34,4 +41,31 @@ class PlanValidator:
             if operation.type not in self._KNOWN_OPERATIONS:
                 warnings.append(f"Operação desconhecida: {operation.type}.")
 
+        warnings.extend(self._operation_order_warnings(plan))
+
         return PlanValidationResult(is_valid=not warnings, warnings=warnings)
+
+    def _operation_order_warnings(self, plan: ExecutionPlan) -> list[str]:
+        warnings: list[str] = []
+        operation_types = [operation.type for operation in plan.operations]
+        aggregate_positions = [
+            index
+            for index, operation_type in enumerate(operation_types)
+            if operation_type in {"aggregate", "statistics"}
+        ]
+        if aggregate_positions:
+            first_aggregate = min(aggregate_positions)
+            if any(
+                operation_type in {"filter", "filter_group"}
+                for operation_type in operation_types[first_aggregate + 1 :]
+            ):
+                warnings.append("Filtros devem ser executados antes das agregações.")
+
+        if (
+            "limit" in operation_types
+            and "sort" in operation_types
+            and operation_types.index("limit") < operation_types.index("sort")
+        ):
+            warnings.append("Ordenação deve ocorrer antes do limite em rankings.")
+
+        return warnings

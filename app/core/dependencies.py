@@ -18,6 +18,8 @@ from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.knowledge_service import KnowledgeService
 from app.memory.conversation import ConversationMemoryService
 from app.memory.in_memory import InMemorySessionStore
+from app.memory.base import BaseMemory
+from app.memory.sqlite import SQLiteSessionStore
 from app.metrics.metric_resolver import MetricResolver
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
@@ -47,7 +49,7 @@ from app.services.semantic_service import SemanticService
 _data_catalog = DataCatalog()
 _semantic_resolver = SemanticResolver()
 _datasource_registry: DataSourceRegistry | None = None
-_conversation_store = InMemorySessionStore()
+_conversation_store: BaseMemory | None = None
 
 
 def provide_settings() -> Settings:
@@ -133,6 +135,14 @@ def provide_context_resolver() -> ContextResolver:
 
 
 def provide_conversation_memory() -> ConversationMemoryService:
+    global _conversation_store
+    if _conversation_store is None:
+        settings = provide_settings()
+        _conversation_store = (
+            SQLiteSessionStore(settings.memory_sqlite_path)
+            if settings.memory_backend == "sqlite"
+            else InMemorySessionStore()
+        )
     return ConversationMemoryService(_conversation_store)
 
 

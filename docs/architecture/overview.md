@@ -5,9 +5,9 @@ chatbot generico: sua responsabilidade e transformar perguntas de negocio em
 representacoes analiticas auditaveis, seguras e executaveis por componentes
 especializados.
 
-O sistema ainda nao responde perguntas finais, nao executa consultas e nao chama
-LLM real. A arquitetura atual prepara o caminho para que essas capacidades sejam
-adicionadas sem misturar responsabilidades.
+O sistema responde perguntas, executa planos sobre fontes tabulares e pode usar
+uma LLM como apoio controlado de raciocinio e narracao. Calculos factuais continuam
+deterministicos e auditaveis.
 
 ## Fluxo Conceitual
 
@@ -30,9 +30,11 @@ Analytical Plan
     ↓
 Execution Plan
     ↓
-Future Executor
+Executor
     ↓
-Future Narrator
+Verifier
+    ↓
+Narrator
 ```
 
 ## Papel da LLM
@@ -53,7 +55,20 @@ O Terbie separa explicitamente:
 - hipotese analitica;
 - plano analitico;
 - plano de execucao;
-- execucao futura;
-- narracao futura.
+- execucao deterministica;
+- verificacao e reparo limitado;
+- narracao factual e interpretativa.
 
 Essa separacao preserva auditabilidade, testabilidade e evolucao segura.
+
+## Ciclo do agente
+
+Consultas analiticas podem usar um ciclo limitado de planejamento, execucao,
+verificacao e reparo. A verificacao cobre preservacao de filtros, percentuais,
+valores predominantes e resultados vazios. O limite de reparos impede loops
+autonomos sem controle.
+
+## Governanca
+
+O runtime remove campos sensiveis da saida, permite configurar tamanho minimo de
+grupo analitico, bloqueia tabelas restritas e registra rastreamento por operacao.

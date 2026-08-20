@@ -13,7 +13,7 @@ Data Catalog
     ↓
 Knowledge / Semantic / Compiler
     ↓
-Future Executor
+Executor / Verifier / Narrator
 ```
 
 ## Google Sheets

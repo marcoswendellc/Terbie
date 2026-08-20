@@ -1,4 +1,7 @@
 from hmac import compare_digest
+from hashlib import pbkdf2_hmac
+from base64 import b64decode
+from binascii import Error as Base64Error
 
 from app.core.config import Settings
 from app.core.exceptions import ConfigurationError, DataSourceError
@@ -46,9 +49,9 @@ class AuthService:
             user_id, stored_username, stored_password = row
             candidate_username = "" if stored_username is None else str(stored_username).strip()
             candidate_password = "" if stored_password is None else str(stored_password)
-            if compare_digest(candidate_username, normalized_username) and compare_digest(
-                candidate_password,
+            if compare_digest(candidate_username, normalized_username) and self._verify_password(
                 password,
+                candidate_password,
             ):
                 return LoginResponse(
                     authenticated=True,
@@ -57,3 +60,18 @@ class AuthService:
                 )
 
         return LoginResponse(authenticated=False)
+
+    def _verify_password(self, provided: str, stored: str) -> bool:
+        if not stored.startswith("pbkdf2_sha256$"):
+            return compare_digest(stored, provided)
+        try:
+            _, iterations, salt, encoded_hash = stored.split("$", maxsplit=3)
+            calculated = pbkdf2_hmac(
+                "sha256",
+                provided.encode("utf-8"),
+                b64decode(salt),
+                int(iterations),
+            )
+            return compare_digest(calculated, b64decode(encoded_hash))
+        except (ValueError, TypeError, Base64Error):
+            return False

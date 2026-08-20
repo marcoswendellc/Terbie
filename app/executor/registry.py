@@ -8,6 +8,7 @@ from app.executor.operations.derived_metric import DerivedMetricOperation
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
 from app.executor.operations.distinct import DistinctOperation
 from app.executor.operations.filter import FilterOperation
+from app.executor.operations.filter_group import FilterGroupOperation
 from app.executor.operations.group_by import GroupByOperation
 from app.executor.operations.limit import LimitOperation
 from app.executor.operations.persona_profile import (
@@ -16,6 +17,7 @@ from app.executor.operations.persona_profile import (
 )
 from app.executor.operations.select import SelectOperation
 from app.executor.operations.sort import SortOperation
+from app.executor.operations.statistics import StatisticsOperation
 
 
 class OperationRegistry:
@@ -24,6 +26,7 @@ class OperationRegistry:
     def __init__(self) -> None:
         self._operations: dict[str, BaseOperation] = {}
         self.register(FilterOperation())
+        self.register(FilterGroupOperation())
         self.register(DeriveDemographicsOperation())
         self.register(PersonaProfileOperation())
         self.register(PersonaComparisonOperation())
@@ -36,6 +39,7 @@ class OperationRegistry:
         self.register(DerivedMetricOperation())
         self.register(SortOperation())
         self.register(LimitOperation())
+        self.register(StatisticsOperation())
 
     def register(self, operation: BaseOperation) -> None:
         self._operations[operation.operation_type] = operation

@@ -1,6 +1,8 @@
 import logging
 import re
 import unicodedata
+from threading import RLock
+from time import monotonic
 
 import pandas as pd
 
@@ -9,6 +11,7 @@ from app.core.exceptions import ConfigurationError, DataSourceError
 from app.executor.executor import TerbieExecutor
 from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
+from app.governance.policy import DataGovernancePolicy
 from app.knowledge.models import KnowledgeContext
 from app.memory.conversation import ConversationMemoryService
 from app.narrator.models import ExecuteResponse, NarratorRequest
@@ -19,6 +22,7 @@ from app.services.data_service import DataService
 from app.services.narrator_service import NarratorService
 from app.services.planner_service import PlannerService
 from app.services.semantic_service import SemanticService
+from app.services.analysis_verifier import AnalysisVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +44,8 @@ class ExecutionService:
         intent_guard: IntentGuard | None = None,
         insight_generator: InsightGenerator | None = None,
         conversation_memory: ConversationMemoryService | None = None,
+        analysis_verifier: AnalysisVerifier | None = None,
+        governance_policy: DataGovernancePolicy | None = None,
     ) -> None:
         self._settings = settings
         self._semantic_service = semantic_service
@@ -50,6 +56,12 @@ class ExecutionService:
         self._intent_guard = intent_guard or IntentGuard()
         self._insight_generator = insight_generator or InsightGenerator()
         self._conversation_memory = conversation_memory
+        self._analysis_verifier = analysis_verifier or AnalysisVerifier()
+        self._governance_policy = governance_policy or DataGovernancePolicy(
+            minimum_group_size=settings.minimum_analytical_group_size,
+        )
+        self._dataframe_cache: tuple[float, dict[str, pd.DataFrame]] | None = None
+        self._cache_lock = RLock()
 
     def execute_question(
         self,
@@ -141,6 +153,24 @@ class ExecutionService:
                     "selected_table": dataframe.attrs.get("table_name"),
                     **({"ranking": ranking_metadata} if ranking_metadata else {}),
                 },
+            },
+        )
+        verification = self._analysis_verifier.verify(
+            plan=planner_response.plan,
+            result=enriched_result,
+        )
+        enriched_result = enriched_result.model_copy(
+            update={
+                "metadata": {
+                    **enriched_result.metadata,
+                    "verification": {
+                        "passed": verification.passed,
+                        "checks": verification.checks,
+                    },
+                },
+                "warnings": list(
+                    dict.fromkeys([*enriched_result.warnings, *verification.warnings]),
+                ),
             },
         )
         insight_result = self._insight_generator.generate(
@@ -363,10 +393,24 @@ class ExecutionService:
                 details={"expected": "GOOGLE_SHEETS_SPREADSHEET_ID"},
             )
 
-        return self._data_service.read_google_spreadsheet_data(
+        ttl = self._settings.data_cache_ttl_seconds
+        with self._cache_lock:
+            if self._dataframe_cache is not None:
+                cached_at, cached = self._dataframe_cache
+                if ttl > 0 and monotonic() - cached_at < ttl:
+                    return {name: frame.copy() for name, frame in cached.items()}
+
+        loaded = self._data_service.read_google_spreadsheet_data(
             spreadsheet_id=spreadsheet_id,
             sheet_names=[self._settings.default_table],
         )
+        if ttl > 0:
+            with self._cache_lock:
+                self._dataframe_cache = (
+                    monotonic(),
+                    {name: frame.copy() for name, frame in loaded.items()},
+                )
+        return loaded
 
     def _select_dataframe(
         self,
@@ -376,16 +420,18 @@ class ExecutionService:
         knowledge_context: KnowledgeContext,
     ) -> pd.DataFrame:
         required_columns = self._required_columns(plan=plan, knowledge_context=knowledge_context)
-        for table_name, dataframe in dataframes.items():
-            if table_name != self._settings.default_table:
-                continue
+        ordered_tables = sorted(
+            dataframes.items(),
+            key=lambda item: (item[0] != self._settings.default_table, -len(item[1])),
+        )
+        for table_name, dataframe in ordered_tables:
             if required_columns.issubset(set(dataframe.columns)):
                 selected = dataframe.copy()
                 selected.attrs["table_name"] = table_name
                 return selected
 
         raise DataSourceError(
-            "Default table does not contain the columns required by the execution plan",
+            "No allowed table contains the columns required by the execution plan",
             details={
                 "table_name": self._settings.default_table,
                 "required_columns": sorted(required_columns),
@@ -507,14 +553,7 @@ class ExecutionService:
         )
 
     def _sanitize_rows(self, rows: list[dict[str, object]]) -> list[dict[str, object]]:
-        return [
-            {
-                key: value
-                for key, value in row.items()
-                if self._normalize_text(key) not in self._SENSITIVE_COLUMNS
-            }
-            for row in rows
-        ]
+        return self._governance_policy.sanitize(rows)
 
     def _log_composite_filter_validation(
         self,

@@ -25,14 +25,26 @@ class PipelineExecutor:
     ) -> ExecutionResult:
         start = perf_counter()
         result_frame = dataframe.copy()
+        operation_trace: list[dict[str, object]] = []
 
-        for operation in plan.operations:
+        for index, operation in enumerate(plan.operations):
             handler = self._registry.get(operation.type)
             if handler is None:
                 context.warnings.append(f"Operação não registrada: {operation.type}.")
                 continue
 
+            operation_start = perf_counter()
+            rows_before = len(result_frame)
             result_frame = handler.execute(result_frame, operation, context)
+            operation_trace.append(
+                {
+                    "index": index,
+                    "operation": operation.type,
+                    "rows_before": rows_before,
+                    "rows_after": len(result_frame),
+                    "duration_ms": round((perf_counter() - operation_start) * 1000, 3),
+                },
+            )
 
         execution_time = perf_counter() - start
         records = result_frame.to_dict(orient="records")
@@ -41,6 +53,7 @@ class PipelineExecutor:
             metadata={
                 "plan_version": plan.version,
                 "operations": [operation.type for operation in plan.operations],
+                "operation_trace": operation_trace,
                 **context.metadata,
             },
             statistics={

@@ -32,6 +32,14 @@ class Settings(BaseSettings):
         default="Usuarios,Usuarios_Terbie,Senhas,Credenciais,Tokens,Secrets",
         alias="BLOCKED_TABLES",
     )
+    data_cache_ttl_seconds: int = Field(default=60, ge=0, alias="DATA_CACHE_TTL_SECONDS")
+    minimum_analytical_group_size: int = Field(
+        default=1,
+        ge=1,
+        alias="MINIMUM_ANALYTICAL_GROUP_SIZE",
+    )
+    memory_backend: Literal["memory", "sqlite"] = Field(default="memory", alias="MEMORY_BACKEND")
+    memory_sqlite_path: str = Field(default=".terbie/memory.db", alias="MEMORY_SQLITE_PATH")
 
     model_config = SettingsConfigDict(
         env_file=".env",
