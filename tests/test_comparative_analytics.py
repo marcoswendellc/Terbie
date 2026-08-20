@@ -204,6 +204,20 @@ def test_same_campaign_name_in_different_shoppings_preserves_both_contexts() -> 
     assert contexts[1]["shopping"] == "Buriti Shopping Guará"
 
 
+def test_contextual_comparison_accepts_table_modifier_and_abbreviated_second_campaign() -> None:
+    response = _compile(
+        "Compare em uma tabela a promoção mães 2026 do Buriti Shopping "
+        "com a mães 2026 do Shopping Sul",
+    )
+
+    contexts = response.hypothesis.comparison_entities
+    assert contexts[0]["promotion"] == "mães 2026"
+    assert contexts[0]["shopping"] == "Buriti Shopping"
+    assert contexts[1]["promotion"] == "mães 2026"
+    assert contexts[1]["shopping"] == "Shopping Sul"
+    assert response.execution_plan.operations[-1].type == "campaign_context_comparison"
+
+
 def test_campaign_context_comparison_aggregates_each_shopping_separately() -> None:
     dataframe = pd.DataFrame(
         [

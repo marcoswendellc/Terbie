@@ -174,9 +174,10 @@ class TerbieCompiler:
         hypothesis: AnalyticalHypothesis,
     ) -> AnalyticalHypothesis:
         match = re.search(
-            r"\bcompare\s+a\s+(?:promocao|promoção|campanha)\s+(.+?)\s+"
+            r"\bcompare(?:\s+em\s+(?:uma\s+)?tabela)?\s+a\s+"
+            r"(?:(?:promocao|promoção|campanha)\s+)?(.+?)\s+"
             r"(?:do|da|no|na)\s+(.+?)\s+com\s+a\s+"
-            r"(?:promocao|promoção|campanha)\s+(.+?)\s+"
+            r"(?:(?:promocao|promoção|campanha)\s+)?(.+?)\s+"
             r"(?:do|da|no|na)\s+(.+?)\s*[?.!]*$",
             question,
             flags=re.IGNORECASE,
