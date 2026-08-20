@@ -13,12 +13,18 @@ class AnalyticalPlanner:
         knowledge_context: KnowledgeContext | None = None,
     ) -> AnalyticalPlan:
         metrics = self._metrics(hypothesis)
-        entities = [hypothesis.business_entity] if hypothesis.business_entity is not None else []
         dimensions = hypothesis.dimensions or self._dimensions(
             analysis_type=hypothesis.analysis_type,
             business_entity=hypothesis.business_entity,
             knowledge_context=knowledge_context,
         )
+        demographic_dimensions = {"genero", "idade", "faixa_etaria"}
+        if demographic_dimensions.intersection(dimensions):
+            entities = [
+                dimension for dimension in dimensions if dimension in demographic_dimensions
+            ]
+        else:
+            entities = [hypothesis.business_entity] if hypothesis.business_entity is not None else []
 
         return AnalyticalPlan(
             intent=hypothesis.analysis_type,

@@ -417,14 +417,14 @@ class ExecutionService:
             if dimension.name in entity_names or any(
                 operation.field == dimension.name for operation in plan.operations
             ):
-                column = dimension.column or dimension.key or dimension.derived_from
+                column = dimension.derived_from or dimension.column or dimension.key
                 if column is not None:
                     columns.add(column)
 
         for operation in plan.operations:
             if operation.type in {"filter", "group_by"} and operation.field is not None:
                 columns.add(
-                    self._resolve_dimension_column(
+                    self._resolve_required_source_column(
                         operation.field,
                         knowledge_context=knowledge_context,
                     ),
@@ -439,7 +439,17 @@ class ExecutionService:
             ):
                 fields = operation.parameters.get("fields", [])
                 if isinstance(fields, list):
-                    columns.update(field for field in fields if isinstance(field, str))
+                    if operation.type == "group_by":
+                        columns.update(
+                            self._resolve_required_source_column(
+                                field,
+                                knowledge_context=knowledge_context,
+                            )
+                            for field in fields
+                            if isinstance(field, str)
+                        )
+                    else:
+                        columns.update(field for field in fields if isinstance(field, str))
 
             subset = operation.parameters.get("subset", [])
             if isinstance(subset, list):
@@ -462,6 +472,19 @@ class ExecutionService:
         for dimension in knowledge_context.dimensions:
             if dimension.name == name:
                 return dimension.column or dimension.key or dimension.derived_from or name
+
+        return name
+
+    def _resolve_required_source_column(
+        self,
+        name: str,
+        *,
+        knowledge_context: KnowledgeContext,
+    ) -> str:
+        """Resolve the physical source needed before derived dimensions are created."""
+        for dimension in knowledge_context.dimensions:
+            if dimension.name == name:
+                return dimension.derived_from or dimension.column or dimension.key or name
 
         return name
 

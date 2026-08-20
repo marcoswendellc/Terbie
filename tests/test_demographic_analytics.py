@@ -2,13 +2,15 @@ from datetime import date
 
 import pandas as pd
 
+from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
-from app.compiler.models import AnalyticalPlan
+from app.compiler.models import AnalyticalHypothesis, AnalyticalPlan
 from app.executor.context import ExecutionContext
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
 from app.knowledge.knowledge_service import KnowledgeService
 from app.planner.models import PlanOperation
 from app.semantic.resolver import SemanticResolver
+from app.services.execution_service import ExecutionService
 
 
 def test_demographics_normalize_gender_and_derive_age_bands() -> None:
@@ -89,3 +91,55 @@ def test_persona_question_groups_gender_and_age_band() -> None:
         "aggregate",
         "sort",
     ]
+
+
+def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:
+    plan = ExecutionPlanBuilder().build(
+        AnalyticalPlan(
+            intent="ranking",
+            entities=["promocao"],
+            metrics=["clientes_unicos"],
+            dimensions=["genero"],
+            filters=[
+                {"type": "filter", "field": "cd_promocao", "operator": "not_null"},
+                {
+                    "type": "filter",
+                    "field": "sk_dtinicio",
+                    "operator": "year_overlap",
+                    "value": 2026,
+                    "end_field": "sk_dtfim",
+                },
+            ],
+            required_operations=["filter", "group_by", "aggregate", "sort", "limit"],
+        ),
+    )
+    service = object.__new__(ExecutionService)
+
+    required = service._required_columns(
+        plan=plan,
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert "cd_sexo" in required
+    assert "genero" not in required
+    assert {"sk_cliente", "cd_promocao", "sk_dtinicio", "sk_dtfim"}.issubset(required)
+
+
+def test_campaign_context_does_not_replace_gender_as_the_analysis_entity() -> None:
+    plan = AnalyticalPlanner().build(
+        hypothesis=AnalyticalHypothesis(
+            analysis_type="ranking",
+            business_entity="promocao",
+            metric="clientes_unicos",
+            metrics=["clientes_unicos"],
+            dimensions=["genero"],
+            filters=[
+                {"type": "filter", "field": "cd_promocao", "operator": "not_null"},
+            ],
+        ),
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert plan.entities == ["genero"]
+    assert plan.dimensions == ["genero"]
+    assert plan.filters[0]["field"] == "cd_promocao"
