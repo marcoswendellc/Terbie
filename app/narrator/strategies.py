@@ -87,6 +87,19 @@ class ListingStrategy(ResponseStrategy):
         else:
             intro = f"Em {year} ocorreram {count_text}:"
 
+        if self._asks_for_table(context.question):
+            lines = [
+                "| Campanha | Shopping | Início | Fim |",
+                "|---|---|---:|---:|",
+            ]
+            for row in context.data:
+                name = self._cell(row.get("nm_promocao") or row.get("cd_promocao"))
+                shopping = self._cell(row.get("nm_empreendimento") or "Não informado")
+                start = self._date(row.get("sk_dtinicio")) or "Não informado"
+                end = self._date(row.get("sk_dtfim")) or "Não informado"
+                lines.append(f"| {name} | {shopping} | {start} | {end} |")
+            return intro + "\n\n" + "\n".join(lines)
+
         items = []
         for row in context.data:
             name = row.get("nm_promocao") or row.get("cd_promocao")
@@ -96,6 +109,17 @@ class ListingStrategy(ResponseStrategy):
             items.append(f"• {name}{period}")
 
         return "\n\n".join([intro, *items])
+
+    def _asks_for_table(self, question: str) -> bool:
+        normalized = "".join(
+            char
+            for char in unicodedata.normalize("NFKD", question.casefold())
+            if not unicodedata.combining(char)
+        )
+        return any(term in normalized for term in ("tabela", "quadro"))
+
+    def _cell(self, value: object) -> str:
+        return str(value).replace("|", "\\|").replace("\n", " ")
 
     def _listing_intro(self, context: NarrativeContext) -> str:
         count_text = (

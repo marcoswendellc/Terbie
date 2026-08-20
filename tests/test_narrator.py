@@ -308,6 +308,43 @@ def test_listing_strategy_answers_campaign_question_directly() -> None:
     assert response.metadata["technical_warnings"] == ["fallback determinístico."]
 
 
+def test_campaign_listing_requested_as_table_includes_shopping_and_period() -> None:
+    execution_result = ExecutionResult(
+        data=[
+            {
+                "nm_promocao": "Promoção Mães 2026",
+                "nm_empreendimento": "Shopping Sul",
+                "sk_dtinicio": 20260423,
+                "sk_dtfim": 20260510,
+            },
+            {
+                "nm_promocao": "Promoção Mães 2026",
+                "nm_empreendimento": "Buriti Shopping Guará",
+                "sk_dtinicio": 20260424,
+                "sk_dtfim": 20260515,
+            },
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Mostre em uma tabela quais campanhas ocorreram em 2026?",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="list_distinct"),
+        ),
+    )
+
+    assert "| Campanha | Shopping | Início | Fim |" in response.answer
+    assert "| Promoção Mães 2026 | Shopping Sul | 23/04/2026 | 10/05/2026 |" in response.answer
+    assert "| Promoção Mães 2026 | Buriti Shopping Guará | 24/04/2026 | 15/05/2026 |" in response.answer
+    assert response.metadata["narrative_provider"] == "deterministic_table"
+
+
 def test_listing_strategy_uses_friendly_distinct_count() -> None:
     execution_result = ExecutionResult(
         data=[{"categoria": "Alimentacao"}, {"categoria": "Lazer"}],
