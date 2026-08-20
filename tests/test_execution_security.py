@@ -76,6 +76,17 @@ class FailingDataService:
         raise AssertionError("DataService should not be called for introduction questions")
 
 
+class FlakyDataService(RecordingDataService):
+    def __init__(self) -> None:
+        super().__init__()
+        self.fail = False
+
+    def read_google_spreadsheet_data(self, **kwargs: Any) -> dict[str, pd.DataFrame]:
+        if self.fail:
+            raise DataSourceError("temporary failure")
+        return super().read_google_spreadsheet_data(**kwargs)
+
+
 class FakeSemanticService:
     def resolve(self, question: str) -> object:
         return {"question": question}
@@ -176,3 +187,17 @@ def test_execute_response_does_not_return_sensitive_columns() -> None:
 
     assert response.data == [{"nm_fantasa": "A", "faturamento": 100.0}]
     assert not {"Senha", "Password", "Token", "Secret"}.intersection(response.data[0])
+
+
+def test_expired_cache_is_reused_when_google_sheets_temporarily_fails() -> None:
+    data_service = FlakyDataService()
+    service = _execution_service(data_service)
+    first = service._load_dataframes()
+    cached_at, cached = service._dataframe_cache
+    service._dataframe_cache = (cached_at - 1000, cached)
+    data_service.fail = True
+
+    second = service._load_dataframes()
+
+    assert second["Dados_copiloto"].equals(first["Dados_copiloto"])
+    assert "último cache válido" in service._data_cache_warning

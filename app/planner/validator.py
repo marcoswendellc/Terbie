@@ -42,8 +42,28 @@ class PlanValidator:
                 warnings.append(f"Operação desconhecida: {operation.type}.")
 
         warnings.extend(self._operation_order_warnings(plan))
+        warnings.extend(self._context_comparison_warnings(plan))
 
         return PlanValidationResult(is_valid=not warnings, warnings=warnings)
+
+    def _context_comparison_warnings(self, plan: ExecutionPlan) -> list[str]:
+        warnings: list[str] = []
+        for operation in plan.operations:
+            if operation.type != "campaign_context_comparison":
+                continue
+            contexts = operation.parameters.get("contexts", [])
+            if not isinstance(contexts, list) or len(contexts) < 2:
+                warnings.append("A comparação contextual exige pelo menos dois itens.")
+                continue
+            keys: list[tuple[str, str]] = []
+            for context in contexts:
+                if not isinstance(context, dict) or not context.get("promotion") or not context.get("shopping"):
+                    warnings.append("Campanha e shopping são obrigatórios em cada item comparado.")
+                    continue
+                keys.append((str(context["promotion"]).casefold(), str(context["shopping"]).casefold()))
+            if len(keys) != len(set(keys)):
+                warnings.append("A comparação contém itens duplicados.")
+        return warnings
 
     def _operation_order_warnings(self, plan: ExecutionPlan) -> list[str]:
         warnings: list[str] = []

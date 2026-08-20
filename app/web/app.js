@@ -1,4 +1,5 @@
 const SESSION_KEY = "terbie.authenticated";
+const TOKEN_KEY = "terbie.access_token";
 const LOGIN_ENDPOINT = "/auth/login";
 const CHAT_SESSION_KEY = "terbie.chat_session_id";
 const EXECUTE_ENDPOINT = "/execute";
@@ -158,10 +159,12 @@ function conversationSessionId() {
 }
 
 async function postQuestion(endpoint, question) {
+  const token = sessionStorage.getItem(TOKEN_KEY);
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ question, session_id: conversationSessionId() }),
   });
@@ -312,6 +315,7 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
     sessionStorage.setItem(SESSION_KEY, "true");
+    if (result.access_token) sessionStorage.setItem(TOKEN_KEY, result.access_token);
     loginForm.reset();
     showChat();
   } catch (_error) {
@@ -365,7 +369,8 @@ messageInput.addEventListener("keydown", (event) => {
 });
 
 logoutButton.addEventListener("click", () => {
-  sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
   showLogin();
 });
 

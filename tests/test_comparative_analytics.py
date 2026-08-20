@@ -216,6 +216,8 @@ def test_contextual_comparison_accepts_table_modifier_and_abbreviated_second_cam
     assert contexts[1]["promotion"] == "mães 2026"
     assert contexts[1]["shopping"] == "Shopping Sul"
     assert response.execution_plan.operations[-1].type == "campaign_context_comparison"
+    assert response.hypothesis.presentation.format == "table"
+    assert response.hypothesis.items[0].context == {"shopping": "Buriti Shopping"}
 
 
 def test_campaign_context_comparison_aggregates_each_shopping_separately() -> None:

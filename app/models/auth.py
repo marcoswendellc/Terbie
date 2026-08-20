@@ -12,5 +12,7 @@ class LoginResponse(BaseModel):
     authenticated: bool
     cd_usuario: str | None = None
     nm_usuario: str | None = None
+    access_token: str | None = None
+    expires_in: int | None = None
 
     model_config = ConfigDict(frozen=True)

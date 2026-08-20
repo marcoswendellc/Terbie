@@ -4,7 +4,13 @@ import re
 from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
-from app.compiler.models import AnalyticalHypothesis, CompilerRequest, CompilerResponse
+from app.compiler.models import (
+    AnalysisItem,
+    AnalyticalHypothesis,
+    CompilerRequest,
+    CompilerResponse,
+    PresentationSpec,
+)
 from app.context_resolution.context_resolver import ContextResolver
 from app.context_resolution.models import ResolvedContext
 from app.entity_resolution.entity_resolver import EntityResolver
@@ -204,6 +210,18 @@ class TerbieCompiler:
                 "analysis_type": "comparison",
                 "business_entity": "promocao",
                 "comparison_entities": contexts,
+                "items": [
+                    AnalysisItem(
+                        entity="promocao",
+                        value=context["promotion"],
+                        context={"shopping": context["shopping"]},
+                    )
+                    for context in contexts
+                ],
+                "presentation": PresentationSpec(
+                    format="table" if re.search(r"\b(tabela|quadro)\b", question, re.IGNORECASE) else "narrative",
+                    percentages_by_default=True,
+                ),
                 "filters": [],
             },
         )

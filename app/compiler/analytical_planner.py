@@ -34,6 +34,8 @@ class AnalyticalPlanner:
             time_scope=hypothesis.time_scope,
             filters=self._filters(hypothesis),
             comparison_entities=hypothesis.comparison_entities,
+            items=hypothesis.items,
+            presentation=hypothesis.presentation,
             required_operations=self._required_operations(
                 analysis_type=hypothesis.analysis_type,
                 business_entity=hypothesis.business_entity,

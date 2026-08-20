@@ -2,6 +2,11 @@ from hmac import compare_digest
 from hashlib import pbkdf2_hmac
 from base64 import b64decode
 from binascii import Error as Base64Error
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from hashlib import sha256
+from hmac import new as hmac_new
+import json
+import time
 
 from app.core.config import Settings
 from app.core.exceptions import ConfigurationError, DataSourceError
@@ -57,12 +62,19 @@ class AuthService:
                     authenticated=True,
                     cd_usuario=None if user_id is None else str(user_id),
                     nm_usuario=candidate_username,
+                    access_token=self._issue_token(
+                        user_id=None if user_id is None else str(user_id),
+                        username=candidate_username,
+                    ),
+                    expires_in=self._settings.session_ttl_seconds,
                 )
 
         return LoginResponse(authenticated=False)
 
     def _verify_password(self, provided: str, stored: str) -> bool:
         if not stored.startswith("pbkdf2_sha256$"):
+            if self._settings.environment == "production":
+                return False
             return compare_digest(stored, provided)
         try:
             _, iterations, salt, encoded_hash = stored.split("$", maxsplit=3)
@@ -75,3 +87,42 @@ class AuthService:
             return compare_digest(calculated, b64decode(encoded_hash))
         except (ValueError, TypeError, Base64Error):
             return False
+
+    def verify_token(self, token: str) -> dict[str, object] | None:
+        try:
+            encoded_payload, encoded_signature = token.split(".", maxsplit=1)
+            expected = hmac_new(
+                self._settings.session_secret.get_secret_value().encode(),
+                encoded_payload.encode(),
+                sha256,
+            ).digest()
+            signature = urlsafe_b64decode(self._pad(encoded_signature))
+            if not compare_digest(expected, signature):
+                return None
+            payload = json.loads(urlsafe_b64decode(self._pad(encoded_payload)))
+            if not isinstance(payload, dict) or int(payload.get("exp", 0)) < int(time.time()):
+                return None
+            return payload
+        except (ValueError, TypeError, json.JSONDecodeError, Base64Error):
+            return None
+
+    def _issue_token(self, *, user_id: str | None, username: str) -> str:
+        now = int(time.time())
+        payload = {
+            "sub": user_id,
+            "username": username,
+            "iat": now,
+            "exp": now + self._settings.session_ttl_seconds,
+        }
+        encoded_payload = urlsafe_b64encode(
+            json.dumps(payload, separators=(",", ":"), sort_keys=True).encode(),
+        ).decode().rstrip("=")
+        signature = hmac_new(
+            self._settings.session_secret.get_secret_value().encode(),
+            encoded_payload.encode(),
+            sha256,
+        ).digest()
+        return f"{encoded_payload}.{urlsafe_b64encode(signature).decode().rstrip('=')}"
+
+    def _pad(self, value: str) -> str:
+        return value + "=" * (-len(value) % 4)

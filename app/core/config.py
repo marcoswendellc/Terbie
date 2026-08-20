@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     )
     memory_backend: Literal["memory", "sqlite"] = Field(default="memory", alias="MEMORY_BACKEND")
     memory_sqlite_path: str = Field(default=".terbie/memory.db", alias="MEMORY_SQLITE_PATH")
+    local_data_path: str | None = Field(default=None, alias="LOCAL_DATA_PATH")
+    auth_required: bool = Field(default=False, alias="AUTH_REQUIRED")
+    session_secret: SecretStr = Field(default=SecretStr("local-development-only"), alias="SESSION_SECRET")
+    session_ttl_seconds: int = Field(default=28800, ge=300, alias="SESSION_TTL_SECONDS")
+    allowed_shoppings: str = Field(default="", alias="ALLOWED_SHOPPINGS")
 
     model_config = SettingsConfigDict(
         env_file=".env",

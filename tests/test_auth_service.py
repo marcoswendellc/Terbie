@@ -45,6 +45,8 @@ def test_authenticates_user_from_users_sheet() -> None:
     assert result.authenticated is True
     assert result.cd_usuario == "7"
     assert result.nm_usuario == "marco"
+    assert result.access_token
+    assert make_service().verify_token(result.access_token) is not None
 
 
 def test_rejects_invalid_password_without_returning_user_data() -> None:
@@ -53,3 +55,16 @@ def test_rejects_invalid_password_without_returning_user_data() -> None:
     assert result.authenticated is False
     assert result.cd_usuario is None
     assert result.nm_usuario is None
+
+
+def test_production_rejects_legacy_plaintext_passwords() -> None:
+    service = AuthService(
+        settings=Settings(
+            environment="production",
+            google_sheets_spreadsheet_id="spreadsheet-id",
+            session_secret="production-test-secret",
+        ),
+        data_source=FakeUsersDataSource(),
+    )
+
+    assert service.authenticate(username="marco", password="segredo").authenticated is False

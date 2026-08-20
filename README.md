@@ -33,6 +33,11 @@ DATA_CACHE_TTL_SECONDS=60
 MINIMUM_ANALYTICAL_GROUP_SIZE=1
 MEMORY_BACKEND=memory            # ou sqlite
 MEMORY_SQLITE_PATH=.terbie/memory.db
+LOCAL_DATA_PATH=./dados              # diretório CSV ou arquivo Excel
+AUTH_REQUIRED=false                  # em produção é sempre obrigatório
+SESSION_SECRET=troque-este-segredo
+SESSION_TTL_SECONDS=28800
+ALLOWED_SHOPPINGS=                    # lista opcional separada por vírgulas
 ```
 
 Em produção, recomenda-se `MINIMUM_ANALYTICAL_GROUP_SIZE=5` ou superior.

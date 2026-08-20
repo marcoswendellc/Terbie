@@ -21,6 +21,7 @@ class AnalysisVerifier:
             "filters_preserved": self._filters_preserved(plan, result),
             "percentages_valid": self._percentages_valid(result),
             "dominant_values_valid": self._dominant_values_valid(result),
+            "comparison_cardinality_valid": self._comparison_cardinality_valid(plan, result),
         }
         if not checks["has_rows"]:
             # Empty results are valid business outcomes; the narrator handles them safely.
@@ -31,6 +32,8 @@ class AnalysisVerifier:
             warnings.append("O resultado contém percentual fora do intervalo de 0% a 100%.")
         if not checks["dominant_values_valid"]:
             warnings.append("O perfil predominante contém valor nulo ou não informado.")
+        if not checks["comparison_cardinality_valid"]:
+            warnings.append("A quantidade de itens retornados não corresponde à comparação solicitada.")
         return VerificationResult(passed=all(checks.values()), warnings=warnings, checks=checks)
 
     def _filters_preserved(self, plan: ExecutionPlan, result: ExecutionResult) -> bool:
@@ -61,3 +64,11 @@ class AnalysisVerifier:
             for key, value in row.items()
             if key.endswith("_predominante")
         )
+
+    def _comparison_cardinality_valid(self, plan: ExecutionPlan, result: ExecutionResult) -> bool:
+        for operation in plan.operations:
+            if operation.type != "campaign_context_comparison":
+                continue
+            contexts = operation.parameters.get("contexts", [])
+            return isinstance(contexts, list) and result.rows_returned == len(contexts)
+        return True

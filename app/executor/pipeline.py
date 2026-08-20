@@ -43,6 +43,19 @@ class PipelineExecutor:
                     "rows_before": rows_before,
                     "rows_after": len(result_frame),
                     "duration_ms": round((perf_counter() - operation_start) * 1000, 3),
+                    **(
+                        {
+                            "field": operation.field,
+                            "operator": operation.parameters.get("operator", "equals"),
+                            "requested_value": operation.parameters.get("value"),
+                            "resolved_value": context.metadata.get("resolved_entities", {}).get(
+                                context.resolve_dimension_column(operation.field),
+                            ),
+                        }
+                        if operation.type == "filter"
+                        and operation.field not in {"cpf", "email", "telefone", "celular"}
+                        else {}
+                    ),
                 },
             )
 

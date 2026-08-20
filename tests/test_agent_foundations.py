@@ -112,6 +112,20 @@ def test_governance_masks_pii_and_suppresses_small_groups() -> None:
     assert result == [{"grupo": "B", "clientes_unicos": 5}]
 
 
+def test_governance_suppresses_a_single_small_group_and_limits_shopping_scope() -> None:
+    policy = DataGovernancePolicy(
+        minimum_group_size=3,
+        allowed_shoppings={"Shopping Sul"},
+    )
+
+    assert policy.sanitize(
+        [{"nm_empreendimento": "Shopping Sul", "clientes_unicos": 2}],
+    ) == []
+    assert policy.sanitize(
+        [{"nm_empreendimento": "Outro Shopping", "clientes_unicos": 10}],
+    ) == []
+
+
 def test_sqlite_memory_persists_between_store_instances(tmp_path: Path) -> None:
     path = str(tmp_path / "memory.db")
     SQLiteSessionStore(path).save("session", {"value": 1})

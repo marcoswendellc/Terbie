@@ -1,0 +1,20 @@
+[
+  {
+    "question": "compare em uma tabela a promoção mães 2026 do buriti shopping com a mães 2026 do shopping sul",
+    "expected_intent": "comparison",
+    "expected_format": "table",
+    "expected_contexts": [
+      {"promotion": "mães 2026", "shopping": "buriti shopping"},
+      {"promotion": "mães 2026", "shopping": "shopping sul"}
+    ]
+  },
+  {
+    "question": "compare a promoção de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Buriti Shopping Guará",
+    "expected_intent": "comparison",
+    "expected_format": "narrative",
+    "expected_contexts": [
+      {"promotion": "de mães 2026", "shopping": "Buriti Shopping"},
+      {"promotion": "de mães 2026", "shopping": "Buriti Shopping Guará"}
+    ]
+  }
+]

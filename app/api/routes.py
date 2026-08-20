@@ -1,7 +1,7 @@
 from inspect import signature
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 
 from app.catalog.data_catalog import DataCatalog
 from app.compiler.models import CompilerResponse
@@ -51,6 +51,23 @@ from app.services.planner_service import PlannerService
 from app.services.semantic_service import SemanticService
 
 router = APIRouter()
+
+
+def require_authenticated_user(
+    authorization: Annotated[str | None, Header()] = None,
+    settings: Annotated[Settings, Depends(provide_settings)] = None,
+    auth_service: Annotated[AuthService, Depends(provide_auth_service)] = None,
+) -> dict[str, object] | None:
+    required = settings.auth_required or settings.environment == "production"
+    if not required:
+        return None
+    prefix = "Bearer "
+    if authorization is None or not authorization.startswith(prefix):
+        raise HTTPException(status_code=401, detail="Autenticação obrigatória.")
+    identity = auth_service.verify_token(authorization[len(prefix) :].strip())
+    if identity is None:
+        raise HTTPException(status_code=401, detail="Sessão inválida ou expirada.")
+    return identity
 
 
 @router.post("/auth/login", response_model=LoginResponse, tags=["auth"])
@@ -292,6 +309,7 @@ def execute_question(
     payload: ExecutionRequest,
     execution_service: Annotated[ExecutionService, Depends(provide_execution_service)],
     knowledge_service: Annotated[KnowledgeService, Depends(provide_knowledge_service)],
+    _identity: Annotated[dict[str, object] | None, Depends(require_authenticated_user)],
 ) -> ExecuteResponse:
     knowledge_context = knowledge_service.get_context()
     arguments = {"question": payload.question, "knowledge_context": knowledge_context}
@@ -316,5 +334,6 @@ def create_narrator_draft(
 def create_orchestrated_draft(
     payload: PlannerRequest,
     orchestrator: Annotated[TerbieOrchestrator, Depends(provide_terbie_orchestrator)],
+    _identity: Annotated[dict[str, object] | None, Depends(require_authenticated_user)],
 ) -> TerbieDraftResponse:
     return orchestrator.create_draft(question=payload.question, session_id=payload.session_id)

@@ -61,6 +61,20 @@ O Terbie separa explicitamente:
 
 Essa separacao preserva auditabilidade, testabilidade e evolucao segura.
 
+## Fonte semantica canonica
+
+`app/semantic_kb` e a fonte canonica de metricas, dimensoes, intencoes, regras,
+sinonimos e exemplos. `KnowledgeService` projeta esse catalogo para os contratos
+de negocio e mantem apenas adaptadores de compatibilidade para definicoes
+legadas. Novos conceitos devem ser cadastrados exclusivamente no catalogo
+canonico.
+
+## Avaliacoes de linguagem
+
+Perguntas reais e seus contratos esperados ficam versionados em
+`evals/business_questions.json`. O avaliador verifica intencao, formato e
+contextos resolvidos, complementando os testes unitarios tradicionais.
+
 ## Ciclo do agente
 
 Consultas analiticas podem usar um ciclo limitado de planejamento, execucao,

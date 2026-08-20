@@ -59,8 +59,14 @@ class ExecutionService:
         self._analysis_verifier = analysis_verifier or AnalysisVerifier()
         self._governance_policy = governance_policy or DataGovernancePolicy(
             minimum_group_size=settings.minimum_analytical_group_size,
+            allowed_shoppings={
+                item.strip()
+                for item in settings.allowed_shoppings.split(",")
+                if item.strip()
+            },
         )
         self._dataframe_cache: tuple[float, dict[str, pd.DataFrame]] | None = None
+        self._data_cache_warning: str | None = None
         self._cache_lock = RLock()
 
     def execute_question(
@@ -135,6 +141,10 @@ class ExecutionService:
             plan=planner_response.plan,
             knowledge_context=knowledge_context,
         )
+        if self._data_cache_warning:
+            result = result.model_copy(
+                update={"warnings": [*result.warnings, self._data_cache_warning]},
+            )
         ranking_metadata = self._ranking_metadata(
             semantic_resolution=semantic_resolution,
             plan=planner_response.plan,
@@ -173,6 +183,19 @@ class ExecutionService:
                 ),
             },
         )
+        governed_rows = self._sanitize_rows(enriched_result.data)
+        governance_warnings = (
+            ["Parte do resultado foi suprimida pela política de governança."]
+            if len(governed_rows) != len(enriched_result.data)
+            else []
+        )
+        enriched_result = enriched_result.model_copy(
+            update={
+                "data": governed_rows,
+                "rows_returned": len(governed_rows),
+                "warnings": [*enriched_result.warnings, *governance_warnings],
+            },
+        )
         insight_result = self._insight_generator.generate(
             enriched_result,
             analytical_plan=None,
@@ -200,7 +223,7 @@ class ExecutionService:
             highlights=[],
             insights=[],
             recommendations=[],
-            data=self._sanitize_rows(enriched_result.data),
+            data=enriched_result.data,
             metadata={**enriched_result.metadata, **narrator_response.metadata},
             warnings=list(
                 dict.fromkeys([*enriched_result.warnings, *narrator_response.warnings]),
@@ -400,10 +423,21 @@ class ExecutionService:
                 if ttl > 0 and monotonic() - cached_at < ttl:
                     return {name: frame.copy() for name, frame in cached.items()}
 
-        loaded = self._data_service.read_google_spreadsheet_data(
-            spreadsheet_id=spreadsheet_id,
-            sheet_names=[self._settings.default_table],
-        )
+        try:
+            loaded = self._data_service.read_google_spreadsheet_data(
+                spreadsheet_id=spreadsheet_id,
+                sheet_names=[self._settings.default_table],
+            )
+            self._data_cache_warning = None
+        except DataSourceError:
+            with self._cache_lock:
+                if self._dataframe_cache is None:
+                    raise
+                _, stale = self._dataframe_cache
+                self._data_cache_warning = (
+                    "A fonte Google Sheets ficou indisponível; a resposta usou o último cache válido."
+                )
+                return {name: frame.copy() for name, frame in stale.items()}
         if ttl > 0:
             with self._cache_lock:
                 self._dataframe_cache = (

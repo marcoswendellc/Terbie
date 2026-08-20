@@ -43,29 +43,44 @@ class GoogleSheetsDataSource(BaseTabularDataSource):
         return True
 
     def read_sheet(self, spreadsheet_id: str, sheet_name: str) -> pd.DataFrame:
-        spreadsheet = self.open_spreadsheet(spreadsheet_id)
-        worksheet = self._worksheet(spreadsheet=spreadsheet, sheet_name=sheet_name)
-        values = worksheet.get_all_values()
-        return self._values_to_data_frame(values)
+        import gspread
+
+        try:
+            spreadsheet = self.open_spreadsheet(spreadsheet_id)
+            worksheet = self._worksheet(spreadsheet=spreadsheet, sheet_name=sheet_name)
+            values = worksheet.get_all_values()
+            return self._values_to_data_frame(values)
+        except gspread.exceptions.APIError as exc:
+            raise self._api_error(exc, spreadsheet_id=spreadsheet_id, sheet_name=sheet_name) from exc
 
     def read_spreadsheet(
         self,
         spreadsheet_id: str,
         sheet_names: list[str] | None = None,
     ) -> dict[str, pd.DataFrame]:
-        spreadsheet = self.open_spreadsheet(spreadsheet_id)
-        target_names = sheet_names or self.list_sheet_names(spreadsheet_id)
-        return {
-            sheet_name: self._worksheet_to_data_frame(
-                spreadsheet=spreadsheet,
-                sheet_name=sheet_name,
-            )
-            for sheet_name in target_names
-        }
+        import gspread
+
+        try:
+            spreadsheet = self.open_spreadsheet(spreadsheet_id)
+            target_names = sheet_names or self.list_sheet_names(spreadsheet_id)
+            return {
+                sheet_name: self._worksheet_to_data_frame(
+                    spreadsheet=spreadsheet,
+                    sheet_name=sheet_name,
+                )
+                for sheet_name in target_names
+            }
+        except gspread.exceptions.APIError as exc:
+            raise self._api_error(exc, spreadsheet_id=spreadsheet_id) from exc
 
     def list_sheet_names(self, spreadsheet_id: str) -> list[str]:
-        spreadsheet = self.open_spreadsheet(spreadsheet_id)
-        return [worksheet.title for worksheet in spreadsheet.worksheets()]
+        import gspread
+
+        try:
+            spreadsheet = self.open_spreadsheet(spreadsheet_id)
+            return [worksheet.title for worksheet in spreadsheet.worksheets()]
+        except gspread.exceptions.APIError as exc:
+            raise self._api_error(exc, spreadsheet_id=spreadsheet_id) from exc
 
     def open_spreadsheet(self, spreadsheet_id: str) -> Spreadsheet:
         import gspread
@@ -172,3 +187,37 @@ class GoogleSheetsDataSource(BaseTabularDataSource):
                 details={"expected": "GOOGLE_SHEETS_SPREADSHEET_ID"},
             )
         return spreadsheet_id
+
+    def _api_error(
+        self,
+        exc: Exception,
+        *,
+        spreadsheet_id: str,
+        sheet_name: str | None = None,
+    ) -> DataSourceError:
+        response = getattr(exc, "response", None)
+        status = getattr(response, "status_code", None)
+        reason = ""
+        try:
+            body = response.json() if response is not None else {}
+            reason = str(body.get("error", {}).get("message", ""))
+        except (AttributeError, TypeError, ValueError):
+            reason = ""
+        if status in {401, 403}:
+            message = "Google Sheets recusou o acesso; verifique credencial e compartilhamento da planilha."
+        elif status == 429:
+            message = "Google Sheets atingiu o limite temporário de requisições."
+        elif isinstance(status, int) and status >= 500:
+            message = "Google Sheets está temporariamente indisponível."
+        else:
+            message = "Google Sheets API request failed"
+        return DataSourceError(
+            message,
+            details={
+                "status": status,
+                "reason": reason[:500] or None,
+                "spreadsheet_id_suffix": spreadsheet_id[-6:],
+                "sheet_name": sheet_name,
+                "retryable": status == 429 or (isinstance(status, int) and status >= 500),
+            },
+        )
