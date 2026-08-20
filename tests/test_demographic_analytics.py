@@ -8,7 +8,10 @@ from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.models import AnalyticalHypothesis, AnalyticalPlan
 from app.executor.context import ExecutionContext
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
-from app.executor.operations.persona_profile import PersonaProfileOperation
+from app.executor.operations.persona_profile import (
+    PersonaComparisonOperation,
+    PersonaProfileOperation,
+)
 from app.context_resolution.context_resolver import ContextResolver
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.knowledge.knowledge_service import KnowledgeService
@@ -225,6 +228,69 @@ def test_persona_locality_columns_are_optional_for_dataframe_selection() -> None
         "nm_empreendimento",
         "sk_cliente",
     }
+
+
+def test_persona_comparison_is_forced_for_plural_shopping_request() -> None:
+    compiler = object.__new__(TerbieCompiler)
+    compiler._context_resolver = ContextResolver()
+
+    normalized = compiler._normalize_persona_question(
+        question="Faça um quadro comparativo de persona entre os shoppings",
+        hypothesis=AnalyticalHypothesis(analysis_type="ranking"),
+    )
+
+    assert normalized.analysis_type == "persona_comparison"
+    assert normalized.business_entity == "empreendimento"
+
+
+def test_persona_comparison_calculates_one_percentage_profile_per_shopping() -> None:
+    dataframe = pd.DataFrame(
+        {
+            "nm_empreendimento": ["Shopping A", "Shopping A", "Shopping B", "Shopping B"],
+            "sk_cliente": [1, 2, 3, 4],
+            "genero": ["Feminino", "Feminino", "Masculino", "Feminino"],
+            "faixa_etaria": ["25-34", "35-44", "18-24", "18-24"],
+            "cidade": ["NULL", "Goiânia", "Anápolis", "Anápolis"],
+        },
+    )
+    context = ExecutionContext(knowledge_context=KnowledgeService().get_context())
+
+    result = PersonaComparisonOperation().execute(
+        dataframe,
+        PlanOperation(type="persona_comparison"),
+        context,
+    )
+
+    shopping_a = result.set_index("nm_empreendimento").loc["Shopping A"]
+    assert shopping_a["genero_predominante"] == "Feminino"
+    assert shopping_a["percentual_genero"] == 1.0
+    assert shopping_a["localidade_predominante"] == "Goiânia"
+    assert shopping_a["percentual_localidade"] == 1.0
+
+
+def test_persona_comparison_narrative_is_a_percentage_table() -> None:
+    context = NarrativeContext(
+        question="Faça um quadro comparativo de persona entre os shoppings",
+        rows_returned=1,
+        data=[
+            {
+                "nm_empreendimento": "Shopping A",
+                "genero_predominante": "Feminino",
+                "percentual_genero": 0.7,
+                "faixa_etaria_predominante": "25-34",
+                "percentual_faixa_etaria": 0.4,
+                "localidade_predominante": "Goiânia",
+                "percentual_localidade": 0.6,
+            },
+        ],
+        top_row={},
+        intent="persona_comparison",
+    )
+
+    answer = PersonaStrategy(NarrativeFormatter()).answer(context)
+
+    assert "| Shopping | Gênero predominante | % gênero |" in answer
+    assert "| Shopping A | Feminino | 70,00% | 25-34 | 40,00% | Goiânia | 60,00% |" in answer
 
 
 def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:

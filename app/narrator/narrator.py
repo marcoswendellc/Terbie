@@ -49,7 +49,7 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
-        if context.intent in {"sales_date_range", "persona"}:
+        if context.intent in {"sales_date_range", "persona", "persona_comparison"}:
             strategy = self._strategy_for(context)
             return NarratorResponse(
                 answer=strategy.answer(context),

@@ -115,6 +115,23 @@ class ExecutionPlanBuilder:
                 )
                 continue
 
+            if operation_name == "persona_comparison":
+                operations.append(
+                    PlanOperation(
+                        type="persona_comparison",
+                        parameters={
+                            "fields": [
+                                "nm_empreendimento",
+                                "sk_cliente",
+                                "cd_sexo",
+                                "dt_nascimento",
+                            ],
+                            "optional_fields": ["cidade", "bairro", "uf"],
+                        },
+                    ),
+                )
+                continue
+
             operation = self._operation(
                 operation_name=operation_name,
                 metric=metric,

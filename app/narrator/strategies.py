@@ -154,9 +154,12 @@ class ListingStrategy(ResponseStrategy):
 
 class PersonaStrategy(ResponseStrategy):
     def can_handle(self, context: NarrativeContext) -> bool:
-        return context.intent == "persona"
+        return context.intent in {"persona", "persona_comparison"}
 
     def answer(self, context: NarrativeContext) -> str:
+        if context.intent == "persona_comparison":
+            return self._comparison_table(context)
+
         row = context.top_row or {}
         shopping = self._shopping_name(context.question)
         gender = str(row.get("genero_predominante", "Não informado"))
@@ -179,6 +182,37 @@ class PersonaStrategy(ResponseStrategy):
                 f"e {self._integer(row.get('quantidade_localidade'))} na localidade."
             )
         return answer
+
+    def _comparison_table(self, context: NarrativeContext) -> str:
+        headers = [
+            "Shopping",
+            "Gênero predominante",
+            "% gênero",
+            "Faixa etária",
+            "% faixa etária",
+            "Localidade",
+            "% localidade",
+        ]
+        rows = []
+        for row in context.data:
+            rows.append(
+                [
+                    str(row.get("nm_empreendimento", "Não informado")),
+                    str(row.get("genero_predominante", "Não informado")),
+                    self._percentage(row.get("percentual_genero")),
+                    str(row.get("faixa_etaria_predominante", "Não informado")),
+                    self._percentage(row.get("percentual_faixa_etaria")),
+                    str(row.get("localidade_predominante", "Não informado")),
+                    self._percentage(row.get("percentual_localidade")),
+                ],
+            )
+
+        lines = [
+            "| " + " | ".join(headers) + " |",
+            "| " + " | ".join(["---"] * len(headers)) + " |",
+            *["| " + " | ".join(values) + " |" for values in rows],
+        ]
+        return "Comparativo de persona por shopping:\n\n" + "\n".join(lines)
 
     def _percentage(self, value: object) -> str:
         if not isinstance(value, int | float):

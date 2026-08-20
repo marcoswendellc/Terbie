@@ -135,6 +135,13 @@ class TerbieCompiler:
         if not re.search(r"\bpersona\b|\bperfil\s+(?:do\s+)?publico\b", normalized):
             return hypothesis
 
+        is_comparison = bool(
+            re.search(
+                r"\b(comparativo|comparar|compare|entre)\b.*\b(shoppings|empreendimentos)\b",
+                normalized,
+            ),
+        )
+
         warnings = [
             warning
             for warning in hypothesis.warnings
@@ -146,8 +153,8 @@ class TerbieCompiler:
         ]
         return hypothesis.model_copy(
             update={
-                "analysis_type": "persona",
-                "business_entity": "genero",
+                "analysis_type": "persona_comparison" if is_comparison else "persona",
+                "business_entity": "empreendimento" if is_comparison else "genero",
                 "metric": "clientes_unicos",
                 "metrics": ["clientes_unicos"],
                 "dimensions": ["genero", "faixa_etaria"],

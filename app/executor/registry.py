@@ -7,7 +7,10 @@ from app.executor.operations.distinct import DistinctOperation
 from app.executor.operations.filter import FilterOperation
 from app.executor.operations.group_by import GroupByOperation
 from app.executor.operations.limit import LimitOperation
-from app.executor.operations.persona_profile import PersonaProfileOperation
+from app.executor.operations.persona_profile import (
+    PersonaComparisonOperation,
+    PersonaProfileOperation,
+)
 from app.executor.operations.select import SelectOperation
 from app.executor.operations.sort import SortOperation
 
@@ -20,6 +23,7 @@ class OperationRegistry:
         self.register(FilterOperation())
         self.register(DeriveDemographicsOperation())
         self.register(PersonaProfileOperation())
+        self.register(PersonaComparisonOperation())
         self.register(CampaignDetailOperation())
         self.register(SelectOperation())
         self.register(DistinctOperation())

@@ -56,6 +56,9 @@ class AnalyticalPlanner:
         if analysis_type == "persona":
             return [*filter_operations, "persona_profile"]
 
+        if analysis_type == "persona_comparison":
+            return [*filter_operations, "persona_comparison"]
+
         if analysis_type == "ranking":
             return [*filter_operations, "group_by", "aggregate", "sort", "limit"]
 

@@ -58,7 +58,8 @@ class PersonaProfileOperation(BaseOperation):
             return "Não informado", 0.0, 0
 
         valid = series.astype("string").str.strip()
-        valid = valid[valid.notna() & valid.ne("") & valid.ne("Não informado")]
+        invalid_labels = {"", "não informado", "null", "none", "nan", "<na>"}
+        valid = valid[valid.notna() & ~valid.str.casefold().isin(invalid_labels)]
         if valid.empty:
             return "Não informado", 0.0, 0
 
@@ -69,3 +70,33 @@ class PersonaProfileOperation(BaseOperation):
             round(float(dominant_count / counts.sum()), 4),
             dominant_count,
         )
+
+
+class PersonaComparisonOperation(BaseOperation):
+    operation_type = "persona_comparison"
+
+    def execute(
+        self,
+        dataframe: "pd.DataFrame",
+        operation: PlanOperation,
+        context: ExecutionContext,
+    ) -> "pd.DataFrame":
+        import pandas as pd
+
+        shopping_column = "nm_empreendimento"
+        if shopping_column not in dataframe.columns:
+            context.warnings.append("Campo de empreendimento não encontrado para comparação.")
+            return pd.DataFrame()
+
+        profile_operation = PersonaProfileOperation()
+        rows: list[dict[str, object]] = []
+        valid = dataframe[dataframe[shopping_column].notna()].copy()
+        for shopping, group in valid.groupby(shopping_column, dropna=True, sort=True):
+            profile = profile_operation.execute(group, operation, context)
+            if profile.empty:
+                continue
+            row = profile.iloc[0].to_dict()
+            rows.append({"nm_empreendimento": shopping, **row})
+
+        context.metadata["persona_comparison_count"] = len(rows)
+        return pd.DataFrame(rows)
