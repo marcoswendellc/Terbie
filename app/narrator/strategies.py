@@ -338,20 +338,40 @@ class RankingStrategy(ResponseStrategy):
                 f"{campaign_context} foram:"
             )
 
-        lines = [
-            (
-                f"{index}. "
-                f"{self._formatter.value(dimension_column, row.get(dimension_column))} — "
-                f"{self._formatter.value(metric_column, row.get(metric_column))}"
+        lines = []
+        for index, row in enumerate(context.data, start=1):
+            dimension_value = self._formatter.value(
+                dimension_column,
+                row.get(dimension_column),
             )
-            for index, row in enumerate(context.data, start=1)
-        ]
+            if len(context.metric_columns) > 1:
+                metric_values = "; ".join(
+                    f"{self._metric_label(column)}: "
+                    f"{self._formatter.value(column, row.get(column))}"
+                    for column in context.metric_columns
+                )
+            else:
+                metric_values = self._formatter.value(
+                    metric_column,
+                    row.get(metric_column),
+                )
+            lines.append(f"{index}. {dimension_value} — {metric_values}")
         calculation_note = (
             "\n\nContagem: notas únicas cadastradas (cd_compra distinto)."
             if metric_column == "quantidade_compras"
             else ""
         )
         return f"{heading}{calculation_note}\n\n" + "\n".join(lines)
+
+    def _metric_label(self, metric_column: str) -> str:
+        return {
+            "quantidade_compras": "Quantidade de compras",
+            "faturamento": "Valor das compras",
+            "clientes_unicos": "Clientes únicos",
+            "ticket_medio": "Ticket médio",
+            "ticket_medio_por_compra": "Ticket médio por compra",
+            "ticket_medio_por_cliente": "Ticket médio por cliente",
+        }.get(metric_column, metric_column.replace("_", " ").capitalize())
 
     def _objective_phrase(self, metric_column: str) -> str:
         if metric_column == "quantidade_compras":

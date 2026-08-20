@@ -209,6 +209,12 @@ class ExecutionPlanBuilder:
                     },
                 )
 
+            if intent == "ranking" and len(requested_metrics) > 1:
+                return PlanOperation(
+                    type="aggregate",
+                    parameters={"metrics": self._aggregate_metrics(requested_metrics)},
+                )
+
             if intent == "metric_query":
                 return PlanOperation(
                     type="aggregate",

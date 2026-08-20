@@ -59,6 +59,8 @@ class MetricResolver:
                 "faturou",
                 "receita",
                 "vendas",
+                "valor das compras",
+                "valor de compras",
             ),
         ),
     )

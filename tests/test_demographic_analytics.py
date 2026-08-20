@@ -8,6 +8,9 @@ from app.compiler.models import AnalyticalHypothesis, AnalyticalPlan
 from app.executor.context import ExecutionContext
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
 from app.knowledge.knowledge_service import KnowledgeService
+from app.narrator.formatter import NarrativeFormatter
+from app.narrator.models import NarrativeContext
+from app.narrator.strategies import RankingStrategy
 from app.planner.models import PlanOperation
 from app.semantic.resolver import SemanticResolver
 from app.services.execution_service import ExecutionService
@@ -143,3 +146,52 @@ def test_campaign_context_does_not_replace_gender_as_the_analysis_entity() -> No
     assert plan.entities == ["genero"]
     assert plan.dimensions == ["genero"]
     assert plan.filters[0]["field"] == "cd_promocao"
+
+
+def test_purchase_quantity_and_value_by_gender_resolve_both_metrics() -> None:
+    interpretation = SemanticResolver().resolve(
+        "Qual foi a quantidade de compras e valor das compras por gênero?",
+    ).interpretation
+
+    assert interpretation is not None
+    assert interpretation.entity == "genero"
+    assert interpretation.dimensions == ["genero"]
+    assert interpretation.metrics == ["quantidade_compras", "faturamento"]
+
+    plan = ExecutionPlanBuilder().build(
+        AnalyticalPlan(
+            intent="ranking",
+            entities=["genero"],
+            metrics=interpretation.metrics,
+            dimensions=interpretation.dimensions,
+            required_operations=["group_by", "aggregate", "sort"],
+        ),
+    )
+    aggregate = next(operation for operation in plan.operations if operation.type == "aggregate")
+    aliases = [metric["alias"] for metric in aggregate.parameters["metrics"]]
+    assert aliases == ["quantidade_compras", "faturamento"]
+
+
+def test_gender_ranking_narrative_displays_purchase_quantity_and_value() -> None:
+    context = NarrativeContext(
+        question="Qual foi a quantidade de compras e valor das compras por gênero?",
+        rows_returned=2,
+        data=[
+            {"genero": "Feminino", "quantidade_compras": 57654, "faturamento": 123456.78},
+            {"genero": "Masculino", "quantidade_compras": 20191, "faturamento": 65432.10},
+        ],
+        columns=["genero", "quantidade_compras", "faturamento"],
+        top_row={
+            "genero": "Feminino",
+            "quantidade_compras": 57654,
+            "faturamento": 123456.78,
+        },
+        metric_columns=["quantidade_compras", "faturamento"],
+        dimension_columns=["genero"],
+        intent="ranking",
+    )
+
+    answer = RankingStrategy(NarrativeFormatter()).answer(context)
+
+    assert "Quantidade de compras: 57.654" in answer
+    assert "Valor das compras: R$ 123.456,78" in answer

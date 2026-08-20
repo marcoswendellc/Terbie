@@ -5,7 +5,14 @@ BUSINESS_METRICS: list[BusinessMetric] = [
         name="faturamento",
         column="vl_compra",
         aggregation="sum",
-        synonyms=["vendas", "receita", "valor vendido", "total vendido"],
+        synonyms=[
+            "vendas",
+            "receita",
+            "valor vendido",
+            "valor das compras",
+            "valor de compras",
+            "total vendido",
+        ],
     ),
     BusinessMetric(
         name="quantidade_compras",
