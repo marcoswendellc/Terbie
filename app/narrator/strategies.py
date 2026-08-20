@@ -73,7 +73,7 @@ class ListingStrategy(ResponseStrategy):
         return []
 
     def _is_promotion_listing(self, context: NarrativeContext) -> bool:
-        return {"cd_promocao", "nm_promocao"}.issubset(set(context.columns))
+        return "nm_promocao" in context.columns
 
     def _promotion_answer(self, context: NarrativeContext) -> str:
         year = self._year_from_question(context.question)
@@ -186,24 +186,27 @@ class PersonaStrategy(ResponseStrategy):
     def _comparison_table(self, context: NarrativeContext) -> str:
         headers = [
             "Shopping",
-            "Gênero predominante",
-            "% gênero",
             "Faixa etária",
-            "% faixa etária",
-            "Localidade",
-            "% localidade",
+            "Gênero",
+            "Cidade",
         ]
         rows = []
         for row in context.data:
             rows.append(
                 [
                     str(row.get("nm_empreendimento", "Não informado")),
-                    str(row.get("genero_predominante", "Não informado")),
-                    self._percentage(row.get("percentual_genero")),
-                    str(row.get("faixa_etaria_predominante", "Não informado")),
-                    self._percentage(row.get("percentual_faixa_etaria")),
-                    str(row.get("localidade_predominante", "Não informado")),
-                    self._percentage(row.get("percentual_localidade")),
+                    self._profile_cell(
+                        row.get("faixa_etaria_predominante"),
+                        row.get("percentual_faixa_etaria"),
+                    ),
+                    self._profile_cell(
+                        row.get("genero_predominante"),
+                        row.get("percentual_genero"),
+                    ),
+                    self._profile_cell(
+                        row.get("localidade_predominante"),
+                        row.get("percentual_localidade"),
+                    ),
                 ],
             )
 
@@ -213,6 +216,9 @@ class PersonaStrategy(ResponseStrategy):
             *["| " + " | ".join(values) + " |" for values in rows],
         ]
         return "Comparativo de persona por shopping:\n\n" + "\n".join(lines)
+
+    def _profile_cell(self, label: object, percentage: object) -> str:
+        return f"{label or 'Não informado'} ({self._percentage(percentage)})"
 
     def _percentage(self, value: object) -> str:
         if not isinstance(value, int | float):

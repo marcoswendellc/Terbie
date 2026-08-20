@@ -135,12 +135,13 @@ class TerbieCompiler:
         if not re.search(r"\bpersona\b|\bperfil\s+(?:do\s+)?publico\b", normalized):
             return hypothesis
 
-        is_comparison = bool(
-            re.search(
-                r"\b(comparativo|comparar|compare|entre)\b.*\b(shoppings|empreendimentos)\b",
-                normalized,
-            ),
+        has_comparison_term = bool(
+            re.search(r"\b(comparativo|comparar|compare|entre|quadro)\b", normalized),
         )
+        has_plural_shoppings = bool(
+            re.search(r"\b(shoppings|empreendimentos)\b", normalized),
+        )
+        is_comparison = has_comparison_term and has_plural_shoppings
 
         warnings = [
             warning
@@ -317,6 +318,28 @@ class TerbieCompiler:
             and not explicitly_mentions_campaign
         ):
             matches = [match for match in matches if match.entity_type != "promocao"]
+        if hypothesis.analysis_type == "list_distinct" and has_shopping_match:
+            matches = [match for match in matches if match.entity_type != "promocao"]
+
+        shopping_matches = [
+            match for match in matches if match.entity_type == "empreendimento"
+        ]
+        if len(shopping_matches) > 1:
+            explicit_shoppings = [
+                match
+                for match in shopping_matches
+                if self._context_resolver._normalize_text(match.value) in normalized_question
+            ]
+            selected_shopping = (
+                max(explicit_shoppings, key=lambda match: len(match.value))
+                if explicit_shoppings
+                else max(shopping_matches, key=lambda match: match.confidence)
+            )
+            matches = [
+                match
+                for match in matches
+                if match.entity_type != "empreendimento" or match == selected_shopping
+            ]
 
         if resolution.is_ambiguous:
             warning = resolution.ambiguity_message or "Entidade ambígua."

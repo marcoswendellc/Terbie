@@ -289,8 +289,8 @@ def test_persona_comparison_narrative_is_a_percentage_table() -> None:
 
     answer = PersonaStrategy(NarrativeFormatter()).answer(context)
 
-    assert "| Shopping | Gênero predominante | % gênero |" in answer
-    assert "| Shopping A | Feminino | 70,00% | 25-34 | 40,00% | Goiânia | 60,00% |" in answer
+    assert "| Shopping | Faixa etária | Gênero | Cidade |" in answer
+    assert "| Shopping A | 25-34 (40,00%) | Feminino (70,00%) | Goiânia (60,00%) |" in answer
 
 
 def test_required_columns_use_demographic_sources_instead_of_derived_outputs() -> None:

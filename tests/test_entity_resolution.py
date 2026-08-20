@@ -70,3 +70,32 @@ def test_generic_shopping_question_does_not_create_named_entity_filters() -> Non
     )
 
     assert result.matches == []
+
+
+def test_specific_shopping_name_wins_over_overlapping_generic_candidate() -> None:
+    compiler = TerbieCompiler(
+        hypothesis_builder=HypothesisBuilder(),
+        analytical_planner=AnalyticalPlanner(),
+        execution_plan_builder=ExecutionPlanBuilder(),
+        validator=PlanValidator(),
+        optimizer=PlanOptimizer(),
+        entity_resolver=EntityResolver(),
+    )
+    question = "Liste as campanhas que ocorreram no Buriti Shopping Rio Verde"
+
+    response = compiler.compile(
+        CompilerRequest(
+            question=question,
+            semantic_resolution=SemanticResolver().resolve(question),
+            knowledge_context=KnowledgeService().get_context(),
+        ),
+    )
+
+    entity_filters = [
+        operation
+        for operation in response.execution_plan.operations
+        if operation.type == "filter" and operation.parameters.get("operator") == "equals"
+    ]
+    assert len(entity_filters) == 1
+    assert entity_filters[0].field == "nm_empreendimento"
+    assert entity_filters[0].parameters["value"] == "Buriti Shopping Rio Verde"
