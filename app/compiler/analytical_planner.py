@@ -64,7 +64,12 @@ class AnalyticalPlanner:
             return [*filter_operations, "persona_comparison"]
 
         if analysis_type == "ranking":
-            return [*filter_operations, "group_by", "aggregate", "sort", "limit"]
+            operations = [*filter_operations, "group_by", "aggregate"]
+            if "ticket_medio_por_compra" in metrics:
+                operations.append("derived_metric_purchase")
+            if "ticket_medio_por_cliente" in metrics:
+                operations.append("derived_metric_customer")
+            return [*operations, "sort", "limit"]
 
         if analysis_type == "comparison":
             if any(

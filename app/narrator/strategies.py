@@ -456,6 +456,19 @@ class RankingStrategy(ResponseStrategy):
                 f"{campaign_context} foram:"
             )
 
+        if self._asks_for_table(context.question):
+            metrics = context.metric_columns
+            headers = [singular_label.capitalize(), *[self._metric_label(metric) for metric in metrics]]
+            lines = [
+                "| " + " | ".join(headers) + " |",
+                "|---|" + "---:|" * len(metrics),
+            ]
+            for row in context.data:
+                dimension_value = str(row.get(dimension_column, "Não informado")).replace("|", "\\|")
+                values = [self._formatter.value(metric, row.get(metric)) for metric in metrics]
+                lines.append("| " + " | ".join([dimension_value, *values]) + " |")
+            return heading + "\n\n" + "\n".join(lines)
+
         lines = []
         for index, row in enumerate(context.data, start=1):
             dimension_value = self._formatter.value(
@@ -480,6 +493,10 @@ class RankingStrategy(ResponseStrategy):
             else ""
         )
         return f"{heading}{calculation_note}\n\n" + "\n".join(lines)
+
+    def _asks_for_table(self, question: str) -> bool:
+        normalized = self._normalize_text(question)
+        return any(term in normalized for term in ("tabela", "quadro"))
 
     def _metric_label(self, metric_column: str) -> str:
         return {

@@ -471,3 +471,27 @@ def test_store_notes_ranking_executes_and_reuses_full_ranking_formatter() -> Non
     )
     assert "1. Loja L — 12" in response.answer
     assert "10. Loja C — 3" in response.answer
+def test_multi_metric_store_top_ten_defaults_to_revenue_and_calculates_ticket() -> None:
+    question = (
+        "Monte uma tabela com dados de ticket médio, faturamento, quantidade de notas "
+        "com o top 10 de lojas da campanha de mães do Shopping Sul"
+    )
+
+    _, response = _compile(question)
+    plan = response.execution_plan
+
+    assert [metric.name for metric in plan.metrics] == [
+        "faturamento",
+        "ticket_medio_por_compra",
+        "quantidade_compras",
+    ]
+    assert any(operation.type == "derived_metric" for operation in plan.operations)
+    assert any(
+        operation.type == "sort"
+        and operation.field == "faturamento"
+        and operation.parameters["direction"] == "desc"
+        for operation in plan.operations
+    )
+    assert plan.operations[-1].type == "limit"
+    assert plan.operations[-1].parameters["value"] == 10
+

@@ -1,6 +1,7 @@
 from datetime import date
 
 import pandas as pd
+import pytest
 
 from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.compiler import TerbieCompiler
@@ -241,6 +242,27 @@ def test_persona_comparison_is_forced_for_plural_shopping_request() -> None:
     )
 
     assert normalized.analysis_type == "persona_comparison"
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Monte uma tabela com os shoppings e a persona de cada um",
+        "Liste os shoppings e informe a persona de cada um",
+    ],
+)
+def test_persona_of_each_shopping_is_always_a_comparison(question: str) -> None:
+    compiler = object.__new__(TerbieCompiler)
+    compiler._context_resolver = ContextResolver()
+
+    normalized = compiler._normalize_persona_question(
+        question=question,
+        hypothesis=AnalyticalHypothesis(analysis_type="persona"),
+    )
+
+    assert normalized.analysis_type == "persona_comparison"
+    assert normalized.business_entity == "empreendimento"
+    assert normalized.presentation.format == "table"
     assert normalized.business_entity == "empreendimento"
 
 

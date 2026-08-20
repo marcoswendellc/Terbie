@@ -101,6 +101,7 @@ class TerbieCompiler:
             hypothesis=hypothesis,
         )
         hypothesis = self._normalize_multi_metric_query(
+            question=request.question,
             hypothesis=hypothesis,
             semantic_resolution=semantic_resolution,
         )
@@ -151,7 +152,13 @@ class TerbieCompiler:
         has_plural_shoppings = bool(
             re.search(r"\b(shoppings|empreendimentos)\b", normalized),
         )
-        is_comparison = has_comparison_term and has_plural_shoppings
+        has_each_term = bool(
+            re.search(
+                r"\b(cada\s+um|cada\s+shopping|cada\s+empreendimento|persona\s+de\s+cada)\b",
+                normalized,
+            ),
+        )
+        is_comparison = has_plural_shoppings and (has_comparison_term or has_each_term)
 
         warnings = [
             warning
@@ -169,6 +176,10 @@ class TerbieCompiler:
                 "metric": "clientes_unicos",
                 "metrics": ["clientes_unicos"],
                 "dimensions": ["genero", "faixa_etaria"],
+                "presentation": PresentationSpec(
+                    format="table" if is_comparison else "narrative",
+                    percentages_by_default=True,
+                ),
                 "warnings": warnings,
             },
         )
@@ -603,12 +614,40 @@ class TerbieCompiler:
     def _normalize_multi_metric_query(
         self,
         *,
+        question: str,
         hypothesis: AnalyticalHypothesis,
         semantic_resolution: SemanticResolution | None,
     ) -> AnalyticalHypothesis:
+        if hypothesis.analysis_type == "ranking":
+            normalized = self._context_resolver._normalize_text(question)
+            metrics = list(hypothesis.metrics)
+            if (
+                hypothesis.business_entity == "loja"
+                and re.search(r"\b(todos?\s+os?\s+detalhes|dados?\s+completos?)\b", normalized)
+            ):
+                metrics = ["faturamento", "quantidade_compras", "ticket_medio_por_compra"]
+            if len(metrics) > 1 and "faturamento" in metrics:
+                explicit_ticket = bool(re.search(r"\b(?:por|maior)\s+ticket\b", normalized))
+                explicit_purchases = bool(
+                    re.search(r"\b(?:por|maior)\s+(?:quantidade\s+de\s+)?(?:notas|compras)\b", normalized),
+                )
+                order_metric = (
+                    "ticket_medio_por_compra"
+                    if explicit_ticket and "ticket_medio_por_compra" in metrics
+                    else "quantidade_compras"
+                    if explicit_purchases and "quantidade_compras" in metrics
+                    else "faturamento"
+                )
+                metrics = [order_metric, *[metric for metric in metrics if metric != order_metric]]
+                return hypothesis.model_copy(
+                    update={"metric": order_metric, "metrics": metrics},
+                )
+            if metrics != hypothesis.metrics:
+                return hypothesis.model_copy(update={"metrics": metrics})
+            return hypothesis
+
         if hypothesis.analysis_type in {
             "comparison",
-            "ranking",
             "summary",
             "campaign_detail",
             "campaign_summary",
