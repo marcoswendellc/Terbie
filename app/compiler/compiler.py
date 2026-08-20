@@ -70,6 +70,10 @@ class TerbieCompiler:
             question=request.question,
             hypothesis=hypothesis,
         )
+        hypothesis = self._normalize_contextual_campaign_comparison(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
         hypothesis = self._normalize_persona_question(
             question=request.question,
             hypothesis=hypothesis,
@@ -160,6 +164,46 @@ class TerbieCompiler:
                 "metrics": ["clientes_unicos"],
                 "dimensions": ["genero", "faixa_etaria"],
                 "warnings": warnings,
+            },
+        )
+
+    def _normalize_contextual_campaign_comparison(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        match = re.search(
+            r"\bcompare\s+a\s+(?:promocao|promoção|campanha)\s+(.+?)\s+"
+            r"(?:do|da|no|na)\s+(.+?)\s+com\s+a\s+"
+            r"(?:promocao|promoção|campanha)\s+(.+?)\s+"
+            r"(?:do|da|no|na)\s+(.+?)\s*[?.!]*$",
+            question,
+            flags=re.IGNORECASE,
+        )
+        if match is None:
+            return hypothesis
+
+        contexts = [
+            {
+                "promotion": match.group(1).strip(),
+                "shopping": match.group(2).strip(),
+                "label": f"{match.group(1).strip()} — {match.group(2).strip()}",
+                "source": "contextual_campaign_comparison",
+            },
+            {
+                "promotion": match.group(3).strip(),
+                "shopping": match.group(4).strip(),
+                "label": f"{match.group(3).strip()} — {match.group(4).strip()}",
+                "source": "contextual_campaign_comparison",
+            },
+        ]
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": "comparison",
+                "business_entity": "promocao",
+                "comparison_entities": contexts,
+                "filters": [],
             },
         )
 
@@ -598,6 +642,12 @@ class TerbieCompiler:
         question: str,
         hypothesis: AnalyticalHypothesis,
     ) -> AnalyticalHypothesis:
+        if any(
+            entity.get("source") == "contextual_campaign_comparison"
+            for entity in hypothesis.comparison_entities
+        ):
+            return hypothesis
+
         resolution = self._entity_resolver.resolve_many(question)
         if resolution.is_ambiguous:
             warning = resolution.ambiguity_message or "Entidade ambígua."

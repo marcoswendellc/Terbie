@@ -10,6 +10,10 @@ from app.core.config import Settings
 from app.core.dependencies import provide_execution_service
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.executor.engine import PandasExecutionEngine
+from app.executor.context import ExecutionContext
+from app.executor.operations.campaign_context_comparison import (
+    CampaignContextComparisonOperation,
+)
 from app.executor.executor import TerbieExecutor
 from app.executor.pipeline import PipelineExecutor
 from app.executor.registry import OperationRegistry
@@ -19,6 +23,7 @@ from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.narrator import TerbieNarrator
 from app.planner.optimizer import PlanOptimizer
+from app.planner.models import PlanOperation
 from app.planner.validator import PlanValidator
 from app.semantic.resolver import SemanticResolver
 from app.services.execution_service import ExecutionService
@@ -179,6 +184,63 @@ def test_campaign_comparison_preserves_specific_shopping_as_context_filter() -> 
         and operation.parameters["operator"] == "equals"
         for operation in response.execution_plan.operations
     )
+
+
+def test_same_campaign_name_in_different_shoppings_preserves_both_contexts() -> None:
+    question = (
+        "Compare a promoção de mães 2026 do Buriti Shopping com a campanha de mães "
+        "2026 do Buriti Shopping Guará"
+    )
+    response = _compile(question)
+
+    assert response.hypothesis.analysis_type == "comparison"
+    operation_types = [operation.type for operation in response.execution_plan.operations]
+    assert operation_types[-1] == "campaign_context_comparison"
+    assert all(operation_type == "filter" for operation_type in operation_types[:-1])
+    contexts = response.hypothesis.comparison_entities
+    assert contexts[0]["promotion"] == "de mães 2026"
+    assert contexts[0]["shopping"] == "Buriti Shopping"
+    assert contexts[1]["promotion"] == "de mães 2026"
+    assert contexts[1]["shopping"] == "Buriti Shopping Guará"
+
+
+def test_campaign_context_comparison_aggregates_each_shopping_separately() -> None:
+    dataframe = pd.DataFrame(
+        [
+            {
+                "nm_promocao": "Promoção Mães 2026",
+                "nm_empreendimento": "Buriti Shopping",
+                "vl_compra": 100.0,
+                "cd_compra": "A1",
+                "sk_cliente": "C1",
+            },
+            {
+                "nm_promocao": "Campanha Mães 2026",
+                "nm_empreendimento": "Buriti Shopping Guará",
+                "vl_compra": 200.0,
+                "cd_compra": "B1",
+                "sk_cliente": "C2",
+            },
+        ],
+    )
+    context = ExecutionContext(knowledge_context=KnowledgeService().get_context())
+    operation = PlanOperation(
+        type="campaign_context_comparison",
+        parameters={
+            "contexts": [
+                {"promotion": "mães 2026", "shopping": "Buriti Shopping"},
+                {"promotion": "mães 2026", "shopping": "Buriti Shopping Guará"},
+            ],
+        },
+    )
+
+    result = CampaignContextComparisonOperation().execute(dataframe, operation, context)
+
+    assert result["faturamento"].tolist() == [100.0, 200.0]
+    assert result["campanha_contexto"].tolist() == [
+        "Promoção Mães 2026 — Buriti Shopping",
+        "Campanha Mães 2026 — Buriti Shopping Guará",
+    ]
 
 
 def test_comparative_table_wording_returns_both_campaigns() -> None:

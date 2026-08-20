@@ -39,6 +39,7 @@ class AnalyticalPlanner:
                 business_entity=hypothesis.business_entity,
                 metrics=metrics,
                 filters=self._filters(hypothesis),
+                comparison_entities=hypothesis.comparison_entities,
             ),
             warnings=hypothesis.warnings,
         )
@@ -50,6 +51,7 @@ class AnalyticalPlanner:
         business_entity: str | None,
         metrics: list[str],
         filters: list[dict[str, object]],
+        comparison_entities: list[dict[str, object]],
     ) -> list[str]:
         filter_operations = ["filter"] if self._has_executable_filters(filters) else []
 
@@ -63,6 +65,11 @@ class AnalyticalPlanner:
             return [*filter_operations, "group_by", "aggregate", "sort", "limit"]
 
         if analysis_type == "comparison":
+            if any(
+                entity.get("source") == "contextual_campaign_comparison"
+                for entity in comparison_entities
+            ):
+                return [*filter_operations, "campaign_context_comparison"]
             return [*filter_operations, "group_by", "aggregate", "derived_metric", "sort"]
 
         if analysis_type == "metric_query":

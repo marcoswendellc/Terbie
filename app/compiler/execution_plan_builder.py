@@ -132,6 +132,24 @@ class ExecutionPlanBuilder:
                 )
                 continue
 
+            if operation_name == "campaign_context_comparison":
+                operations.append(
+                    PlanOperation(
+                        type="campaign_context_comparison",
+                        parameters={
+                            "contexts": analytical_plan.comparison_entities,
+                            "fields": [
+                                "nm_promocao",
+                                "nm_empreendimento",
+                                "vl_compra",
+                                "cd_compra",
+                                "sk_cliente",
+                            ],
+                        },
+                    ),
+                )
+                continue
+
             operation = self._operation(
                 operation_name=operation_name,
                 metric=metric,
