@@ -157,6 +157,22 @@ def test_comparative_table_wording_is_compiled_as_a_comparison() -> None:
         ARCA,
         NO_PELO,
     ]
+
+
+def test_campaign_comparison_preserves_specific_shopping_as_context_filter() -> None:
+    response = _compile(
+        "Faça um quadro comparativo das campanhas do Buriti Shopping Bay Marketing",
+    )
+
+    assert response.hypothesis.analysis_type == "comparison"
+    assert response.hypothesis.business_entity == "promocao"
+    assert response.hypothesis.comparison_entities == []
+    assert any(
+        filter_item.get("field") == "nm_empreendimento"
+        and filter_item.get("operator") == "equals"
+        and filter_item.get("value") == "Buriti Shopping Bay Marketing"
+        for filter_item in response.hypothesis.filters
+    )
     assert not any(
         operation.type == "filter"
         and operation.field == "nm_promocao"

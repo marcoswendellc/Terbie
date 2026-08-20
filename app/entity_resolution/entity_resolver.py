@@ -149,4 +149,14 @@ class EntityResolver:
                     "buriti rio verde",
                 ],
             ),
+            EntityCandidate(
+                field="nm_empreendimento",
+                value="Buriti Shopping Bay Marketing",
+                entity_type="empreendimento",
+                aliases=[
+                    "buriti shopping bay marketing",
+                    "shopping buriti bay marketing",
+                    "buriti bay marketing",
+                ],
+            ),
         ]

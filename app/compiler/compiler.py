@@ -608,6 +608,45 @@ class TerbieCompiler:
         if not resolution.matches:
             return hypothesis
 
+        normalized_question = self._context_resolver._normalize_text(question)
+        shopping_matches = [
+            match for match in resolution.matches if match.entity_type == "empreendimento"
+        ]
+        compares_campaign_collection = bool(
+            re.search(r"\b(campanhas|promocoes)\b", normalized_question)
+            and re.search(r"\b(quadro|comparativo|comparar|compare)\b", normalized_question)
+        )
+        if compares_campaign_collection and shopping_matches:
+            explicit_shoppings = [
+                match
+                for match in shopping_matches
+                if self._context_resolver._normalize_text(match.value) in normalized_question
+            ]
+            selected_shopping = (
+                max(explicit_shoppings, key=lambda match: len(match.value))
+                if explicit_shoppings
+                else max(shopping_matches, key=lambda match: match.confidence)
+            )
+            shopping_filter = self._entity_filter(selected_shopping)
+            filters = self._deduplicate_filters([*hypothesis.filters, shopping_filter])
+            warnings = [
+                warning
+                for warning in hypothesis.warnings
+                if warning
+                not in {
+                    "Nenhuma entidade de negócio identificada.",
+                    "Nenhuma métrica identificada.",
+                }
+            ]
+            return hypothesis.model_copy(
+                update={
+                    "business_entity": "promocao",
+                    "filters": filters,
+                    "comparison_entities": [],
+                    "warnings": warnings,
+                },
+            )
+
         if len(resolution.matches) < 2:
             return hypothesis.model_copy(
                 update={
