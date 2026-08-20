@@ -299,6 +299,41 @@ def test_contextual_comparison_preserves_a_requested_side_without_data() -> None
     assert "Buriti Shopping" in context.warnings[0]
 
 
+def test_partial_campaign_name_matches_full_name_within_selected_shopping() -> None:
+    dataframe = pd.DataFrame(
+        [
+            {
+                "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+                "nm_empreendimento": "Buriti Shopping",
+                "vl_compra": 150.0,
+                "cd_compra": "A1",
+                "sk_cliente": "C1",
+            },
+            {
+                "nm_promocao": "Promoção Mães 2026",
+                "nm_empreendimento": "Buriti Shopping Guará",
+                "vl_compra": 200.0,
+                "cd_compra": "B1",
+                "sk_cliente": "C2",
+            },
+        ],
+    )
+    context = ExecutionContext(knowledge_context=KnowledgeService().get_context())
+    operation = PlanOperation(
+        type="campaign_context_comparison",
+        parameters={
+            "contexts": [
+                {"promotion": "no pelo 360", "shopping": "buriti shopping"},
+                {"promotion": "de mães 2026", "shopping": "Buriti Shopping Guará"},
+            ],
+        },
+    )
+
+    result = CampaignContextComparisonOperation().execute(dataframe, operation, context)
+
+    assert result["faturamento"].tolist() == [150.0, 200.0]
+
+
 def test_comparative_table_wording_returns_both_campaigns() -> None:
     response = _execution_service().execute_question(
         question="me resuma em uma tabela comparativa as campanhas arcaparque e no pelo",

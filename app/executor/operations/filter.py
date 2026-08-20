@@ -50,7 +50,13 @@ class FilterOperation(BaseOperation):
             requested = self._normalize(str(value))
             candidates = dataframe[field].dropna().astype("string").unique().tolist()
             scored = [
-                (self._entity_similarity(requested, self._normalize(candidate)), candidate)
+                (
+                    self._entity_similarity(
+                        self._match_text(requested, field),
+                        self._match_text(self._normalize(candidate), field),
+                    ),
+                    candidate,
+                )
                 for candidate in candidates
             ]
             if not scored:
@@ -106,10 +112,18 @@ class FilterOperation(BaseOperation):
 
         requested_tokens = set(requested.split())
         candidate_tokens = set(candidate.split())
+        if len(requested_tokens) >= 2 and requested_tokens.issubset(candidate_tokens):
+            return 0.95
         union = requested_tokens | candidate_tokens
         token_score = len(requested_tokens & candidate_tokens) / len(union) if union else 0.0
         sequence_score = SequenceMatcher(None, requested, candidate).ratio()
         return max(token_score, sequence_score)
+
+    def _match_text(self, value: str, field: str) -> str:
+        if field != "nm_promocao":
+            return value
+        ignored = {"a", "as", "campanha", "da", "das", "de", "do", "dos", "promocao"}
+        return " ".join(token for token in value.split() if token not in ignored)
 
     def _date_series(self, series: "pd.Series") -> "pd.Series":
         normalized = series.astype("string").str.strip().str.replace(r"\.0$", "", regex=True)

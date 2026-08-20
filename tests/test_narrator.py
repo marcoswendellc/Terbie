@@ -143,6 +143,31 @@ def test_comparison_table_keeps_missing_side_visible_without_fake_zeroes() -> No
     assert "Variação" not in response.answer
 
 
+def test_comparison_without_numeric_results_never_says_only_completed() -> None:
+    execution_result = ExecutionResult(
+        data=[
+            {"campanha_contexto": "No Pelo 360 — Buriti Shopping", "faturamento": None},
+            {"campanha_contexto": "Mães 2026 — Buriti Shopping Guará", "faturamento": None},
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Compare as campanhas",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="comparison"),
+        ),
+    )
+
+    assert response.answer.startswith("Não encontrei dados")
+    assert response.answer != "Comparação concluída."
+
+
 def test_comparative_frame_lists_every_campaign_as_a_table_row() -> None:
     execution_result = ExecutionResult(
         data=[

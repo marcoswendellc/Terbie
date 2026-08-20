@@ -564,6 +564,24 @@ class ComparisonStrategy(ResponseStrategy):
         if not context.data:
             return "Não há dados suficientes para sustentar uma comparação confiável."
 
+        available = [
+            row
+            for row in context.data
+            if any(isinstance(row.get(metric), int | float) for metric in self._METRIC_LABELS)
+        ]
+        if not available:
+            labels = [
+                self._formatter.value(
+                    context.dimension_columns[0] if context.dimension_columns else context.columns[0],
+                    row.get(context.dimension_columns[0] if context.dimension_columns else context.columns[0]),
+                )
+                for row in context.data
+            ]
+            return "Não encontrei dados para as combinações solicitadas: " + "; ".join(labels) + "."
+
+        if len(available) < len(context.data):
+            return self._comparison_table(context)
+
         if self._asks_for_table(context.question) and len(context.data) >= 2:
             return self._comparison_table(context)
 
@@ -593,12 +611,18 @@ class ComparisonStrategy(ResponseStrategy):
         if not context.data:
             return []
 
+        revenue_rows = [
+            row for row in context.data if isinstance(row.get("faturamento"), int | float)
+        ]
+        if not revenue_rows:
+            return []
+
         label_column = (
             context.dimension_columns[0]
             if context.dimension_columns
             else context.columns[0]
         )
-        revenue_winner = self._max_row(context.data, "faturamento")
+        revenue_winner = self._max_row(revenue_rows, "faturamento")
         label = self._formatter.value(label_column, revenue_winner.get(label_column))
         revenue = self._formatter.value("faturamento", revenue_winner.get("faturamento", 0))
         return [f"{label}, com {revenue} de faturamento"]
