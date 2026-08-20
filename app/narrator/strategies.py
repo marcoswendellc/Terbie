@@ -564,7 +564,7 @@ class ComparisonStrategy(ResponseStrategy):
         if not context.data:
             return "Não há dados suficientes para sustentar uma comparação confiável."
 
-        if "tabela" in self._normalize(context.question) and len(context.data) >= 2:
+        if self._asks_for_table(context.question) and len(context.data) >= 2:
             return self._comparison_table(context)
 
         label_column = (
@@ -612,9 +612,8 @@ class ComparisonStrategy(ResponseStrategy):
             if context.dimension_columns
             else context.columns[0]
         )
-        base_row, compared_row = context.data[:2]
-        base_label = self._cell(base_row.get(label_column))
-        compared_label = self._cell(compared_row.get(label_column))
+        base_row = context.data[0]
+        compared_row = context.data[1]
         metrics = [
             metric
             for metric in context.metric_columns
@@ -631,26 +630,28 @@ class ComparisonStrategy(ResponseStrategy):
             "|---|" + "---:|" * len(metrics),
         ]
 
-        lines.append(self._metric_row(base_label, base_row, metrics))
-        lines.append(self._metric_row(compared_label, compared_row, metrics))
-        lines.append(
-            self._variation_row(
-                "Variação absoluta",
-                base_row,
-                compared_row,
-                metrics,
-                percentage=False,
-            ),
-        )
-        lines.append(
-            self._variation_row(
-                "Variação percentual",
-                base_row,
-                compared_row,
-                metrics,
-                percentage=True,
-            ),
-        )
+        for row in context.data:
+            lines.append(self._metric_row(self._cell(row.get(label_column)), row, metrics))
+
+        if len(context.data) == 2:
+            lines.append(
+                self._variation_row(
+                    "Variação absoluta",
+                    base_row,
+                    compared_row,
+                    metrics,
+                    percentage=False,
+                ),
+            )
+            lines.append(
+                self._variation_row(
+                    "Variação percentual",
+                    base_row,
+                    compared_row,
+                    metrics,
+                    percentage=True,
+                ),
+            )
 
         return "\n".join(lines)
 
@@ -692,6 +693,10 @@ class ComparisonStrategy(ResponseStrategy):
     def _normalize(self, text: str) -> str:
         replacements = str.maketrans("áàâãéêíóôõúç", "aaaaeeiooouc")
         return text.lower().translate(replacements)
+
+    def _asks_for_table(self, question: str) -> bool:
+        normalized = self._normalize(question)
+        return any(term in normalized for term in ("tabela", "quadro", "comparativo"))
 
 
 class TrendStrategy(ResponseStrategy):

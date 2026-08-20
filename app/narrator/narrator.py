@@ -234,7 +234,10 @@ class TerbieNarrator:
 
     def _requires_comparison_table(self, context) -> bool:
         return context.intent in {"comparison", "compare_periods"} and (
-            "tabela" in self._normalize(context.question)
+            any(
+                term in self._normalize(context.question)
+                for term in ("tabela", "quadro", "comparativo")
+            )
         )
 
     def _requires_exact_ranking(self, context) -> bool:

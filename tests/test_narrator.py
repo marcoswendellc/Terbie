@@ -109,6 +109,35 @@ def test_comparison_table_is_guaranteed_even_without_gemini() -> None:
     assert response.metadata["narrative_provider"] == "deterministic_table"
 
 
+def test_comparative_frame_lists_every_campaign_as_a_table_row() -> None:
+    execution_result = ExecutionResult(
+        data=[
+            {"nm_promocao": "Campanha A", "faturamento": 100.0},
+            {"nm_promocao": "Campanha B", "faturamento": 90.0},
+            {"nm_promocao": "Campanha C", "faturamento": 80.0},
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=3,
+    )
+
+    response = _narrator().narrate(
+        NarratorRequest(
+            question="Faça um quadro comparativo das campanhas",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="comparison"),
+        ),
+    )
+
+    assert "| Campanha A | R$ 100,00 |" in response.answer
+    assert "| Campanha B | R$ 90,00 |" in response.answer
+    assert "| Campanha C | R$ 80,00 |" in response.answer
+    assert "Variação absoluta" not in response.answer
+    assert response.metadata["narrative_provider"] == "deterministic_table"
+
+
 def test_ranking_execution_result_highlights_first_row() -> None:
     execution_result = ExecutionResult(
         data=[
