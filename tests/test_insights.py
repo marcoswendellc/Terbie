@@ -120,9 +120,9 @@ def test_narrator_communicates_insight_result_without_calculating() -> None:
         ),
     )
 
-    assert response.answer.startswith("Comparando as campanhas")
-    assert "No Pelo apresentou desempenho superior." in response.answer
-    assert "No Pelo liderou em faturamento." in response.answer
-    assert "Você também pode analisar" in response.answer
-    assert response.insights[0]["title"] == "Maior faturamento"
-    assert response.recommendations == ["Comparar bairros", "Comparar ticket por loja"]
+    assert "| Campanha / comparação | Faturamento |" in response.answer
+    assert "| No Pelo | R$ 100,00 |" in response.answer
+    assert "Resumo dos indicadores" not in response.answer
+    assert "Você também pode analisar" not in response.answer
+    assert response.insights == []
+    assert response.recommendations == []

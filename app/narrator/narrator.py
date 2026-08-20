@@ -59,6 +59,19 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
+        if context.intent in {"comparison", "compare_periods"}:
+            strategy = ComparisonStrategy(self._formatter)
+            answer = strategy.answer(context)
+            return NarratorResponse(
+                answer=answer,
+                summary=None,
+                highlights=[],
+                insights=[],
+                recommendations=[],
+                warnings=context.warnings,
+                metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
+            )
+
         if (
             context.intent == "list_distinct"
             and "nm_promocao" in context.columns
@@ -94,23 +107,6 @@ class TerbieNarrator:
                     **self._metadata(context),
                     "narrative_provider": "deterministic_ranking",
                 },
-            )
-
-        if context.intent in {"comparison", "compare_periods"} and (
-            context.insight_result is None
-            or not getattr(context.insight_result, "insights", [])
-        ):
-            strategy = ComparisonStrategy(self._formatter)
-            answer = strategy.answer(context)
-            return NarratorResponse(
-                answer=answer,
-                summary=None,
-                highlights=self._deduplicate_highlights(
-                    answer=answer,
-                    highlights=strategy.highlights(context),
-                ),
-                warnings=context.warnings,
-                metadata={**self._metadata(context), "narrative_provider": "deterministic_comparison"},
             )
 
         if self._intelligent_provider is not None:

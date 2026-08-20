@@ -603,33 +603,7 @@ class ComparisonStrategy(ResponseStrategy):
             ]
             return "Não encontrei dados para as combinações solicitadas: " + "; ".join(labels) + "."
 
-        if len(available) < len(context.data):
-            return self._comparison_table(context)
-
-        if self._asks_for_table(context.question) and len(context.data) >= 2:
-            return self._comparison_table(context)
-
-        label_column = (
-            context.dimension_columns[0]
-            if context.dimension_columns
-            else context.columns[0]
-        )
-        revenue_winner = self._max_row(context.data, "faturamento")
-        ticket_winner = self._max_row(context.data, "ticket_medio")
-        revenue_label = self._formatter.value(label_column, revenue_winner.get(label_column))
-        ticket_label = self._formatter.value(label_column, ticket_winner.get(label_column))
-        revenue = self._formatter.value("faturamento", revenue_winner.get("faturamento", 0))
-        ticket = self._formatter.value("ticket_medio", ticket_winner.get("ticket_medio", 0))
-
-        return (
-            f"Comparando as campanhas, {revenue_label} apresentou o maior faturamento, "
-            f"com {revenue}, enquanto {ticket_label} teve o maior ticket médio, de {ticket}.\n\n"
-            "Resumo dos indicadores:\n"
-            "• Faturamento\n"
-            "• Ticket médio\n"
-            "• Quantidade de compras\n"
-            "• Clientes únicos"
-        )
+        return self._comparison_table(context)
 
     def highlights(self, context: NarrativeContext) -> list[str]:
         if not context.data:
@@ -661,7 +635,7 @@ class ComparisonStrategy(ResponseStrategy):
             else context.columns[0]
         )
         base_row = context.data[0]
-        compared_row = context.data[1]
+        compared_row = context.data[1] if len(context.data) > 1 else None
         metrics = [
             metric
             for metric in context.metric_columns
@@ -683,6 +657,7 @@ class ComparisonStrategy(ResponseStrategy):
         comparable_metrics = [
             metric
             for metric in metrics
+            if compared_row is not None
             if isinstance(base_row.get(metric), int | float)
             and isinstance(compared_row.get(metric), int | float)
         ]

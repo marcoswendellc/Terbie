@@ -109,8 +109,17 @@ KB_RESPONSE_RULES: list[KBResponseRule] = [
     KBResponseRule(
         id="comparison_returns_side_by_side_metrics",
         intent="comparison",
-        description="Comparacoes devem trazer itens lado a lado com metricas relevantes.",
-        must_include=["compared_items", "metrics"],
+        description=(
+            "Comparacoes devem ser respondidas diretamente em tabela, com os itens "
+            "lado a lado e as metricas calculadas, sem blocos genericos adicionais."
+        ),
+        must_include=["comparison_table", "compared_items", "metrics"],
+        must_not_include=[
+            "indicator_summary_block",
+            "generic_recommendations",
+            "generic_suggestions",
+        ],
+        priority=50,
     ),
     KBResponseRule(
         id="promotion_summary_uses_main_indicators",

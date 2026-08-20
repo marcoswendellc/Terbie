@@ -439,8 +439,9 @@ def test_execute_endpoint_returns_comparative_answer_and_data() -> None:
 
     body = response.json()
     assert response.status_code == 200
-    assert "Comparando as campanhas" in body["answer"]
-    assert "Resumo dos indicadores" in body["answer"]
+    assert "| Campanha / comparação |" in body["answer"]
+    assert "Resumo dos indicadores" not in body["answer"]
+    assert "Você também pode analisar" not in body["answer"]
     assert "Encontrei" not in body["answer"]
     assert len(body["data"]) == 2
 
