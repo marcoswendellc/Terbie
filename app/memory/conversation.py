@@ -51,6 +51,19 @@ class ConversationMemoryService:
         rewritten = question.strip()
         unresolved: list[str] = []
 
+        # Corrections such as "quero saber a melhor" refer to the previous
+        # analytical question, not to the aggregate shown in the last answer.
+        # Reusing that question also avoids turning the previous winner into a
+        # filter for the follow-up query.
+        if self._is_result_correction(normalized) and state.ultima_pergunta:
+            rewritten = state.ultima_pergunta
+            return ContextualQuestion(
+                original_question=question,
+                rewritten_question=rewritten,
+                summary=session.summary,
+                state=state,
+            )
+
         for key, patterns in self.REFERENCES.items():
             if not any(re.search(pattern, normalized) for pattern in patterns):
                 continue
@@ -224,6 +237,16 @@ class ConversationMemoryService:
     def _is_elliptical(self, normalized: str) -> bool:
         return normalized.startswith("e ") or bool(
             re.fullmatch(r"(e )?(no|na|do|da) .+", normalized)
+        )
+
+    def _is_result_correction(self, normalized: str) -> bool:
+        return bool(
+            re.fullmatch(
+                r"(?:eu\s+)?(?:quero|queria)\s+saber\s+(?:qual\s+)?"
+                r"(?:foi\s+)?(?:a|o)\s+(?:melhor|maior)",
+                normalized,
+            )
+            or re.fullmatch(r"(?:so\s+)?(?:a|o)\s+(?:melhor|maior)", normalized)
         )
 
     def _has_metric(self, normalized: str) -> bool:

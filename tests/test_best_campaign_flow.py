@@ -43,26 +43,32 @@ class BestCampaignDataService:
             {
                 "cd_promocao": "P001",
                 "nm_promocao": "Campanha A",
+                "nm_empreendimento": "Shopping Sul",
                 "sk_dtinicio": 20260101,
                 "sk_dtfim": 20260131,
                 "vl_compra": 100.0,
                 "cd_compra": "a1",
+                "sk_cliente": "c1",
             },
             {
                 "cd_promocao": "P002",
                 "nm_promocao": "Campanha B",
+                "nm_empreendimento": "Buriti Shopping",
                 "sk_dtinicio": 20260201,
                 "sk_dtfim": 20260228,
                 "vl_compra": 300.0,
                 "cd_compra": "b1",
+                "sk_cliente": "c2",
             },
             {
                 "cd_promocao": None,
                 "nm_promocao": "Compra sem campanha",
+                "nm_empreendimento": "Shopping Sul",
                 "sk_dtinicio": 20260301,
                 "sk_dtfim": 20260331,
                 "vl_compra": 999.0,
                 "cd_compra": "x1",
+                "sk_cliente": "c3",
             },
         ]
         if not self._include_campaigns:
@@ -131,9 +137,34 @@ def test_best_campaign_without_year_uses_faturamento_ranking_limit_one() -> None
         "filter",
         "group_by",
         "aggregate",
+        "derived_metric",
+        "derived_metric",
         "sort",
         "limit",
     ]
+
+
+def test_best_shopping_campaign_returns_only_winner_and_names_shopping() -> None:
+    response = _execution_service().execute_question(
+        question="Qual a campanha promocional teve melhor resultado em 2026?",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+
+    assert response.data == [
+        {
+            "nm_promocao": "Campanha B",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 300.0,
+            "quantidade_compras": 1,
+            "clientes_unicos": 1,
+            "ticket_medio_por_compra": 300.0,
+            "ticket_medio_por_cliente": 300.0,
+        }
+    ]
+    assert response.answer == (
+        "A melhor campanha em 2026, considerando faturamento, foi "
+        "Campanha B, no Buriti Shopping."
+    )
 
 
 def test_best_campaign_when_no_campaign_is_found_returns_safe_answer() -> None:

@@ -47,6 +47,43 @@ def test_gemini_prompt_requests_dynamic_comparison_table_and_variations() -> Non
     assert '"faturamento": 125.0' in prompt
 
 
+def test_gemini_prompt_keeps_single_campaign_winner_and_uses_all_metrics() -> None:
+    provider = GeminiNarrativeProvider(
+        api_key="test-key",
+        model="gemini-test",
+        timeout_ms=10000,
+    )
+    context = NarrativeContext(
+        question="Qual foi a melhor campanha em 2026?",
+        rows_returned=1,
+        data=[
+            {
+                "nm_promocao": "Mães 2026",
+                "nm_empreendimento": "Shopping Sul",
+                "faturamento": 1000.0,
+                "quantidade_compras": 10,
+                "ticket_medio_por_compra": 100.0,
+            }
+        ],
+        columns=[
+            "nm_promocao",
+            "nm_empreendimento",
+            "faturamento",
+            "quantidade_compras",
+            "ticket_medio_por_compra",
+        ],
+        top_row={"nm_promocao": "Mães 2026"},
+        intent="ranking",
+    )
+
+    prompt = provider._prompt(context)
+
+    assert "apenas a vencedora" in prompt
+    assert "identifique o shopping" in prompt
+    assert '"quantidade_compras": 10' in prompt
+    assert '"ticket_medio_por_compra": 100.0' in prompt
+
+
 class FakeIntelligentProvider(BaseNarrativeProvider):
     def generate(self, context):
         assert context.data == [{"loja": "A", "faturamento": 300.0}]

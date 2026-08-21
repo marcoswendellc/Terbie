@@ -129,3 +129,24 @@ def test_old_turns_are_summarized_and_recent_history_is_bounded() -> None:
     assert len(session.recent_turns) == 2
     assert "Pergunta 0" in session.summary
     assert "Pergunta 1" in session.summary
+
+
+def test_correction_asking_only_for_best_reuses_previous_question() -> None:
+    memory = _memory()
+    _record(
+        memory,
+        session_id="correction",
+        question="Qual a campanha promocional teve melhor resultado em 2026?",
+        answer="As 10 campanhas com maior faturamento foram...",
+        entity="campanha",
+        data={"nm_promocao": "Mães 2026", "nm_empreendimento": "Shopping Sul"},
+    )
+
+    result = memory.contextualize(
+        session_id="correction",
+        question="Quero saber a melhor",
+    )
+
+    assert result.rewritten_question == (
+        "Qual a campanha promocional teve melhor resultado em 2026?"
+    )

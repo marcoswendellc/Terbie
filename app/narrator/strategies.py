@@ -357,10 +357,18 @@ class RankingStrategy(ResponseStrategy):
         metric_phrase = self._metric_phrase(metric_column=metric_column, metric=metric)
         if self._is_best_campaign_question(context.question, dimension_column, metric_column):
             period = self._year_from_question(context.question)
+            shopping = self._shopping_from_row(context.top_row or {})
+            location = f", no {shopping}" if shopping else ""
             if period is not None:
-                return f"A melhor campanha em {period}, considerando faturamento, foi {dimension}."
+                return (
+                    f"A melhor campanha em {period}, considerando faturamento, "
+                    f"foi {dimension}{location}."
+                )
 
-            return f"A melhor campanha, considerando faturamento, foi {dimension}."
+            return (
+                f"A melhor campanha, considerando faturamento, foi "
+                f"{dimension}{location}."
+            )
 
         return (
             f"{article} {label} com {objective}{context_text} "
@@ -561,8 +569,23 @@ class RankingStrategy(ResponseStrategy):
         return (
             dimension_column == "nm_promocao"
             and metric_column == "faturamento"
-            and "melhor campanha" in normalized
+            and (
+                "melhor campanha" in normalized
+                or bool(
+                    re.search(
+                        r"\b(?:campanha|promocao)(?:\s+promocional)?\b.*"
+                        r"\b(?:melhor|maior)(?:\s+resultado)?\b",
+                        normalized,
+                    )
+                )
+            )
         )
+
+    def _shopping_from_row(self, row: dict) -> str | None:
+        value = row.get("nm_empreendimento")
+        if value is None or not str(value).strip():
+            return None
+        return str(value).strip()
 
     def _year_from_question(self, question: str) -> str | None:
         match = re.search(r"\b(20\d{2}|19\d{2})\b", question)

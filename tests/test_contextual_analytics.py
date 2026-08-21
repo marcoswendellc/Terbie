@@ -65,7 +65,7 @@ def test_shopping_context_best_campaign_dimension() -> None:
     response = _compile("Para o Buriti Shopping, qual foi a melhor campanha do ano?")
 
     assert response.hypothesis.analysis_type == "ranking"
-    assert response.hypothesis.dimensions == ["nm_promocao"]
+    assert response.hypothesis.dimensions == ["nm_promocao", "nm_empreendimento"]
     assert response.hypothesis.metric == "faturamento"
     assert (
         _operation(response, "filter", "nm_empreendimento").parameters["value"]

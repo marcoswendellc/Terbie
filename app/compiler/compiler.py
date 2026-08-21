@@ -351,18 +351,37 @@ class TerbieCompiler:
             and hypothesis.business_entity == "promocao"
             and bool(re.search(r"\b(campanha|promocao)\b", normalized))
         )
-        asks_for_shopping = bool(
-            re.search(
-                r"\b(?:qual|que|em qual|em que)\s+(?:foi\s+o\s+)?(?:shopping|empreendimento)\b",
-                normalized,
-            )
-            or re.search(r"\b(?:shopping|empreendimento)\s+(?:ocorreu|aconteceu)\b", normalized)
-        )
-        if not (asks_for_campaign_ranking and asks_for_shopping):
+        if not asks_for_campaign_ranking:
             return hypothesis
 
+        if re.search(r"\b(?:notas?|compras?)\b", normalized):
+            primary_metric = "quantidade_compras"
+        elif re.search(r"\bclientes?\b", normalized):
+            primary_metric = "clientes_unicos"
+        elif re.search(r"\bticket\s+medio\b", normalized):
+            primary_metric = "ticket_medio"
+        else:
+            primary_metric = hypothesis.metric or "faturamento"
+        campaign_metrics = [
+            primary_metric,
+            *[
+                metric
+                for metric in (
+                    "faturamento",
+                    "quantidade_compras",
+                    "clientes_unicos",
+                    "ticket_medio_por_compra",
+                    "ticket_medio_por_cliente",
+                )
+                if metric != primary_metric
+            ],
+        ]
         return hypothesis.model_copy(
-            update={"dimensions": ["nm_promocao", "nm_empreendimento"]},
+            update={
+                "dimensions": ["nm_promocao", "nm_empreendimento"],
+                "metric": primary_metric,
+                "metrics": campaign_metrics,
+            },
         )
 
     def _fallback_hypothesis(
@@ -538,6 +557,8 @@ class TerbieCompiler:
             r"\bqual\s+(foi\s+o\s+)?bairro\b",
             r"\bqual\s+(foi\s+a\s+)?cidade\b",
             r"\bqual\s+(foi\s+a\s+|foi\s+o\s+)?campanha\b",
+            r"\bqual\s+(?:a\s+)?(?:campanha|promocao)(?:\s+promocional)?\b.*"
+            r"\b(?:melhor|maior)\b",
         )
         if any(re.search(pattern, normalized) for pattern in singular_patterns):
             return 1
@@ -632,7 +653,11 @@ class TerbieCompiler:
                     re.search(r"\b(?:por|maior)\s+(?:quantidade\s+de\s+)?(?:notas|compras)\b", normalized),
                 )
                 order_metric = (
-                    "ticket_medio_por_compra"
+                    hypothesis.metric
+                    if hypothesis.business_entity == "promocao"
+                    and hypothesis.metric_source == "explicit"
+                    and hypothesis.metric in metrics
+                    else "ticket_medio_por_compra"
                     if explicit_ticket and "ticket_medio_por_compra" in metrics
                     else "quantidade_compras"
                     if explicit_purchases and "quantidade_compras" in metrics

@@ -361,6 +361,16 @@ def test_explicit_and_default_ranking_limits() -> None:
                 for parameter in semantic_resolution.parameters
             )
 
+    _, singular_campaign = _compile(
+        "qual a campanha promocional teve melhor resultado em 2026"
+    )
+    singular_limit = next(
+        operation
+        for operation in singular_campaign.execution_plan.operations
+        if operation.type == "limit"
+    )
+    assert singular_limit.parameters["value"] == 1
+
 
 @pytest.mark.parametrize(
     ("question", "dimension", "metric", "limit"),
@@ -442,14 +452,23 @@ def test_requested_ranking_object_has_priority_over_context_filter(
                 operation.type == "group_by" and operation.field == "nm_promocao"
                 for operation in plan.operations
             )
-    if metric == "quantidade_compras":
-        assert plan.metrics[0].aggregation == "count_distinct"
-        assert any(
-            operation.type == "aggregate"
-            and operation.field == "cd_compra"
-            and operation.function == "count_distinct"
-            for operation in plan.operations
-        )
+        if metric == "quantidade_compras":
+            assert plan.metrics[0].aggregation == "count_distinct"
+            assert any(
+                operation.type == "aggregate"
+                and (
+                    (
+                        operation.field == "cd_compra"
+                        and operation.function == "count_distinct"
+                    )
+                    or any(
+                        item.get("field") == "cd_compra"
+                        and item.get("function") == "count_distinct"
+                        for item in operation.parameters.get("metrics", [])
+                    )
+                )
+                for operation in plan.operations
+            )
 
 
 def test_store_notes_ranking_executes_and_reuses_full_ranking_formatter() -> None:
@@ -494,4 +513,3 @@ def test_multi_metric_store_top_ten_defaults_to_revenue_and_calculates_ticket() 
     )
     assert plan.operations[-1].type == "limit"
     assert plan.operations[-1].parameters["value"] == 10
-
