@@ -149,6 +149,7 @@ def test_context_sent_to_ai_contains_recent_questions_and_answers() -> None:
 
     assert "Usuário: Qual o top 10 de campanhas em 2026?" in result.summary
     assert "Terbie: 1. Campanha A\n2. Campanha B" in result.summary
+    assert 'Resultado estruturado: [{"nm_promocao": "Campanha A"}]' in result.summary
 
 
 def test_correction_asking_only_for_best_reuses_previous_question() -> None:

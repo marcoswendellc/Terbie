@@ -24,6 +24,7 @@ class ConversationTurn(BaseModel):
     question: str
     rewritten_question: str
     answer: str
+    result_data: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class ConversationSession(BaseModel):

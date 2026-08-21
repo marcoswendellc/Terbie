@@ -466,15 +466,25 @@ class RankingStrategy(ResponseStrategy):
 
         if self._asks_for_table(context.question):
             metrics = context.metric_columns
-            headers = [singular_label.capitalize(), *[self._metric_label(metric) for metric in metrics]]
+            dimension_columns = context.dimension_columns
+            headers = [
+                *[
+                    self._dimension_label(column)
+                    for column in dimension_columns
+                ],
+                *[self._metric_label(metric) for metric in metrics],
+            ]
             lines = [
                 "| " + " | ".join(headers) + " |",
-                "|---|" + "---:|" * len(metrics),
+                "|" + "---|" * len(dimension_columns) + "---:|" * len(metrics),
             ]
             for row in context.data:
-                dimension_value = str(row.get(dimension_column, "Não informado")).replace("|", "\\|")
+                dimension_values = [
+                    str(row.get(column, "Não informado")).replace("|", "\\|")
+                    for column in dimension_columns
+                ]
                 values = [self._formatter.value(metric, row.get(metric)) for metric in metrics]
-                lines.append("| " + " | ".join([dimension_value, *values]) + " |")
+                lines.append("| " + " | ".join([*dimension_values, *values]) + " |")
             return heading + "\n\n" + "\n".join(lines)
 
         lines = []
@@ -515,6 +525,14 @@ class RankingStrategy(ResponseStrategy):
             "ticket_medio_por_compra": "Ticket médio por compra",
             "ticket_medio_por_cliente": "Ticket médio por cliente",
         }.get(metric_column, metric_column.replace("_", " ").capitalize())
+
+    def _dimension_label(self, dimension_column: str) -> str:
+        return {
+            "nm_promocao": "Campanha",
+            "nm_empreendimento": "Shopping",
+            "nm_fantasa": "Loja",
+            "nm_segmento": "Segmento",
+        }.get(dimension_column, dimension_column.replace("_", " ").capitalize())
 
     def _objective_phrase(self, metric_column: str) -> str:
         if metric_column == "quantidade_compras":

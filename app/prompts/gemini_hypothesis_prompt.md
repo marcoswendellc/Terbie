@@ -48,6 +48,11 @@ Regras:
 - Quando a pergunta atual omitir o objetivo, herde da troca imediatamente anterior
   apenas o que for necessário para compreendê-la.
 - Não confunda posições de rankings anteriores com nomes ou códigos armazenados na base.
+- O campo "Resultado estruturado" preserva as linhas na mesma ordem apresentada ao
+  usuário. Use-o para resolver referências posicionais como "campanha 10".
+- Perguntas descritivas como "onde ocorreu?" ou "em que shopping?" não exigem
+  indicador numérico. Use `list_distinct`, selecione `nm_empreendimento` e aplique
+  como filtro a entidade resolvida pelo histórico.
 - Nunca responder em linguagem natural.
 - Identificar filtros explícitos antes de definir agrupamentos.
 - Quando o usuário disser "na campanha X", "na promoção X" ou

@@ -1,3 +1,4 @@
+import json
 import re
 import unicodedata
 from datetime import UTC, datetime
@@ -183,6 +184,9 @@ class ConversationMemoryService:
                 question=context.original_question,
                 rewritten_question=context.rewritten_question,
                 answer=answer,
+                result_data=[
+                    dict(row) for row in (data or [])[:50] if isinstance(row, dict)
+                ],
             ),
         ]
         overflow = turns[: -self._recent_limit]
@@ -258,6 +262,11 @@ class ConversationMemoryService:
         parts = [session.summary.strip()] if session.summary.strip() else []
         for turn in session.recent_turns:
             parts.append(f"Usuário: {turn.question}\nTerbie: {turn.answer}")
+            if turn.result_data:
+                parts.append(
+                    "Resultado estruturado: "
+                    + json.dumps(turn.result_data, ensure_ascii=False, default=str)
+                )
         return "\n\n".join(parts)[-6000:]
 
     def _normalize(self, text: str) -> str:
