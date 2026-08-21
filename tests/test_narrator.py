@@ -74,6 +74,7 @@ def test_gemini_prompt_keeps_single_campaign_winner_and_uses_all_metrics() -> No
         ],
         top_row={"nm_promocao": "Mães 2026"},
         intent="ranking",
+        conversation_context="Usuário: Qual o top 10? Terbie: 1. Mães 2026",
     )
 
     prompt = provider._prompt(context)
@@ -82,6 +83,7 @@ def test_gemini_prompt_keeps_single_campaign_winner_and_uses_all_metrics() -> No
     assert "identifique o shopping" in prompt
     assert '"quantidade_compras": 10' in prompt
     assert '"ticket_medio_por_compra": 100.0' in prompt
+    assert '"conversation_context": "Usuário: Qual o top 10?' in prompt
 
 
 class FakeIntelligentProvider(BaseNarrativeProvider):

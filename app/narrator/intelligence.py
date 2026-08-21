@@ -76,6 +76,7 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
             "columns": context.columns,
             "rows_returned": context.rows_returned,
             "calculated_result": context.data[:50],
+            "conversation_context": context.conversation_context,
         }
         return (
             "Você é o narrador analítico do Terbie. Responda em português brasileiro "
@@ -89,6 +90,8 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
             "a resposta somente quando forem relevantes. A primeira linha de um ranking "
             "calculado é a vencedora e não pode ser substituída por outra entidade. "
             "Não transforme um pedido singular em top 10. Quando ele pedir uma "
+            "Use o histórico da conversa para compreender referências e continuações, "
+            "mas use somente calculated_result para afirmar números na resposta atual. "
             "tabela, entregue uma tabela Markdown no campo answer. Quando pedir uma "
             "comparação entre entidades, apresente uma linha por indicador e colunas "
             "para cada entidade; inclua também variação absoluta e percentual, se os "

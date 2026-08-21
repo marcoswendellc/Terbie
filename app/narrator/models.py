@@ -9,6 +9,7 @@ class NarratorRequest(BaseModel):
     semantic_resolution: Any | None = None
     execution_plan: Any | None = None
     insight_result: Any | None = None
+    conversation_context: str = ""
 
     model_config = ConfigDict(frozen=True)
 
@@ -25,6 +26,7 @@ class NarrativeContext(BaseModel):
     intent: str | None = None
     insight_result: Any | None = None
     execution_metadata: dict[str, Any] = Field(default_factory=dict)
+    conversation_context: str = ""
 
     model_config = ConfigDict(frozen=True)
 

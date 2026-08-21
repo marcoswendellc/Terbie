@@ -60,7 +60,7 @@ class ConversationMemoryService:
             return ContextualQuestion(
                 original_question=question,
                 rewritten_question=rewritten,
-                summary=session.summary,
+                summary=self._conversation_context(session),
                 state=state,
             )
 
@@ -117,7 +117,7 @@ class ConversationMemoryService:
         return ContextualQuestion(
             original_question=question,
             rewritten_question=rewritten,
-            summary=session.summary,
+            summary=self._conversation_context(session),
             state=state,
             clarification=clarification,
         )
@@ -253,6 +253,12 @@ class ConversationMemoryService:
         return any(
             term in normalized for term in ("venda", "faturamento", "ticket", "compra", "cliente")
         )
+
+    def _conversation_context(self, session: ConversationSession) -> str:
+        parts = [session.summary.strip()] if session.summary.strip() else []
+        for turn in session.recent_turns:
+            parts.append(f"Usuário: {turn.question}\nTerbie: {turn.answer}")
+        return "\n\n".join(parts)[-6000:]
 
     def _normalize(self, text: str) -> str:
         value = "".join(

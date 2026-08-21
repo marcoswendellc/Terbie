@@ -16,6 +16,8 @@ Use apenas:
 - knowledge_context
 - schema_context
 - catalog_context
+- conversation_summary, que contém as mensagens anteriores da mesma sessão
+- session_state
 
 Retorne somente JSON válido compatível com AnalyticalHypothesis:
 
@@ -40,6 +42,12 @@ Regras:
 - Se houver ambiguidade, reduzir confidence.
 - Nunca criar colunas inexistentes.
 - Nunca criar valores não presentes no contexto.
+- Interprete a pergunta atual como continuação da conversa quando necessário.
+- Resolva pronomes, elipses, correções e referências como "o primeiro", "campanha 2",
+  "e a próxima?" ou "e aquela?" usando conversation_summary.
+- Quando a pergunta atual omitir o objetivo, herde da troca imediatamente anterior
+  apenas o que for necessário para compreendê-la.
+- Não confunda posições de rankings anteriores com nomes ou códigos armazenados na base.
 - Nunca responder em linguagem natural.
 - Identificar filtros explícitos antes de definir agrupamentos.
 - Quando o usuário disser "na campanha X", "na promoção X" ou

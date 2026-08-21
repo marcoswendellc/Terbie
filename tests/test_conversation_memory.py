@@ -131,6 +131,26 @@ def test_old_turns_are_summarized_and_recent_history_is_bounded() -> None:
     assert "Pergunta 1" in session.summary
 
 
+def test_context_sent_to_ai_contains_recent_questions_and_answers() -> None:
+    memory = _memory()
+    _record(
+        memory,
+        session_id="history",
+        question="Qual o top 10 de campanhas em 2026?",
+        answer="1. Campanha A\n2. Campanha B",
+        entity="campanha",
+        data={"nm_promocao": "Campanha A"},
+    )
+
+    result = memory.contextualize(
+        session_id="history",
+        question="E em qual shopping ocorreu a segunda?",
+    )
+
+    assert "Usuário: Qual o top 10 de campanhas em 2026?" in result.summary
+    assert "Terbie: 1. Campanha A\n2. Campanha B" in result.summary
+
+
 def test_correction_asking_only_for_best_reuses_previous_question() -> None:
     memory = _memory()
     _record(

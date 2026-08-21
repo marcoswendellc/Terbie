@@ -23,6 +23,7 @@ class NarrativeContextBuilder:
             warnings=execution_result.warnings,
             intent=getattr(request.execution_plan, "intent", None),
             insight_result=request.insight_result,
+            conversation_context=request.conversation_context,
             execution_metadata={
                 **execution_result.metadata,
                 "rows_returned": execution_result.metadata.get(

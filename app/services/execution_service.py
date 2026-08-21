@@ -214,6 +214,7 @@ class ExecutionService:
                 semantic_resolution=semantic_resolution,
                 execution_plan=planner_response.plan,
                 insight_result=insight_result,
+                conversation_context=memory_context.summary if memory_context else "",
             ),
         )
 
