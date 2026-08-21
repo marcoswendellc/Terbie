@@ -96,22 +96,12 @@ class TerbieNarrator:
                 metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
             )
 
-        if self._requires_exact_ranking(context):
-            strategy = self._strategy_for(context)
-            return NarratorResponse(
-                answer=strategy.answer(context),
-                summary=None,
-                highlights=[],
-                warnings=context.warnings,
-                metadata={
-                    **self._metadata(context),
-                    "narrative_provider": "deterministic_ranking",
-                },
-            )
-
         if self._intelligent_provider is not None:
             intelligent = self._intelligent_provider.generate(context)
-            if intelligent is not None:
+            if intelligent is not None and self._intelligent_is_grounded(
+                context=context,
+                answer=intelligent.answer,
+            ):
                 return NarratorResponse(
                     answer=intelligent.answer,
                     summary=intelligent.summary,
@@ -121,6 +111,18 @@ class TerbieNarrator:
                     ),
                     warnings=context.warnings,
                     metadata={**self._metadata(context), "narrative_provider": "gemini"},
+                )
+            if context.intent == "ranking":
+                strategy = self._strategy_for(context)
+                return NarratorResponse(
+                    answer=strategy.answer(context),
+                    summary=None,
+                    highlights=[],
+                    warnings=context.warnings,
+                    metadata={
+                        **self._metadata(context),
+                        "narrative_provider": "deterministic_ranking",
+                    },
                 )
 
         if context.insight_result is not None:
@@ -270,6 +272,23 @@ class TerbieNarrator:
     def _requires_exact_ranking(self, context) -> bool:
         """Prevent a generative narrator from changing calculated rankings."""
         return context.intent == "ranking" and context.rows_returned > 1
+
+    def _intelligent_is_grounded(self, *, context, answer: str) -> bool:
+        if context.intent != "ranking" or not context.dimension_columns:
+            return True
+
+        dimension = context.dimension_columns[0]
+        entities = [
+            str(row.get(dimension, "")).strip()
+            for row in context.data
+            if str(row.get(dimension, "")).strip()
+        ]
+        if not entities:
+            return True
+
+        normalized_answer = self._normalize(answer)
+        positions = [normalized_answer.find(self._normalize(entity)) for entity in entities]
+        return all(position >= 0 for position in positions) and positions == sorted(positions)
 
     def _metadata(self, context) -> dict[str, object]:
         metadata: dict[str, object] = {

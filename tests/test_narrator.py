@@ -95,6 +95,41 @@ class FakeIntelligentProvider(BaseNarrativeProvider):
         )
 
 
+class ValidRankingProvider(BaseNarrativeProvider):
+    def generate(self, context):
+        return IntelligentNarrative(answer="1. Loja A — R$ 300,00\n2. Loja B — R$ 200,00")
+
+
+def test_intelligent_provider_decides_ranking_presentation_when_grounded() -> None:
+    narrator = TerbieNarrator(
+        context_builder=NarrativeContextBuilder(),
+        formatter=NarrativeFormatter(),
+        intelligent_provider=ValidRankingProvider(),
+    )
+    execution_result = ExecutionResult(
+        data=[
+            {"loja": "Loja A", "faturamento": 300.0},
+            {"loja": "Loja B", "faturamento": 200.0},
+        ],
+        metadata={},
+        statistics={},
+        warnings=[],
+        execution_time=0.01,
+        rows_returned=2,
+    )
+
+    response = narrator.narrate(
+        NarratorRequest(
+            question="Qual o top 2 de lojas?",
+            execution_result=execution_result,
+            execution_plan=ExecutionPlan(intent="ranking"),
+        ),
+    )
+
+    assert response.metadata["narrative_provider"] == "gemini"
+    assert response.answer.startswith("1. Loja A")
+
+
 def test_intelligent_narrative_is_used_after_execution() -> None:
     narrator = TerbieNarrator(
         context_builder=NarrativeContextBuilder(),
