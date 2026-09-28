@@ -1,10 +1,15 @@
 from typing import Any
 
 from app.catalog.data_catalog import DataCatalog
+from app.compiler.analytical_planner import AnalyticalPlanner
 from app.compiler.compiler import TerbieCompiler
+from app.compiler.execution_plan_builder import ExecutionPlanBuilder
+from app.compiler.hypothesis_builder import HypothesisBuilder
 from app.compiler.models import CompilerRequest, CompilerResponse
 from app.knowledge.models import KnowledgeContext
 from app.planner.models import PlannerResponse, PlanValidationResult
+from app.planner.optimizer import PlanOptimizer
+from app.planner.validator import PlanValidator
 from app.semantic.models import SemanticResolution
 
 
@@ -13,6 +18,19 @@ class PlannerService:
 
     def __init__(self, compiler: TerbieCompiler) -> None:
         self._compiler = compiler
+
+    @classmethod
+    def deterministic(cls) -> "PlannerService":
+        """Local preflight uses the canonical compiler without another model call."""
+        return cls(
+            compiler=TerbieCompiler(
+                hypothesis_builder=HypothesisBuilder(),
+                analytical_planner=AnalyticalPlanner(),
+                execution_plan_builder=ExecutionPlanBuilder(),
+                validator=PlanValidator(),
+                optimizer=PlanOptimizer(),
+            )
+        )
 
     def create_draft_plan(
         self,

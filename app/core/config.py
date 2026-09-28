@@ -26,6 +26,16 @@ class Settings(BaseSettings):
     gemini_model: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL")
     gemini_timeout_ms: int = Field(default=15000, ge=10000, alias="GEMINI_TIMEOUT_MS")
     reasoning_provider: str = Field(default="mock", alias="REASONING_PROVIDER")
+    conversational_analysis_enabled: bool = Field(
+        default=True, alias="CONVERSATIONAL_ANALYSIS_ENABLED"
+    )
+    conversation_max_analyses: int = Field(default=3, ge=1, le=3, alias="CONVERSATION_MAX_ANALYSES")
+    conversation_budget_seconds: float = Field(
+        default=60,
+        gt=0,
+        le=300,
+        alias="CONVERSATION_BUDGET_SECONDS",
+    )
     default_datasource: str = Field(default="google_sheets", alias="DEFAULT_DATASOURCE")
     default_table: str = Field(default="Dados_copiloto", alias="DEFAULT_TABLE")
     blocked_tables: str = Field(
@@ -42,7 +52,9 @@ class Settings(BaseSettings):
     memory_sqlite_path: str = Field(default=".terbie/memory.db", alias="MEMORY_SQLITE_PATH")
     local_data_path: str | None = Field(default=None, alias="LOCAL_DATA_PATH")
     auth_required: bool = Field(default=False, alias="AUTH_REQUIRED")
-    session_secret: SecretStr = Field(default=SecretStr("local-development-only"), alias="SESSION_SECRET")
+    session_secret: SecretStr = Field(
+        default=SecretStr("local-development-only"), alias="SESSION_SECRET"
+    )
     session_ttl_seconds: int = Field(default=28800, ge=300, alias="SESSION_TTL_SECONDS")
     allowed_shoppings: str = Field(default="", alias="ALLOWED_SHOPPINGS")
 

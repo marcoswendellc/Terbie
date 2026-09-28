@@ -6,23 +6,27 @@ from time import monotonic
 
 import pandas as pd
 
+from app.conversation.budget import remaining_timeout
+from app.conversation.director import ConversationDirector, schema_context
 from app.core.config import Settings
 from app.core.exceptions import ConfigurationError, DataSourceError
 from app.executor.executor import TerbieExecutor
+from app.governance.policy import DataGovernancePolicy
 from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
-from app.governance.policy import DataGovernancePolicy
 from app.knowledge.models import KnowledgeContext
 from app.memory.conversation import ConversationMemoryService
+from app.memory.models import ContextualQuestion
 from app.narrator.models import ExecuteResponse, NarratorRequest
 from app.planner.models import ExecutionPlan
+from app.planner.validator import PlanValidator
 from app.query_plan.models import MultiQueryPlan, QueryPlan
 from app.query_plan.multi import MultiQueryPlanner
+from app.services.analysis_verifier import AnalysisVerifier
 from app.services.data_service import DataService
 from app.services.narrator_service import NarratorService
 from app.services.planner_service import PlannerService
 from app.services.semantic_service import SemanticService
-from app.services.analysis_verifier import AnalysisVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +50,7 @@ class ExecutionService:
         conversation_memory: ConversationMemoryService | None = None,
         analysis_verifier: AnalysisVerifier | None = None,
         governance_policy: DataGovernancePolicy | None = None,
+        conversation_director: ConversationDirector | None = None,
     ) -> None:
         self._settings = settings
         self._semantic_service = semantic_service
@@ -56,13 +61,12 @@ class ExecutionService:
         self._intent_guard = intent_guard or IntentGuard()
         self._insight_generator = insight_generator or InsightGenerator()
         self._conversation_memory = conversation_memory
+        self._conversation_director = conversation_director
         self._analysis_verifier = analysis_verifier or AnalysisVerifier()
         self._governance_policy = governance_policy or DataGovernancePolicy(
             minimum_group_size=settings.minimum_analytical_group_size,
             allowed_shoppings={
-                item.strip()
-                for item in settings.allowed_shoppings.split(",")
-                if item.strip()
+                item.strip() for item in settings.allowed_shoppings.split(",") if item.strip()
             },
         )
         self._dataframe_cache: tuple[float, dict[str, pd.DataFrame]] | None = None
@@ -75,6 +79,145 @@ class ExecutionService:
         question: str,
         knowledge_context: KnowledgeContext,
         session_id: str | None = None,
+    ) -> ExecuteResponse:
+        if self._conversation_director is None:
+            return self._execute_question(
+                question=question,
+                knowledge_context=knowledge_context,
+                session_id=session_id,
+            )
+        session = (
+            self._conversation_memory.get(session_id)
+            if self._conversation_memory is not None and session_id
+            else None
+        )
+        selected, clarification = (None, None)
+        if session is not None:
+            selected, clarification = self._conversation_memory.resolve_suggestion(
+                session=session,
+                question=question,
+            )
+        if clarification:
+            # Keep the options available while the user chooses.
+            return self._routed_response(
+                question,
+                response=clarification,
+                response_type="clarification_required",
+            )
+        resolved_question = selected or question
+        guard = self._intent_guard.evaluate(resolved_question)
+        if guard.should_stop and guard.intent != "clarification":
+            return self._routed_response(
+                question,
+                response=guard.response or "",
+                response_type=guard.intent,
+            )
+        dataframes = self._load_dataframes()
+        response = self._conversation_director.run(
+            question=resolved_question,
+            session=session,
+            schemas=schema_context(dataframes),
+            knowledge=knowledge_context.model_dump(mode="json"),
+            execute=lambda analytical_question: self._execute_question(
+                question=analytical_question,
+                knowledge_context=knowledge_context,
+                dataframes=dataframes,
+                allow_multi=False,
+            ),
+            validate_suggestion=lambda follow_up: self._can_execute_suggestion(
+                follow_up,
+                dataframes=dataframes,
+                knowledge_context=knowledge_context,
+            ),
+        )
+        if response is None:
+            response = self._execute_question(
+                question=question,
+                knowledge_context=knowledge_context,
+                session_id=session_id,
+                dataframes=dataframes,
+            )
+            return response.model_copy(
+                update={
+                    "warnings": [
+                        *response.warnings,
+                        "A direção conversacional ficou indisponível; usei o planejamento padrão.",
+                    ]
+                }
+            )
+        response = response.model_copy(update={"question": question})
+        if session is not None:
+            questions = response.metadata.get("analysis_questions", [])
+            context = ContextualQuestion(
+                original_question=question,
+                rewritten_question="; ".join(questions) or resolved_question,
+                summary=session.summary,
+                state=session.state,
+            )
+            saved = self._conversation_memory.record(
+                session_id=session_id,
+                context=context,
+                answer=response.answer,
+                data=response.data,
+                suggestions=response.suggestions,
+                analysis_questions=questions,
+                goal=response.metadata.get("goal", ""),
+            )
+            response = response.model_copy(
+                update={
+                    "metadata": {
+                        **response.metadata,
+                        "session_id": session_id,
+                        "session_state": saved.state.model_dump(mode="json"),
+                    }
+                }
+            )
+        return response
+
+    def _can_execute_suggestion(
+        self,
+        question: str,
+        *,
+        dataframes: dict[str, pd.DataFrame],
+        knowledge_context: KnowledgeContext,
+    ) -> bool:
+        try:
+            if self._intent_guard.evaluate(question).should_stop:
+                return False
+            resolution = self._semantic_service.resolve(question=question)
+            draft = PlannerService.deterministic().create_draft_plan(
+                question=question,
+                semantic_resolution=resolution,
+                knowledge_context=knowledge_context,
+            )
+            if not draft.plan.operations or not PlanValidator().validate(draft.plan).is_valid:
+                return False
+            required = self._required_columns(plan=draft.plan, knowledge_context=knowledge_context)
+            required.update(
+                self._resolve_required_source_column(
+                    item.canonical, knowledge_context=knowledge_context
+                )
+                for item in resolution.mapped_columns
+                if item.role == "dimension"
+                and any(
+                    dimension.name == item.canonical for dimension in knowledge_context.dimensions
+                )
+            )
+            return bool(required) and any(
+                required.issubset(frame.columns) for frame in dataframes.values()
+            )
+        except Exception:
+            logger.warning("Follow-up preflight failed")
+            return False
+
+    def _execute_question(
+        self,
+        *,
+        question: str,
+        knowledge_context: KnowledgeContext,
+        session_id: str | None = None,
+        dataframes: dict[str, pd.DataFrame] | None = None,
+        allow_multi: bool = True,
     ) -> ExecuteResponse:
         original_question = question
         memory_context = None
@@ -112,30 +255,64 @@ class ExecutionService:
                 response_type=intent_guard_result.intent,
             )
 
-        multi_query_plan = MultiQueryPlanner(
-            semantic_service=self._semantic_service,
-            planner_service=self._planner_service,
-        ).build(question=question, knowledge_context=knowledge_context)
+        multi_query_plan = (
+            MultiQueryPlanner(
+                semantic_service=self._semantic_service,
+                planner_service=self._planner_service,
+            ).build(question=question, knowledge_context=knowledge_context)
+            if allow_multi
+            else None
+        )
         if multi_query_plan is not None:
-            return self._execute_multi_query(
+            response = self._execute_multi_query(
                 multi_query_plan=multi_query_plan,
                 knowledge_context=knowledge_context,
             )
+            if self._conversation_memory is not None and session_id and memory_context:
+                self._conversation_memory.record(
+                    session_id=session_id,
+                    context=memory_context,
+                    answer=response.answer,
+                    data=response.data,
+                    analysis_questions=[item.question for item in multi_query_plan.plans],
+                )
+                response = response.model_copy(
+                    update={
+                        "question": original_question,
+                        "metadata": {**response.metadata, "session_id": session_id},
+                    }
+                )
+            return response
 
         semantic_resolution = self._semantic_service.resolve(question=question)
+        remaining_timeout(1)
         planner_response = self._planner_service.create_draft_plan(
             question=question,
             semantic_resolution=semantic_resolution,
             knowledge_context=knowledge_context,
             conversation_summary=memory_context.summary if memory_context else "",
             session_state=memory_context.state.model_dump(mode="json") if memory_context else {},
+            schema={"tables": schema_context(dataframes)} if dataframes is not None else None,
         )
-        dataframes = self._load_dataframes()
+        if not allow_multi and (
+            not planner_response.plan.operations
+            or not PlanValidator().validate(planner_response.plan).is_valid
+        ):
+            return self._routed_response(
+                original_question,
+                response=(
+                    "Não encontrei um plano válido para esse pedido. "
+                    "Especifique a métrica e o recorte."
+                ),
+                response_type="analysis_failed",
+            )
+        dataframes = dataframes if dataframes is not None else self._load_dataframes()
         dataframe = self._select_dataframe(
             dataframes=dataframes,
             plan=planner_response.plan,
             knowledge_context=knowledge_context,
         )
+        remaining_timeout(1)
         result = self._executor.execute(
             dataframe=dataframe,
             plan=planner_response.plan,
@@ -183,6 +360,17 @@ class ExecutionService:
                 ),
             },
         )
+        if verification.warnings:
+            return ExecuteResponse(
+                question=original_question,
+                answer=(
+                    "Não consegui validar esta análise. "
+                    "Tente especificar a métrica e o recorte desejados."
+                ),
+                data=[],
+                metadata={**enriched_result.metadata, "response_type": "analysis_failed"},
+                warnings=enriched_result.warnings,
+            )
         governed_rows = self._sanitize_rows(enriched_result.data)
         governance_warnings = (
             ["Parte do resultado foi suprimida pela política de governança."]
@@ -207,6 +395,7 @@ class ExecutionService:
             and not insight_result.recommendations
         ):
             insight_result = None
+        remaining_timeout(1)
         narrator_response = self._narrator_service.narrate(
             NarratorRequest(
                 question=question,
@@ -343,6 +532,23 @@ class ExecutionService:
                 },
             },
         )
+        verification = self._analysis_verifier.verify(plan=plan, result=enriched_result)
+        if verification.warnings:
+            raise ValueError("The compiled query failed analytical verification")
+        governed_rows = self._sanitize_rows(enriched_result.data)
+        enriched_result = enriched_result.model_copy(
+            update={
+                "data": governed_rows,
+                "rows_returned": len(governed_rows),
+                "metadata": {
+                    **enriched_result.metadata,
+                    "verification": {
+                        "passed": verification.passed,
+                        "checks": verification.checks,
+                    },
+                },
+            }
+        )
         narrator_response = self._narrator_service.narrate(
             NarratorRequest(
                 question=query_plan.question,
@@ -436,7 +642,8 @@ class ExecutionService:
                     raise
                 _, stale = self._dataframe_cache
                 self._data_cache_warning = (
-                    "A fonte Google Sheets ficou indisponível; a resposta usou o último cache válido."
+                    "A fonte Google Sheets ficou indisponível; "
+                    "a resposta usou o último cache válido."
                 )
                 return {name: frame.copy() for name, frame in stale.items()}
         if ttl > 0:

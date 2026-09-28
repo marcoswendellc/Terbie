@@ -41,10 +41,18 @@ Narrator
 
 A LLM sera apenas uma implementacao de `ReasoningProvider`.
 
-Ela podera apoiar raciocinio e planejamento, mas nao tera acesso a dados brutos,
-credenciais, DataFrames completos, tabelas inteiras ou resultados reais de
-consulta. A LLM devera trabalhar somente com pergunta, schemas, catalogo,
-semantica, conhecimento de negocio e contratos declarativos.
+Ela pode apoiar raciocínio e planejamento sem acesso a dados brutos, credenciais,
+DataFrames ou tabelas completas. O planejamento usa pergunta, schemas, catálogo,
+semântica, conhecimento de negócio e contratos declarativos. A direção da conversa,
+a narrativa e as sugestões podem receber resultados calculados e sanitizados e o
+histórico dessas respostas. Governança e verificação precedem a narrativa.
+
+Com Gemini, `/execute` usa um diretor conversacional para escolher até três análises
+necessárias à pergunta atual e apresentar suas premissas. Depois, oferece até duas
+sugestões compatíveis com o schema, que só são executadas após escolha do usuário.
+As perguntas resolvidas e sugestões são registradas por sessão. O prazo de 60 segundos
+é cooperativo: impede iniciar novas etapas, sem interromper operações pandas em curso.
+Sem Gemini ou em falha de direção, permanece o fluxo analítico tradicional.
 
 ## Principio Central
 

@@ -95,6 +95,7 @@ KB_DIMENSIONS: list[KBDimension] = [
         synonyms=[
             "faixa etaria",
             "faixas etarias",
+            "perfil etario",
             "publico jovem",
             "publico adulto",
             "mais jovem",

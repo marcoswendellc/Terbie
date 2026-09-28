@@ -158,7 +158,7 @@ function conversationSessionId() {
   return sessionId;
 }
 
-async function postQuestion(endpoint, question) {
+async function postQuestion(endpoint, question, sessionId = conversationSessionId()) {
   const token = sessionStorage.getItem(TOKEN_KEY);
   const response = await fetch(endpoint, {
     method: "POST",
@@ -166,7 +166,7 @@ async function postQuestion(endpoint, question) {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ question, session_id: conversationSessionId() }),
+    body: JSON.stringify({ question, session_id: sessionId }),
   });
 
   if (!response.ok) {
@@ -213,22 +213,41 @@ function uniqueHighlights(answer, highlights) {
   });
 }
 
-function usefulSuggestions() {
-  return [
-    "Filtrar por periodo",
-    "Comparar itens",
-    "Detalhar por categoria",
-    "Ver faturamento, quantidade de notas e ticket medio",
-  ];
-}
-
-function appendSuggestions(lines) {
-  lines.push("", "Voce tambem pode aprofundar a analise:");
-  usefulSuggestions().forEach((suggestion) => lines.push(`- ${suggestion}`));
-}
-
 function formatExecuteResponse(payload) {
-  return payload.answer || "Analise concluida.";
+  const lines = [payload.answer || "Não consegui concluir a análise."];
+  if (Array.isArray(payload.assumptions) && payload.assumptions.length) {
+    lines.push("", `Recorte considerado: ${payload.assumptions.join(" ")}`);
+  }
+  if (payload.metadata?.pending_analyses > 0) {
+    lines.push("", "Parte da análise ficou pendente pelo limite deste turno. Você pode pedir para continuar com um recorte menor.");
+  }
+  return lines.join("\n");
+}
+
+function appendFollowUpSuggestions(message, payload) {
+  const suggestions = Array.isArray(payload.suggestions) ? payload.suggestions.slice(0, 2) : [];
+  if (!suggestions.length) return;
+  const block = document.createElement("div");
+  block.className = "follow-up-suggestions";
+  const label = document.createElement("p");
+  label.textContent = "Podemos aprofundar:";
+  block.appendChild(label);
+  suggestions.forEach((suggestion) => {
+    if (!suggestion.label || !suggestion.question) return;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "follow-up-button";
+    button.textContent = suggestion.label;
+    button.title = suggestion.question;
+    button.addEventListener("click", () => {
+      if (messageInput.disabled || button.disabled) return;
+      messageInput.value = suggestion.question;
+      chatForm.requestSubmit();
+    });
+    block.appendChild(button);
+  });
+  message.querySelector(".message-bubble").appendChild(block);
+  scrollConversation();
 }
 
 function formatDraftResponse(payload) {
@@ -260,19 +279,17 @@ function formatDraftResponse(payload) {
   if (operations) {
     lines.push(`Operacoes: ${operations}`);
   }
-  appendSuggestions(lines);
-
   return lines.join("\n");
 }
 
-async function askBackend(question) {
+async function askBackend(question, sessionId = conversationSessionId()) {
   try {
-    const executionPayload = await postQuestion(EXECUTE_ENDPOINT, question);
-    return formatExecuteResponse(executionPayload);
+    const executionPayload = await postQuestion(EXECUTE_ENDPOINT, question, sessionId);
+    return executionPayload;
   } catch (executeError) {
     try {
-      const draftPayload = await postQuestion(DRAFT_ENDPOINT, question);
-      return `${formatDraftResponse(draftPayload)}\n\nNao executei a consulta completa porque a etapa de execucao retornou: ${executeError.message}`;
+      const draftPayload = await postQuestion(DRAFT_ENDPOINT, question, sessionId);
+      return {answer: draftPayload.response || "Consegui interpretar a pergunta, mas não concluir a consulta. Tente novamente ou especifique um recorte menor.", suggestions: []};
     } catch (draftError) {
       throw new Error(
         `Nao consegui conectar a conversa ao backend agora. Execucao: ${executeError.message}. Plano: ${draftError.message}.`
@@ -335,14 +352,20 @@ chatForm.addEventListener("submit", (event) => {
   }
 
   appendMessage("user", question);
+  messages.querySelectorAll(".follow-up-button").forEach((button) => { button.disabled = true; });
   messageInput.value = "";
   messageInput.style.height = "auto";
   messageInput.disabled = true;
   chatForm.querySelector("button").disabled = true;
   const pendingMessage = appendMessage("app", "Consultando...");
+  const requestSession = conversationSessionId();
 
-  askBackend(question)
-    .then((answer) => updateMessage(pendingMessage, answer))
+  askBackend(question, requestSession)
+    .then((payload) => {
+      if (requestSession !== conversationSessionId()) return;
+      updateMessage(pendingMessage, formatExecuteResponse(payload));
+      appendFollowUpSuggestions(pendingMessage, payload);
+    })
     .catch((error) =>
       updateMessage(
         pendingMessage,

@@ -2,6 +2,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.conversation.models import FollowUpSuggestion
+
 
 class NarratorRequest(BaseModel):
     question: str
@@ -52,5 +54,7 @@ class ExecuteResponse(BaseModel):
     data: list[dict[str, Any]]
     metadata: dict[str, Any] = Field(default_factory=dict)
     warnings: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    suggestions: list[FollowUpSuggestion] = Field(default_factory=list, max_length=2)
 
     model_config = ConfigDict(frozen=True)

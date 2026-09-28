@@ -4,6 +4,7 @@ import unicodedata
 from datetime import UTC, datetime
 from typing import Any
 
+from app.conversation.models import FollowUpSuggestion
 from app.memory.base import BaseMemory
 from app.memory.models import (
     ContextualQuestion,
@@ -49,8 +50,26 @@ class ConversationMemoryService:
         session = self.get(session_id)
         state = session.state
         normalized = self._normalize(question)
+        selected, clarification = self.resolve_suggestion(session=session, question=question)
+        if selected or clarification:
+            return ContextualQuestion(
+                original_question=question,
+                rewritten_question=selected or question,
+                summary=self._conversation_context(session),
+                state=state,
+                clarification=clarification,
+            )
         rewritten = question.strip()
         unresolved: list[str] = []
+
+        ranked_reference = self._resolve_ranked_reference(
+            question=question,
+            normalized=normalized,
+            session=session,
+        )
+        if ranked_reference is not None:
+            rewritten = ranked_reference
+            normalized = self._normalize(rewritten)
 
         # Corrections such as "quero saber a melhor" refer to the previous
         # analytical question, not to the aggregate shown in the last answer.
@@ -131,6 +150,9 @@ class ConversationMemoryService:
         answer: str,
         plan: Any | None = None,
         data: list[dict[str, Any]] | None = None,
+        suggestions: list[FollowUpSuggestion] | None = None,
+        analysis_questions: list[str] | None = None,
+        goal: str = "",
     ) -> ConversationSession:
         session = self.get(session_id)
         updates: dict[str, Any] = {
@@ -200,10 +222,45 @@ class ConversationMemoryService:
             state=new_state,
             recent_turns=recent,
             summary=summary,
+            goal=goal,
+            analysis_questions=analysis_questions or [context.rewritten_question],
+            suggestions=(suggestions or [])[:2],
             updated_at=datetime.now(UTC),
         )
         self._store.save(session_id, saved.model_dump(mode="json"))
         return saved
+
+    def resolve_suggestion(
+        self, *, session: ConversationSession, question: str,
+    ) -> tuple[str | None, str | None]:
+        """Resolve short choices only; explicit new filters belong to the planner."""
+        if not session.suggestions:
+            return None, None
+        normalized = self._normalize(question).strip(" .!?;")
+        ordinals = {"1": 0, "a primeira": 0, "primeira": 0,
+                    "2": 1, "a segunda": 1, "segunda": 1}
+        if normalized in ordinals:
+            index = ordinals[normalized]
+            if index < len(session.suggestions):
+                return session.suggestions[index].question, None
+            return None, "Essa opção não está disponível. Qual aprofundamento você prefere?"
+        if normalized in {"sim", "pode", "pode sim", "continue", "quero"}:
+            if len(session.suggestions) == 1:
+                return session.suggestions[0].question, None
+            return None, "Qual aprofundamento você prefere: " + " ou ".join(
+                item.label for item in session.suggestions
+            ) + "?"
+        stopwords = {"o", "a", "os", "as", "de", "do", "da", "dos", "das", "por"}
+        tokens = set(normalized.split()) - stopwords
+        matches = [
+            item for item in session.suggestions
+            if tokens and tokens.issubset(set(self._normalize(item.label).split()) - stopwords)
+        ]
+        if len(matches) == 1:
+            return matches[0].question, None
+        if len(matches) > 1:
+            return None, "Qual destas opções: " + " ou ".join(item.label for item in matches) + "?"
+        return None, None
 
     def _explicit_mentions(self, question: str) -> set[str]:
         normalized = self._normalize(question)
@@ -268,6 +325,51 @@ class ConversationMemoryService:
                     + json.dumps(turn.result_data, ensure_ascii=False, default=str)
                 )
         return "\n\n".join(parts)[-6000:]
+
+    def _resolve_ranked_reference(
+        self,
+        *,
+        question: str,
+        normalized: str,
+        session: ConversationSession,
+    ) -> str | None:
+        field_by_label = {
+            "campanha": "nm_promocao",
+            "promocao": "nm_promocao",
+            "loja": "nm_fantasa",
+            "segmento": "nm_segmento",
+            "shopping": "nm_empreendimento",
+            "empreendimento": "nm_empreendimento",
+        }
+        match = re.search(
+            r"\b(campanha|promocao|loja|segmento|shopping|empreendimento)\s+(\d+)\b",
+            normalized,
+        )
+        if match is None:
+            return None
+
+        label, raw_position = match.groups()
+        position = int(raw_position)
+        field = field_by_label[label]
+        for turn in reversed(session.recent_turns):
+            if position < 1 or position > len(turn.result_data):
+                continue
+            row = turn.result_data[position - 1]
+            value = str(row.get(field) or "").strip()
+            if not value:
+                continue
+            rewritten = re.sub(
+                rf"\b{re.escape(label)}\s+{raw_position}\b",
+                f"{label} {value}",
+                question,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+            shopping = str(row.get("nm_empreendimento") or "").strip()
+            if shopping and field != "nm_empreendimento":
+                rewritten += f"; referência do resultado anterior no shopping {shopping}"
+            return rewritten
+        return None
 
     def _normalize(self, text: str) -> str:
         value = "".join(

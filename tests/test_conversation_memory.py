@@ -152,6 +152,39 @@ def test_context_sent_to_ai_contains_recent_questions_and_answers() -> None:
     assert 'Resultado estruturado: [{"nm_promocao": "Campanha A"}]' in result.summary
 
 
+def test_ranked_reference_is_grounded_from_structured_conversation_result() -> None:
+    memory = _memory()
+    context = ContextualQuestion(
+        original_question="Qual o top 3 de campanhas?",
+        rewritten_question="Qual o top 3 de campanhas?",
+        summary="",
+        state=memory.get("ranked-reference").state,
+    )
+    memory.record(
+        session_id="ranked-reference",
+        context=context,
+        answer="1. A\n2. B\n3. C",
+        plan=ExecutionPlan(
+            intent="ranking",
+            entities=[PlanEntity(name="campanha")],
+            metrics=[PlanMetric(name="faturamento")],
+        ),
+        data=[
+            {"nm_promocao": "Campanha A", "nm_empreendimento": "Shopping A"},
+            {"nm_promocao": "Campanha B", "nm_empreendimento": "Shopping B"},
+            {"nm_promocao": "Campanha C", "nm_empreendimento": "Shopping C"},
+        ],
+    )
+
+    result = memory.contextualize(
+        session_id="ranked-reference",
+        question="Em que shopping ocorreu a campanha 2?",
+    )
+
+    assert "campanha Campanha B" in result.rewritten_question
+    assert "shopping Shopping B" in result.rewritten_question
+
+
 def test_correction_asking_only_for_best_reuses_previous_question() -> None:
     memory = _memory()
     _record(

@@ -88,6 +88,10 @@ class TerbieCompiler:
             question=request.question,
             hypothesis=hypothesis,
         )
+        hypothesis = self._normalize_descriptive_location_question(
+            question=request.question,
+            hypothesis=hypothesis,
+        )
         hypothesis = self._apply_entity_resolution(
             question=request.question,
             hypothesis=hypothesis,
@@ -134,6 +138,78 @@ class TerbieCompiler:
             execution_plan=optimized_plan,
             warnings=warnings,
             status="draft_created" if not warnings else "completed_with_warnings",
+        )
+
+    def _normalize_descriptive_location_question(
+        self,
+        *,
+        question: str,
+        hypothesis: AnalyticalHypothesis,
+    ) -> AnalyticalHypothesis:
+        normalized = self._context_resolver._normalize_text(question)
+        shopping_listing = re.search(
+            r"\bquais\s+(?:os\s+)?(?:shoppings|empreendimentos)\b.*"
+            r"\b(?:campanha|promocao)\s+(?:de\s+)?(.+?)(?:\?|$)",
+            normalized,
+        )
+        if shopping_listing is not None:
+            campaign_term = shopping_listing.group(1).strip(" .?!")
+            filters = [
+                filter_item
+                for filter_item in hypothesis.filters
+                if filter_item.get("field") != "nm_promocao"
+            ]
+            filters.append(
+                {
+                    "type": "filter",
+                    "field": "nm_promocao",
+                    "operator": "contains",
+                    "value": campaign_term,
+                    "source": "descriptive_campaign_lookup",
+                }
+            )
+            warnings = [
+                warning
+                for warning in hypothesis.warnings
+                if warning not in {
+                    "Nenhuma métrica identificada.",
+                    "Nenhuma entidade de negócio identificada.",
+                }
+            ]
+            return hypothesis.model_copy(
+                update={
+                    "analysis_type": "list_distinct",
+                    "business_entity": "empreendimento",
+                    "metric": None,
+                    "metrics": [],
+                    "dimensions": ["nm_empreendimento"],
+                    "filters": filters,
+                    "warnings": warnings,
+                },
+            )
+
+        asks_for_location = bool(
+            re.search(r"\b(?:em\s+que|qual)\s+(?:shopping|empreendimento)\b", normalized)
+            or re.search(r"\bonde\s+(?:ocorreu|aconteceu|foi\s+realizada)\b", normalized)
+        )
+        mentions_campaign = bool(re.search(r"\b(?:campanha|promocao)\b", normalized))
+        if not (asks_for_location and mentions_campaign):
+            return hypothesis
+
+        warnings = [
+            warning
+            for warning in hypothesis.warnings
+            if warning != "Nenhuma métrica identificada."
+        ]
+        return hypothesis.model_copy(
+            update={
+                "analysis_type": "list_distinct",
+                "business_entity": "promocao",
+                "metric": None,
+                "metrics": [],
+                "dimensions": ["nm_promocao", "nm_empreendimento"],
+                "warnings": warnings,
+            },
         )
 
     def _normalize_persona_question(

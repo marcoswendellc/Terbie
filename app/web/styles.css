@@ -493,3 +493,34 @@ textarea:focus {
     width: 100%;
   }
 }
+.follow-up-suggestions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.follow-up-suggestions p {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: .9rem;
+}
+
+.follow-up-button {
+  border: 1px solid currentColor;
+  border-radius: 1rem;
+  background: transparent;
+  color: inherit;
+  padding: .5rem .8rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.follow-up-button:hover, .follow-up-button:focus-visible {
+  background: rgba(100, 130, 170, .12);
+}
+
+.follow-up-button:disabled {
+  opacity: .5;
+  cursor: default;
+}

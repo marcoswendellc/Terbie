@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.conversation.models import FollowUpSuggestion
+
 
 class ConversationState(BaseModel):
     campanha: str | None = None
@@ -32,6 +34,9 @@ class ConversationSession(BaseModel):
     state: ConversationState = Field(default_factory=ConversationState)
     recent_turns: list[ConversationTurn] = Field(default_factory=list)
     summary: str = ""
+    goal: str = ""
+    analysis_questions: list[str] = Field(default_factory=list)
+    suggestions: list[FollowUpSuggestion] = Field(default_factory=list, max_length=2)
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 

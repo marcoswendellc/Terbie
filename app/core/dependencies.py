@@ -4,6 +4,8 @@ from app.compiler.compiler import TerbieCompiler
 from app.compiler.execution_plan_builder import ExecutionPlanBuilder
 from app.compiler.hypothesis_builder import HypothesisBuilder
 from app.context_resolution.context_resolver import ContextResolver
+from app.conversation.director import ConversationDirector
+from app.conversation.gemini import GeminiConversationProvider
 from app.core.config import Settings, get_settings
 from app.datasources.factory import DataSourceFactory
 from app.datasources.google_sheets import GoogleSheetsDataSource
@@ -16,9 +18,9 @@ from app.executor.registry import OperationRegistry
 from app.insights.generator import InsightGenerator
 from app.intent_guard.intent_guard import IntentGuard
 from app.knowledge.knowledge_service import KnowledgeService
+from app.memory.base import BaseMemory
 from app.memory.conversation import ConversationMemoryService
 from app.memory.in_memory import InMemorySessionStore
-from app.memory.base import BaseMemory
 from app.memory.sqlite import SQLiteSessionStore
 from app.metrics.metric_resolver import MetricResolver
 from app.narrator.context_builder import NarrativeContextBuilder
@@ -262,8 +264,23 @@ def provide_narrator_service() -> NarratorService:
 
 
 def provide_execution_service() -> ExecutionService:
+    settings = provide_settings()
+    director = None
+    if (
+        settings.conversational_analysis_enabled
+        and settings.reasoning_provider.strip().lower() == "gemini"
+    ):
+        director = ConversationDirector(
+            GeminiConversationProvider(
+                api_key=settings.gemini_api_key,
+                model=settings.gemini_model,
+                timeout_ms=settings.gemini_timeout_ms,
+            ),
+            max_analyses=settings.conversation_max_analyses,
+            budget_seconds=settings.conversation_budget_seconds,
+        )
     return ExecutionService(
-        settings=provide_settings(),
+        settings=settings,
         semantic_service=provide_semantic_service(),
         planner_service=provide_planner_service(),
         data_service=provide_data_service(),
@@ -272,6 +289,7 @@ def provide_execution_service() -> ExecutionService:
         intent_guard=provide_intent_guard(),
         insight_generator=provide_insight_generator(),
         conversation_memory=provide_conversation_memory(),
+        conversation_director=director,
     )
 
 

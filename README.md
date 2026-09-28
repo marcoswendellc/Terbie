@@ -28,6 +28,17 @@ Documentos principais:
 
 ## Configuração operacional
 
+Com `REASONING_PROVIDER=gemini`, o chat escolhe até três análises para responder
+à pergunta e oferece até duas sugestões de aprofundamento. O gestor pode clicar
+em uma sugestão, responder pelo rótulo/ordinal ou redirecionar a conversa por texto.
+As premissas aparecem abaixo da resposta. Isso requer a configuração Gemini já
+usada pelo projeto; sem ela permanece o planejamento tradicional.
+
+`CONVERSATIONAL_ANALYSIS_ENABLED=false` desativa a direção conversacional.
+`CONVERSATION_MAX_ANALYSES` aceita de 1 a 3 (padrão 3), e
+`CONVERSATION_BUDGET_SECONDS` define o prazo cooperativo (padrão 60 segundos).
+O limite impede novas etapas; consultas já iniciadas têm seus próprios timeouts.
+
 ```text
 DATA_CACHE_TTL_SECONDS=60
 MINIMUM_ANALYTICAL_GROUP_SIZE=1

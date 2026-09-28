@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import SecretStr
 
 from app.compiler.models import AnalyticalHypothesis
+from app.conversation.budget import remaining_timeout
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext, ReasoningResult
 from app.reasoning.prompt_renderer import PromptRenderer
@@ -104,8 +105,7 @@ class GeminiReasoningProvider(BaseReasoningProvider):
                 hypothesis=None,
                 raw_response=f"{type(exc).__name__}: {exc}",
                 warnings=[
-                    "Gemini não retornou uma AnalyticalHypothesis válida "
-                    f"({type(exc).__name__}).",
+                    f"Gemini não retornou uma AnalyticalHypothesis válida ({type(exc).__name__}).",
                 ],
                 provider="gemini",
                 model=self._model,
@@ -124,6 +124,7 @@ class GeminiReasoningProvider(BaseReasoningProvider):
     def _generate_text(self, context: ReasoningContext) -> str:
         from google.genai import types
 
+        timeout = remaining_timeout(self._timeout_ms)
         client = self._client or self._create_client()
         prompt = self._prompt_renderer.render(template_path=self._prompt_path, context=context)
         response = client.models.generate_content(
@@ -133,6 +134,10 @@ class GeminiReasoningProvider(BaseReasoningProvider):
                 temperature=0.1,
                 response_mime_type="application/json",
                 response_schema=_HYPOTHESIS_RESPONSE_SCHEMA,
+                http_options=types.HttpOptions(
+                    timeout=timeout,
+                    retry_options=types.HttpRetryOptions(attempts=1),
+                ),
             ),
         )
         text = getattr(response, "text", None)
@@ -162,4 +167,3 @@ class GeminiReasoningProvider(BaseReasoningProvider):
             return fenced_match.group(1).strip()
 
         return stripped
-

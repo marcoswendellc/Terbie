@@ -73,6 +73,35 @@ def test_shopping_context_best_campaign_dimension() -> None:
     )
 
 
+def test_campaign_location_is_descriptive_and_requires_no_numeric_metric() -> None:
+    response = _compile(
+        "Em que shopping ocorreu a campanha Promoção Mães 2026; "
+        "referência do resultado anterior no shopping Shopping Sul?"
+    )
+
+    assert response.hypothesis.analysis_type == "list_distinct"
+    assert response.hypothesis.business_entity == "promocao"
+    assert response.hypothesis.metrics == []
+    assert "Nenhuma métrica identificada." not in response.warnings
+    assert any(operation.type == "select" for operation in response.execution_plan.operations)
+
+
+def test_shoppings_for_named_campaign_use_descriptive_contains_filter() -> None:
+    response = _compile("Quais shoppings fizeram campanha de mães 2026?")
+
+    assert response.hypothesis.analysis_type == "list_distinct"
+    assert response.hypothesis.business_entity == "empreendimento"
+    assert response.hypothesis.metrics == []
+    campaign_filter = _operation(response, "filter", "nm_promocao")
+    assert campaign_filter.parameters["operator"] == "contains"
+    assert campaign_filter.parameters["value"] == "maes 2026"
+    select = next(
+        operation for operation in response.execution_plan.operations
+        if operation.type == "select"
+    )
+    assert select.parameters["fields"] == ["nm_empreendimento"]
+
+
 def test_best_campaign_with_requested_shopping_groups_by_both_dimensions() -> None:
     response = _compile(
         "Qual foi a campanha de maior faturamento e em que shopping ocorreu?"

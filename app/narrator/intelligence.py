@@ -5,6 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
+from app.conversation.budget import remaining_timeout
 from app.narrator.models import NarrativeContext
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,7 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
         try:
             from google.genai import types
 
+            timeout = remaining_timeout(self._timeout_ms)
             client = self._client or self._create_client()
             response = client.models.generate_content(
                 model=self._model,
@@ -55,6 +57,10 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
                     temperature=0.2,
                     response_mime_type="application/json",
                     response_schema=IntelligentNarrative,
+                    http_options=types.HttpOptions(
+                        timeout=timeout,
+                        retry_options=types.HttpRetryOptions(attempts=1),
+                    ),
                 ),
             )
             text = getattr(response, "text", None)
@@ -63,8 +69,7 @@ class GeminiNarrativeProvider(BaseNarrativeProvider):
             return IntelligentNarrative.model_validate_json(text)
         except Exception:
             logger.exception(
-                "Gemini narrative generation failed; using deterministic narrative. "
-                "model=%s",
+                "Gemini narrative generation failed; using deterministic narrative. model=%s",
                 self._model,
             )
             return None

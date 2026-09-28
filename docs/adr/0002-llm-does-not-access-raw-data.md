@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted — esclarecido em 2026-09-28 para narrativa e direção conversacional.
 
 ## Contexto
 
@@ -12,9 +12,16 @@ auditavel.
 
 ## Decisao
 
-A LLM podera receber apenas pergunta, schema, catalogo, resolucao semantica,
-conhecimento de negocio e contratos declarativos. Ela nunca recebera DataFrames,
-tabelas completas, credenciais ou resultados reais.
+A LLM de planejamento recebe pergunta, schema, catálogo, resolução semântica,
+conhecimento de negócio e contratos declarativos. A narrativa, a direção da conversa
+e as sugestões podem receber resultados calculados após verificação e sanitização,
+assim como o histórico dessas respostas. Não recebem DataFrames, tabelas brutas
+completas ou credenciais. A narrativa recebe até 50 linhas calculadas por contexto;
+o diretor usa até 20 linhas de cada turno recente e as sugestões até 50 por análise.
+
+Esta revisão explicita o uso de resultados governados que o narrador já fazia e
+aplica a mesma ordem de governança às consultas compostas. Valores de negócio são
+calculados pelo executor; a LLM escolhe análises e apresenta seus resultados.
 
 ## Consequencias
 
