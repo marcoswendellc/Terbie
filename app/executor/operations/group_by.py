@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from app.core.exceptions import AnalyticalExecutionError
+
 from app.executor.context import ExecutionContext
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
@@ -22,15 +24,13 @@ class GroupByOperation(BaseOperation):
         columns = [context.resolve_dimension_column(field) for field in fields]
         columns = [column for column in columns if column is not None]
         if not columns:
-            context.warnings.append("Operação group_by sem campo definido.")
-            return dataframe
+            raise AnalyticalExecutionError("Operação group_by sem campo definido.")
 
         missing_columns = [column for column in columns if column not in dataframe.columns]
         if missing_columns:
-            context.warnings.append(
+            raise AnalyticalExecutionError(
                 f"Campo de agrupamento não encontrado: {', '.join(missing_columns)}."
             )
-            return dataframe
 
         context.group_by_fields = columns
         context.metadata["group_by_fields"] = context.group_by_fields

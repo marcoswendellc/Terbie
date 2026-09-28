@@ -75,6 +75,9 @@ class ContextResolver:
         return filters
 
     def _dimensions(self, normalized_question: str) -> list[ResolvedDimension]:
+        explicit = self.explicit_grouping(normalized_question)
+        if explicit:
+            return explicit
         patterns = (
             (
                 "loja",
@@ -144,6 +147,23 @@ class ContextResolver:
 
         return dimensions
 
+    def explicit_grouping(self, question: str) -> list[ResolvedDimension]:
+        normalized = self._normalize_text(question)
+        fields = {
+            "loja": ("lojas?|nm_fantasa", "nm_fantasa"),
+            "segmento": ("segmentos?|nm_segmento", "nm_segmento"),
+            "bairro": ("bairros?", "bairro"),
+            "cidade": ("cidades?", "cidade"),
+            "empreendimento": ("shoppings?|empreendimentos?|nm_empreendimento", "nm_empreendimento"),
+            "genero": ("generos?|sexo|cd_sexo", "genero"),
+            "faixa_etaria": ("faixas? etarias?|faixa_etaria", "faixa_etaria"),
+        }
+        return [
+            ResolvedDimension(concept=name, label=name, field=field)
+            for name, (pattern, field) in fields.items()
+            if re.search(r"\bpor\s+(?:" + pattern + r")\b", normalized)
+        ]
+
     def _null_exclusion_filters(
         self,
         normalized_question: str,
@@ -178,6 +198,11 @@ class ContextResolver:
         for concept_name, pattern in patterns:
             match = re.search(pattern, question, flags=re.IGNORECASE)
             if match is None:
+                continue
+
+            # "por segmento (nm_segmento)" declares a grouping, not a value filter.
+            prefix = question[:match.start()]
+            if re.search(r"\bpor\s*$", prefix, flags=re.IGNORECASE):
                 continue
 
             value = match.group(1).strip(" .?!,;:")

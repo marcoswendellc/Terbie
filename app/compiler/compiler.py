@@ -128,6 +128,7 @@ class TerbieCompiler:
             hypothesis=hypothesis,
             semantic_resolution=semantic_resolution,
         )
+        hypothesis = self._normalize_explicit_breakdown(request.question, hypothesis)
         if temporal is not None:
             named_campaigns = {
                 match.value
@@ -202,6 +203,26 @@ class TerbieCompiler:
             warnings=warnings,
             status="draft_created" if not warnings else "completed_with_warnings",
         )
+
+    def _normalize_explicit_breakdown(
+        self, question: str, hypothesis: AnalyticalHypothesis
+    ) -> AnalyticalHypothesis:
+        dimensions = self._context_resolver.explicit_grouping(question)
+        filters = list(hypothesis.filters)
+        campaign = re.search(
+            r'["“]((?:Promoção|Promocao|Campanha)\s+[^"”]+)["”]', question, re.IGNORECASE
+        )
+        if campaign and hypothesis.analysis_type != "comparison":
+            filters = [item for item in filters if item.get("field") != "nm_promocao"]
+            filters.append({"type": "filter", "field": "nm_promocao",
+                            "operator": "equals", "value": campaign.group(1)})
+        updates = {"filters": self._deduplicate_filters(filters)}
+        if dimensions and (hypothesis.metric or hypothesis.metrics):
+            updates["dimensions"] = [item.field for item in dimensions]
+            updates["business_entity"] = dimensions[0].label
+            if hypothesis.analysis_type not in {"ranking", "comparison"}:
+                updates["analysis_type"] = "metric_query"
+        return hypothesis.model_copy(update=updates)
 
     def _normalize_descriptive_location_question(
         self,

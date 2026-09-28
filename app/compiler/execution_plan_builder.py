@@ -409,7 +409,7 @@ class ExecutionPlanBuilder:
 
     def _select_fields(self, analytical_plan: AnalyticalPlan) -> list[str]:
         if analytical_plan.intent == "metric_query":
-            return analytical_plan.metrics
+            return [*analytical_plan.dimensions, *analytical_plan.metrics]
 
         if analytical_plan.intent == "list_distinct" and "promocao" in analytical_plan.entities:
             return ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]

@@ -51,6 +51,27 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
+        if context.intent == "metric_query" and context.dimension_columns:
+            columns = [*context.dimension_columns, *context.metric_columns]
+            labels = {
+                "nm_segmento": "Segmento", "nm_fantasa": "Loja", "genero": "Gênero",
+                "bairro": "Bairro", "cidade": "Cidade", "faixa_etaria": "Faixa etária",
+                "nm_empreendimento": "Shopping", **ComparisonStrategy._METRIC_LABELS,
+            }
+            lines = [
+                "| " + " | ".join(labels.get(column, column) for column in columns) + " |",
+                "| " + " | ".join("---" for _ in columns) + " |",
+            ]
+            for row in context.data:
+                lines.append("| " + " | ".join(
+                    self._formatter.value(column, row.get(column)).replace("|", "\\|")
+                    for column in columns
+                ) + " |")
+            return NarratorResponse(
+                answer="\n".join(lines), summary=None, highlights=[], warnings=context.warnings,
+                metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
+            )
+
         if context.intent in {
             "sales_date_range",
             "persona",

@@ -28,6 +28,15 @@ class AnalyticalPlanner:
                 [hypothesis.business_entity] if hypothesis.business_entity is not None else []
             )
 
+        operations = self._required_operations(
+            analysis_type=hypothesis.analysis_type,
+            business_entity=hypothesis.business_entity,
+            metrics=metrics,
+            filters=self._filters(hypothesis),
+            comparison_entities=hypothesis.comparison_entities,
+        )
+        if hypothesis.analysis_type == "metric_query" and dimensions:
+            operations.insert(operations.index("aggregate"), "group_by")
         return AnalyticalPlan(
             intent=hypothesis.analysis_type,
             entities=entities,
@@ -38,13 +47,7 @@ class AnalyticalPlanner:
             comparison_entities=hypothesis.comparison_entities,
             items=hypothesis.items,
             presentation=hypothesis.presentation,
-            required_operations=self._required_operations(
-                analysis_type=hypothesis.analysis_type,
-                business_entity=hypothesis.business_entity,
-                metrics=metrics,
-                filters=self._filters(hypothesis),
-                comparison_entities=hypothesis.comparison_entities,
-            ),
+            required_operations=operations,
             warnings=hypothesis.warnings,
         )
 
@@ -202,6 +205,8 @@ class AnalyticalPlanner:
             if promotion_key_filter not in filters and not has_named_promotion_filter:
                 filters.insert(0, promotion_key_filter)
 
+        has_campaign_filter = any(item.get("field") == "nm_promocao" for item in filters)
+        if hypothesis.business_entity == "promocao" or has_campaign_filter:
             if hypothesis.time_scope is not None and hypothesis.time_scope.isdigit():
                 promotion_year_filter = {
                     "type": "filter",

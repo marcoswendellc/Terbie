@@ -321,11 +321,19 @@ class ExecutionService:
                 response_type="analysis_failed",
             )
         dataframes = dataframes if dataframes is not None else self._load_dataframes()
-        dataframe = self._select_dataframe(
-            dataframes=dataframes,
-            plan=planner_response.plan,
-            knowledge_context=knowledge_context,
-        )
+        try:
+            dataframe = self._select_dataframe(
+                dataframes=dataframes,
+                plan=planner_response.plan,
+                knowledge_context=knowledge_context,
+            )
+        except DataSourceError:
+            return self._routed_response(
+                original_question,
+                response="Não encontrei uma tabela disponível com os campos necessários "
+                "para esse recorte. Não foi possível concluir a análise.",
+                response_type="analysis_failed",
+            )
         remaining_timeout(1)
         try:
             result = self._executor.execute(
