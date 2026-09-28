@@ -26,6 +26,31 @@ class ResponseStrategy(ABC):
         return []
 
 
+class TemporalSelectionStrategy(ResponseStrategy):
+    def can_handle(self, context: NarrativeContext) -> bool:
+        return context.intent == "temporal_lookup"
+
+    def answer(self, context: NarrativeContext) -> str:
+        selection = context.execution_metadata.get("temporal_selection", {})
+        field = selection.get("field", "sk_dtinicio")
+        date_label = "término" if field == "sk_dtfim" else "início"
+        order = "antiga" if selection.get("direction") == "asc" else "recente"
+
+        def item(row):
+            value = datetime.fromisoformat(str(row[field])).strftime("%d/%m/%Y")
+            return f"{row['nm_promocao']} — {row['nm_empreendimento']}, {date_label} em {value}"
+
+        if len(context.data) == 1:
+            return f"A campanha mais {order} é {item(context.data[0])}."
+        dates = {row[field] for row in context.data}
+        intro = (
+            "Há empate entre as campanhas nesta data:"
+            if len(dates) == 1
+            else f"Campanhas ordenadas pela data de {date_label}:"
+        )
+        return intro + "\n\n" + "\n".join(f"• {item(row)}" for row in context.data)
+
+
 class SalesDateRangeStrategy(ResponseStrategy):
     def can_handle(self, context: NarrativeContext) -> bool:
         return context.intent == "sales_date_range"
@@ -62,10 +87,7 @@ class ListingStrategy(ResponseStrategy):
             return self._promotion_answer(context)
 
         intro = self._listing_intro(context)
-        items = [
-            f"• {self._row_label(row, context.dimension_columns)}"
-            for row in context.data
-        ]
+        items = [f"• {self._row_label(row, context.dimension_columns)}" for row in context.data]
         return "\n\n".join([intro, *items])
 
     def highlights(self, context: NarrativeContext) -> list[str]:
@@ -365,14 +387,10 @@ class RankingStrategy(ResponseStrategy):
                     f"foi {dimension}{location}."
                 )
 
-            return (
-                f"A melhor campanha, considerando faturamento, foi "
-                f"{dimension}{location}."
-            )
+            return f"A melhor campanha, considerando faturamento, foi {dimension}{location}."
 
         return (
-            f"{article} {label} com {objective}{context_text} "
-            f"foi {dimension}, com {metric_phrase}."
+            f"{article} {label} com {objective}{context_text} foi {dimension}, com {metric_phrase}."
         )
 
     def _asks_for_ranked_list(self, question: str) -> bool:
@@ -459,19 +477,13 @@ class RankingStrategy(ResponseStrategy):
                 f"{campaign_context}, de {requested_limit} solicitadas:"
             )
         else:
-            heading = (
-                f"As {actual_count} {plural_label} com {objective}"
-                f"{campaign_context} foram:"
-            )
+            heading = f"As {actual_count} {plural_label} com {objective}{campaign_context} foram:"
 
         if self._asks_for_table(context.question):
             metrics = context.metric_columns
             dimension_columns = context.dimension_columns
             headers = [
-                *[
-                    self._dimension_label(column)
-                    for column in dimension_columns
-                ],
+                *[self._dimension_label(column) for column in dimension_columns],
                 *[self._metric_label(metric) for metric in metrics],
             ]
             lines = [
@@ -654,8 +666,14 @@ class ComparisonStrategy(ResponseStrategy):
         if not available:
             labels = [
                 self._formatter.value(
-                    context.dimension_columns[0] if context.dimension_columns else context.columns[0],
-                    row.get(context.dimension_columns[0] if context.dimension_columns else context.columns[0]),
+                    context.dimension_columns[0]
+                    if context.dimension_columns
+                    else context.columns[0],
+                    row.get(
+                        context.dimension_columns[0]
+                        if context.dimension_columns
+                        else context.columns[0]
+                    ),
                 )
                 for row in context.data
             ]
@@ -674,9 +692,7 @@ class ComparisonStrategy(ResponseStrategy):
             return []
 
         label_column = (
-            context.dimension_columns[0]
-            if context.dimension_columns
-            else context.columns[0]
+            context.dimension_columns[0] if context.dimension_columns else context.columns[0]
         )
         revenue_winner = self._max_row(revenue_rows, "faturamento")
         label = self._formatter.value(label_column, revenue_winner.get(label_column))
@@ -688,9 +704,7 @@ class ComparisonStrategy(ResponseStrategy):
 
     def _comparison_table(self, context: NarrativeContext) -> str:
         label_column = (
-            context.dimension_columns[0]
-            if context.dimension_columns
-            else context.columns[0]
+            context.dimension_columns[0] if context.dimension_columns else context.columns[0]
         )
         base_row = context.data[0]
         compared_row = context.data[1] if len(context.data) > 1 else None

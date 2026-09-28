@@ -26,5 +26,9 @@ class ServiceError(TerbieError):
     """Raised when an application service fails."""
 
 
+class AnalyticalExecutionError(ServiceError):
+    """A requested analytical operation could not be executed as planned."""
+
+
 class DataSourceError(TerbieError):
     """Raised when a configured data source cannot be accessed."""

@@ -1,6 +1,7 @@
 from time import perf_counter
 from typing import TYPE_CHECKING
 
+from app.core.exceptions import AnalyticalExecutionError
 from app.executor.context import ExecutionContext
 from app.executor.models import ExecutionResult
 from app.executor.registry import OperationRegistry
@@ -24,14 +25,15 @@ class PipelineExecutor:
         context: ExecutionContext,
     ) -> ExecutionResult:
         start = perf_counter()
+        if not plan.operations:
+            raise AnalyticalExecutionError("Plano sem operações analíticas.")
         result_frame = dataframe.copy()
         operation_trace: list[dict[str, object]] = []
 
         for index, operation in enumerate(plan.operations):
             handler = self._registry.get(operation.type)
             if handler is None:
-                context.warnings.append(f"Operação não registrada: {operation.type}.")
-                continue
+                raise AnalyticalExecutionError("Operação analítica não registrada.")
 
             operation_start = perf_counter()
             rows_before = len(result_frame)

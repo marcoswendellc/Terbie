@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from app.core.exceptions import AnalyticalExecutionError
 from app.executor.context import ExecutionContext
 from app.executor.numeric import numeric_series
 from app.executor.operations.base import BaseOperation
@@ -36,12 +37,10 @@ class AggregateOperation(BaseOperation):
             return self._ticket_medio(dataframe=dataframe, alias=alias, context=context)
 
         if operation.function not in {"sum", "count_distinct"}:
-            context.warnings.append(f"Agregação não suportada: {operation.function}.")
-            return dataframe
+            raise AnalyticalExecutionError("Agregação sem função suportada.")
 
         if metric_column is None or metric_column not in dataframe.columns:
-            context.warnings.append(f"Campo de métrica não encontrado: {metric_column}.")
-            return dataframe
+            raise AnalyticalExecutionError("Campo de métrica não encontrado.")
 
         if operation.function == "count_distinct":
             if context.group_by_fields:
@@ -82,8 +81,7 @@ class AggregateOperation(BaseOperation):
             or value_column not in dataframe.columns
             or purchase_column not in dataframe.columns
         ):
-            context.warnings.append("Campos necessários para ticket_medio não encontrados.")
-            return dataframe
+            raise AnalyticalExecutionError("Campos necessários para ticket_medio não encontrados.")
 
         working_frame = dataframe.assign(
             **{value_column: numeric_series(dataframe[value_column])},
@@ -113,19 +111,20 @@ class AggregateOperation(BaseOperation):
 
         aggregations: dict[str, tuple[str, str]] = {}
         numeric_columns: dict[str, pd.Series] = {}
+        if not metrics:
+            raise AnalyticalExecutionError("Agregação sem métricas definidas.")
         for metric in metrics:
             if not isinstance(metric, dict):
-                continue
+                raise AnalyticalExecutionError("Definição de métrica inválida.")
 
             field = metric.get("field")
             function = metric.get("function")
             alias = metric.get("alias")
             if not isinstance(field, str) or not isinstance(alias, str):
-                continue
+                raise AnalyticalExecutionError("Métrica sem campo ou nome de saída.")
 
             if field not in dataframe.columns:
-                context.warnings.append(f"Campo de métrica não encontrado: {field}.")
-                continue
+                raise AnalyticalExecutionError("Campo de métrica não encontrado.")
 
             if function == "sum":
                 numeric_columns[field] = numeric_series(dataframe[field])
@@ -159,16 +158,25 @@ class AggregateOperation(BaseOperation):
                 )
                 aggregations[alias] = (alias, "first")
             else:
-                context.warnings.append(f"Agregação não suportada: {function}.")
+                raise AnalyticalExecutionError("Agregação sem função suportada.")
 
         if not aggregations:
-            return dataframe
+            return pd.DataFrame(
+                columns=[
+                    *context.group_by_fields,
+                    *[metric["alias"] for metric in metrics if isinstance(metric, dict)],
+                ]
+            )
 
         working_frame = dataframe.assign(**numeric_columns) if numeric_columns else dataframe
         if context.group_by_fields:
-            return working_frame.groupby(context.group_by_fields, dropna=False).agg(
-                **aggregations,
-            ).reset_index()
+            return (
+                working_frame.groupby(context.group_by_fields, dropna=False)
+                .agg(
+                    **aggregations,
+                )
+                .reset_index()
+            )
 
         return pd.DataFrame(
             [

@@ -12,6 +12,7 @@ from app.memory.models import (
     ConversationState,
     ConversationTurn,
 )
+from app.semantic.temporal import TemporalSelection, resolve_temporal_reference
 
 
 class ConversationMemoryService:
@@ -50,6 +51,17 @@ class ConversationMemoryService:
         session = self.get(session_id)
         state = session.state
         normalized = self._normalize(question)
+        previous = session.recent_turns[-1].question if session.recent_turns else ""
+        if session.recent_turns and TemporalSelection.parse(previous) is None:
+            previous = session.recent_turns[-1].rewritten_question
+        temporal_reference = resolve_temporal_reference(question, previous)
+        if temporal_reference:
+            return ContextualQuestion(
+                original_question=question,
+                rewritten_question=temporal_reference,
+                summary=self._conversation_context(session),
+                state=state,
+            )
         selected, clarification = self.resolve_suggestion(session=session, question=question)
         if selected or clarification:
             return ContextualQuestion(
@@ -206,9 +218,7 @@ class ConversationMemoryService:
                 question=context.original_question,
                 rewritten_question=context.rewritten_question,
                 answer=answer,
-                result_data=[
-                    dict(row) for row in (data or [])[:50] if isinstance(row, dict)
-                ],
+                result_data=[dict(row) for row in (data or [])[:50] if isinstance(row, dict)],
             ),
         ]
         overflow = turns[: -self._recent_limit]
@@ -231,14 +241,16 @@ class ConversationMemoryService:
         return saved
 
     def resolve_suggestion(
-        self, *, session: ConversationSession, question: str,
+        self,
+        *,
+        session: ConversationSession,
+        question: str,
     ) -> tuple[str | None, str | None]:
         """Resolve short choices only; explicit new filters belong to the planner."""
         if not session.suggestions:
             return None, None
         normalized = self._normalize(question).strip(" .!?;")
-        ordinals = {"1": 0, "a primeira": 0, "primeira": 0,
-                    "2": 1, "a segunda": 1, "segunda": 1}
+        ordinals = {"1": 0, "a primeira": 0, "primeira": 0, "2": 1, "a segunda": 1, "segunda": 1}
         if normalized in ordinals:
             index = ordinals[normalized]
             if index < len(session.suggestions):
@@ -253,7 +265,8 @@ class ConversationMemoryService:
         stopwords = {"o", "a", "os", "as", "de", "do", "da", "dos", "das", "por"}
         tokens = set(normalized.split()) - stopwords
         matches = [
-            item for item in session.suggestions
+            item
+            for item in session.suggestions
             if tokens and tokens.issubset(set(self._normalize(item.label).split()) - stopwords)
         ]
         if len(matches) == 1:

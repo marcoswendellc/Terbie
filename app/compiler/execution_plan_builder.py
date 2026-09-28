@@ -78,14 +78,50 @@ class ExecutionPlanBuilder:
         operations: list[PlanOperation] = []
         metric = metrics[0] if metrics else None
         limit_parameter = self._limit_parameter(parameters)
-        group_field = analytical_plan.dimensions[0] if analytical_plan.dimensions else (
-            analytical_plan.entities[0] if analytical_plan.entities else None
+        group_field = (
+            analytical_plan.dimensions[0]
+            if analytical_plan.dimensions
+            else (analytical_plan.entities[0] if analytical_plan.entities else None)
         )
         group_fields = analytical_plan.dimensions
         select_fields = self._select_fields(analytical_plan)
         distinct_fields = self._distinct_fields(analytical_plan)
 
         operations.extend(self._filter_operations(analytical_plan.filters))
+
+        if analytical_plan.intent == "temporal_lookup":
+            fields = ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]
+            temporal = next(
+                (item for item in analytical_plan.filters if item.get("type") == "temporal_order"),
+                None,
+            )
+            if temporal is None:
+                raise ValueError("Consulta temporal sem critério de ordenação.")
+            date_field = str(temporal["field"])
+            return [
+                *operations,
+                PlanOperation(type="select", parameters={"fields": fields}),
+                PlanOperation(
+                    type="sort",
+                    field=date_field,
+                    parameters={
+                        "direction": temporal["direction"],
+                        "data_type": "date",
+                        "as_of": temporal["as_of"],
+                        "year": temporal.get("year"),
+                        "active": temporal.get("active", False),
+                        "date_fields": ["sk_dtinicio", "sk_dtfim"],
+                    },
+                ),
+                PlanOperation(type="distinct", parameters={"subset": fields}),
+                PlanOperation(
+                    type="limit",
+                    parameters={
+                        "value": limit_parameter.value if limit_parameter else 1,
+                        "keep_ties": date_field,
+                    },
+                ),
+            ]
 
         demographic_fields = {"genero", "idade", "faixa_etaria"}
         if demographic_fields.intersection(group_fields):

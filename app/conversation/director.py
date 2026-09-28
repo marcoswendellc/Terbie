@@ -6,9 +6,15 @@ from typing import Any
 import pandas as pd
 
 from app.conversation.budget import analytical_deadline
-from app.conversation.models import ConversationProvider, FollowUpSuggestion
+from app.conversation.models import (
+    AnalysisDecision,
+    AnalysisQuestion,
+    ConversationProvider,
+    FollowUpSuggestion,
+)
 from app.memory.models import ConversationSession
 from app.narrator.models import ExecuteResponse
+from app.semantic.temporal import TemporalSelection, resolve_temporal_reference
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +52,11 @@ class ConversationDirector:
         validate_suggestion: Callable[[str], bool] | None = None,
     ) -> ExecuteResponse | None:
         deadline = self._clock() + self._budget
+        previous = session.recent_turns[-1].question if session and session.recent_turns else ""
+        if session and session.recent_turns and TemporalSelection.parse(previous) is None:
+            previous = session.recent_turns[-1].rewritten_question
+        resolved = resolve_temporal_reference(question, previous) or question
+        temporal = TemporalSelection.parse(resolved)
         context = {
             "question": question,
             "schemas": schemas,
@@ -53,7 +64,15 @@ class ConversationDirector:
             "conversation": self._history(session),
         }
         try:
-            decision = self._provider.decide(context, timeout_ms=self._remaining(deadline))
+            decision = (
+                AnalysisDecision(
+                    goal="Identificar campanha por data",
+                    assumptions=[temporal.assumption],
+                    analyses=[AnalysisQuestion(title="Campanha por data", question=resolved)],
+                )
+                if temporal
+                else self._provider.decide(context, timeout_ms=self._remaining(deadline))
+            )
         except Exception:
             logger.exception("Conversational direction unavailable")
             return None

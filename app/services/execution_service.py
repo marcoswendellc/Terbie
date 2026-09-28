@@ -9,7 +9,7 @@ import pandas as pd
 from app.conversation.budget import remaining_timeout
 from app.conversation.director import ConversationDirector, schema_context
 from app.core.config import Settings
-from app.core.exceptions import ConfigurationError, DataSourceError
+from app.core.exceptions import AnalyticalExecutionError, ConfigurationError, DataSourceError
 from app.executor.executor import TerbieExecutor
 from app.governance.policy import DataGovernancePolicy
 from app.insights.generator import InsightGenerator
@@ -294,6 +294,20 @@ class ExecutionService:
             session_state=memory_context.state.model_dump(mode="json") if memory_context else {},
             schema={"tables": schema_context(dataframes)} if dataframes is not None else None,
         )
+        clarification = next(
+            (
+                item.value
+                for item in planner_response.plan.parameters
+                if item.type == "clarification"
+            ),
+            None,
+        )
+        if clarification:
+            return self._routed_response(
+                original_question,
+                response=str(clarification),
+                response_type="clarification_required",
+            )
         if not allow_multi and (
             not planner_response.plan.operations
             or not PlanValidator().validate(planner_response.plan).is_valid
@@ -313,11 +327,19 @@ class ExecutionService:
             knowledge_context=knowledge_context,
         )
         remaining_timeout(1)
-        result = self._executor.execute(
-            dataframe=dataframe,
-            plan=planner_response.plan,
-            knowledge_context=knowledge_context,
-        )
+        try:
+            result = self._executor.execute(
+                dataframe=dataframe,
+                plan=planner_response.plan,
+                knowledge_context=knowledge_context,
+            )
+        except AnalyticalExecutionError:
+            return self._routed_response(
+                original_question,
+                response="Não consegui executar uma análise válida para esse pedido. "
+                "Pode especificar o indicador ou o critério desejado?",
+                response_type="analysis_failed",
+            )
         if self._data_cache_warning:
             result = result.model_copy(
                 update={"warnings": [*result.warnings, self._data_cache_warning]},

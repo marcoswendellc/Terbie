@@ -16,11 +16,13 @@ from app.context_resolution.models import ResolvedContext
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.entity_resolution.models import EntityMatch
 from app.knowledge.models import KnowledgeContext
+from app.planner.models import PlanParameter
 from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
 from app.semantic.models import SemanticResolution
+from app.semantic.temporal import TemporalSelection
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +64,24 @@ class TerbieCompiler:
             else None
         )
 
-        hypothesis = self._build_hypothesis(
-            question=request.question,
-            semantic_resolution=semantic_resolution,
-            knowledge_context=knowledge_context,
-            schema_context=(
-                request.schema_context if isinstance(request.schema_context, dict) else None
-            ),
-            conversation_summary=request.conversation_summary,
-            session_state=request.session_state,
+        temporal = TemporalSelection.parse(request.question)
+        hypothesis = (
+            self._fallback_hypothesis(
+                question=request.question,
+                semantic_resolution=semantic_resolution,
+                knowledge_context=knowledge_context,
+            )
+            if temporal
+            else self._build_hypothesis(
+                question=request.question,
+                semantic_resolution=semantic_resolution,
+                knowledge_context=knowledge_context,
+                schema_context=(
+                    request.schema_context if isinstance(request.schema_context, dict) else None
+                ),
+                conversation_summary=request.conversation_summary,
+                session_state=request.session_state,
+            )
         )
         hypothesis = self._normalize_explicit_comparison(
             question=request.question,
@@ -117,12 +128,64 @@ class TerbieCompiler:
             hypothesis=hypothesis,
             semantic_resolution=semantic_resolution,
         )
+        if temporal is not None:
+            named_campaigns = {
+                match.value
+                for match in self._entity_resolver.resolve_many(request.question).matches
+                if match.entity_type == "promocao" and match.strategy in {"contains", "equals"}
+            }
+            hypothesis = hypothesis.model_copy(
+                update={
+                    "analysis_type": "temporal_lookup",
+                    "business_entity": "promocao",
+                    "metric": None,
+                    "metrics": [],
+                    "metric_source": None,
+                    "dimensions": ["nm_promocao", "nm_empreendimento"],
+                    "filters": [
+                        *[
+                            item
+                            for item in hypothesis.filters
+                            if item.get("type") not in {"limit", "temporal_order"}
+                            and (
+                                item.get("field") != "nm_promocao"
+                                or item.get("value") in named_campaigns
+                            )
+                        ],
+                        temporal.parameters(),
+                        {"type": "limit", "value": temporal.limit},
+                    ],
+                    "warnings": [
+                        warning
+                        for warning in hypothesis.warnings
+                        if warning
+                        not in {
+                            "Nenhuma métrica identificada.",
+                            "Nenhuma entidade de negócio identificada.",
+                        }
+                    ],
+                }
+            )
         analytical_plan = self._analytical_planner.build(
             hypothesis=hypothesis,
             knowledge_context=knowledge_context,
         )
         execution_plan = self._execution_plan_builder.build(analytical_plan)
         optimized_plan = self._optimizer.optimize(execution_plan)
+        clarification = (
+            temporal.clarification(request.question, hypothesis.filters) if temporal else None
+        )
+        if clarification:
+            optimized_plan = optimized_plan.model_copy(
+                update={
+                    "operations": [],
+                    "parameters": [
+                        *optimized_plan.parameters,
+                        PlanParameter(type="clarification", value=clarification),
+                    ],
+                    "warnings": [*optimized_plan.warnings, clarification],
+                }
+            )
         validation = self._validator.validate(optimized_plan)
         warnings = self._warnings(
             hypothesis_warnings=hypothesis.warnings,
@@ -171,7 +234,8 @@ class TerbieCompiler:
             warnings = [
                 warning
                 for warning in hypothesis.warnings
-                if warning not in {
+                if warning
+                not in {
                     "Nenhuma métrica identificada.",
                     "Nenhuma entidade de negócio identificada.",
                 }
@@ -197,9 +261,7 @@ class TerbieCompiler:
             return hypothesis
 
         warnings = [
-            warning
-            for warning in hypothesis.warnings
-            if warning != "Nenhuma métrica identificada."
+            warning for warning in hypothesis.warnings if warning != "Nenhuma métrica identificada."
         ]
         return hypothesis.model_copy(
             update={
@@ -320,7 +382,9 @@ class TerbieCompiler:
                     for context in contexts
                 ],
                 "presentation": PresentationSpec(
-                    format="table" if re.search(r"\b(tabela|quadro)\b", question, re.IGNORECASE) else "narrative",
+                    format="table"
+                    if re.search(r"\b(tabela|quadro)\b", question, re.IGNORECASE)
+                    else "narrative",
                     percentages_by_default=True,
                 ),
                 "filters": [],
@@ -504,9 +568,7 @@ class TerbieCompiler:
         if hypothesis.analysis_type == "list_distinct" and has_shopping_match:
             matches = [match for match in matches if match.entity_type != "promocao"]
 
-        shopping_matches = [
-            match for match in matches if match.entity_type == "empreendimento"
-        ]
+        shopping_matches = [match for match in matches if match.entity_type == "empreendimento"]
         if len(shopping_matches) > 1:
             explicit_shoppings = [
                 match
@@ -584,9 +646,8 @@ class TerbieCompiler:
                 for resolved_filter in resolved_context.filters
             ],
         ]
-        if (
-            (resolved_context.intent or hypothesis.analysis_type) == "ranking"
-            and not any(filter_item.get("type") == "limit" for filter_item in filters)
+        if (resolved_context.intent or hypothesis.analysis_type) == "ranking" and not any(
+            filter_item.get("type") == "limit" for filter_item in filters
         ):
             filters.append({"type": "limit", "value": self._default_ranking_limit(question)})
 
@@ -662,9 +723,7 @@ class TerbieCompiler:
             return hypothesis
 
         filters = [
-            filter_item
-            for filter_item in hypothesis.filters
-            if filter_item.get("type") != "limit"
+            filter_item for filter_item in hypothesis.filters if filter_item.get("type") != "limit"
         ]
         filters.append({"type": "limit", "value": requested_limit})
         return hypothesis.model_copy(update={"filters": filters})
@@ -718,15 +777,16 @@ class TerbieCompiler:
         if hypothesis.analysis_type == "ranking":
             normalized = self._context_resolver._normalize_text(question)
             metrics = list(hypothesis.metrics)
-            if (
-                hypothesis.business_entity == "loja"
-                and re.search(r"\b(todos?\s+os?\s+detalhes|dados?\s+completos?)\b", normalized)
+            if hypothesis.business_entity == "loja" and re.search(
+                r"\b(todos?\s+os?\s+detalhes|dados?\s+completos?)\b", normalized
             ):
                 metrics = ["faturamento", "quantidade_compras", "ticket_medio_por_compra"]
             if len(metrics) > 1 and "faturamento" in metrics:
                 explicit_ticket = bool(re.search(r"\b(?:por|maior)\s+ticket\b", normalized))
                 explicit_purchases = bool(
-                    re.search(r"\b(?:por|maior)\s+(?:quantidade\s+de\s+)?(?:notas|compras)\b", normalized),
+                    re.search(
+                        r"\b(?:por|maior)\s+(?:quantidade\s+de\s+)?(?:notas|compras)\b", normalized
+                    ),
                 )
                 order_metric = (
                     hypothesis.metric
@@ -757,8 +817,7 @@ class TerbieCompiler:
             return hypothesis
         semantic_metrics = (
             semantic_resolution.interpretation.metrics
-            if semantic_resolution is not None
-            and semantic_resolution.interpretation is not None
+            if semantic_resolution is not None and semantic_resolution.interpretation is not None
             else []
         )
         metrics = semantic_metrics or hypothesis.metrics
@@ -923,8 +982,7 @@ class TerbieCompiler:
             filter_item
             for filter_item in hypothesis.filters
             if not (
-                filter_item.get("type") == "filter"
-                and filter_item.get("field") == comparison_field
+                filter_item.get("type") == "filter" and filter_item.get("field") == comparison_field
             )
         ]
         business_entity = hypothesis.business_entity or resolution.matches[0].entity_type

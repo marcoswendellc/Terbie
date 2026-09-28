@@ -24,7 +24,9 @@ class AnalyticalPlanner:
                 dimension for dimension in dimensions if dimension in demographic_dimensions
             ]
         else:
-            entities = [hypothesis.business_entity] if hypothesis.business_entity is not None else []
+            entities = (
+                [hypothesis.business_entity] if hypothesis.business_entity is not None else []
+            )
 
         return AnalyticalPlan(
             intent=hypothesis.analysis_type,
@@ -56,6 +58,9 @@ class AnalyticalPlanner:
         comparison_entities: list[dict[str, object]],
     ) -> list[str]:
         filter_operations = ["filter"] if self._has_executable_filters(filters) else []
+
+        if analysis_type == "temporal_lookup":
+            return [*filter_operations, "select", "distinct", "sort", "limit"]
 
         if analysis_type == "persona":
             return [*filter_operations, "persona_profile"]
@@ -117,9 +122,11 @@ class AnalyticalPlanner:
         business_entity: str | None,
         knowledge_context: KnowledgeContext | None,
     ) -> list[str]:
-        available_dimensions = {
-            dimension.name for dimension in knowledge_context.dimensions
-        } if knowledge_context is not None else set()
+        available_dimensions = (
+            {dimension.name for dimension in knowledge_context.dimensions}
+            if knowledge_context is not None
+            else set()
+        )
 
         if analysis_type == "comparison" and business_entity == "promocao":
             return ["nm_promocao"]

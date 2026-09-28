@@ -11,6 +11,7 @@ from app.narrator.strategies import (
     RankingStrategy,
     ResponseStrategy,
     SalesDateRangeStrategy,
+    TemporalSelectionStrategy,
     TrendStrategy,
 )
 
@@ -28,6 +29,7 @@ class TerbieNarrator:
         self._formatter = formatter
         self._intelligent_provider = intelligent_provider
         self._strategies: list[ResponseStrategy] = [
+            TemporalSelectionStrategy(formatter),
             SalesDateRangeStrategy(formatter),
             PersonaStrategy(formatter),
             ListingStrategy(formatter),
@@ -49,7 +51,12 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
-        if context.intent in {"sales_date_range", "persona", "persona_comparison"}:
+        if context.intent in {
+            "sales_date_range",
+            "persona",
+            "persona_comparison",
+            "temporal_lookup",
+        }:
             strategy = self._strategy_for(context)
             return NarratorResponse(
                 answer=strategy.answer(context),
@@ -145,10 +152,7 @@ class TerbieNarrator:
 
     def _narrate_insights(self, context) -> NarratorResponse:
         insight_result = context.insight_result
-        insights = [
-            insight.model_dump()
-            for insight in getattr(insight_result, "insights", [])
-        ]
+        insights = [insight.model_dump() for insight in getattr(insight_result, "insights", [])]
         recommendations = list(getattr(insight_result, "recommendations", []))
         answer = self._insight_answer(
             context=context,
@@ -184,11 +188,7 @@ class TerbieNarrator:
         if summary:
             parts.append(summary)
 
-        winner_insights = [
-            insight
-            for insight in insights
-            if insight.get("type") == "winner"
-        ]
+        winner_insights = [insight for insight in insights if insight.get("type") == "winner"]
         if winner_insights:
             ranking_campaign_answer = self._campaign_ranking_answer(
                 context=context,
@@ -214,16 +214,12 @@ class TerbieNarrator:
             ]
             if descriptions:
                 parts.append(" ".join(descriptions))
-            metric_titles = "\n".join(
-                f"• {insight['title']}"
-                for insight in winner_insights[:4]
-            )
+            metric_titles = "\n".join(f"• {insight['title']}" for insight in winner_insights[:4])
             parts.append(f"Resumo dos indicadores:\n{metric_titles}")
 
         if recommendations:
             recommendation_lines = "\n".join(
-                f"• {recommendation}"
-                for recommendation in recommendations[:3]
+                f"• {recommendation}" for recommendation in recommendations[:3]
             )
             parts.append(f"Você também pode analisar:\n\n{recommendation_lines}")
 
