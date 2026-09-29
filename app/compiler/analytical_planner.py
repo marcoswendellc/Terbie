@@ -18,6 +18,8 @@ class AnalyticalPlanner:
             business_entity=hypothesis.business_entity,
             knowledge_context=knowledge_context,
         )
+        if hypothesis.analysis_type == "metric_query":
+            dimensions = hypothesis.dimensions
         demographic_dimensions = {"genero", "idade", "faixa_etaria"}
         if demographic_dimensions.intersection(dimensions):
             entities = [
@@ -206,7 +208,9 @@ class AnalyticalPlanner:
                 filters.insert(0, promotion_key_filter)
 
         has_campaign_filter = any(item.get("field") == "nm_promocao" for item in filters)
-        if hypothesis.business_entity == "promocao" or has_campaign_filter:
+        if (
+            hypothesis.business_entity == "promocao" or has_campaign_filter
+        ) and "mes" not in hypothesis.dimensions:
             if hypothesis.time_scope is not None and hypothesis.time_scope.isdigit():
                 promotion_year_filter = {
                     "type": "filter",

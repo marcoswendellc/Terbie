@@ -21,6 +21,7 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
+from app.semantic.explicit_query import is_explicit_query
 from app.semantic.models import SemanticResolution
 from app.semantic.temporal import TemporalSelection
 
@@ -71,7 +72,7 @@ class TerbieCompiler:
                 semantic_resolution=semantic_resolution,
                 knowledge_context=knowledge_context,
             )
-            if temporal
+            if temporal or is_explicit_query(request.question)
             else self._build_hypothesis(
                 question=request.question,
                 semantic_resolution=semantic_resolution,
@@ -129,6 +130,62 @@ class TerbieCompiler:
             semantic_resolution=semantic_resolution,
         )
         hypothesis = self._normalize_explicit_breakdown(request.question, hypothesis)
+        normalized = self._context_resolver._normalize_text(request.question)
+        if re.search(r"\b(por mes|mensal|mensais|mes a mes)\b", normalized):
+            metrics = [
+                m
+                for m in hypothesis.metrics
+                if m
+                in {
+                    "faturamento",
+                    "quantidade_compras",
+                    "clientes_unicos",
+                    "ticket_medio_por_compra",
+                    "ticket_medio_por_cliente",
+                }
+            ]
+            if metrics:
+                hypothesis = hypothesis.model_copy(
+                    update={
+                        "analysis_type": "metric_query",
+                        "business_entity": "mes",
+                        "dimensions": ["mes", *[d for d in hypothesis.dimensions if d != "mes"]],
+                        "metric": metrics[0],
+                        "metrics": metrics,
+                        "filters": [
+                            item for item in hypothesis.filters if item.get("type") != "limit"
+                        ],
+                    }
+                )
+                if re.search(r"\b(?:nas?|das?) campanhas?\b", normalized):
+                    hypothesis.filters.append(
+                        {"type": "filter", "field": "cd_promocao", "operator": "not_null"}
+                    )
+                months = [
+                    "janeiro",
+                    "fevereiro",
+                    "marco",
+                    "abril",
+                    "maio",
+                    "junho",
+                    "julho",
+                    "agosto",
+                    "setembro",
+                    "outubro",
+                    "novembro",
+                    "dezembro",
+                ]
+                mentioned = [
+                    match for match in re.finditer(r"\b(" + "|".join(months) + r")\b", normalized)
+                ]
+                if mentioned:
+                    hypothesis.filters.append(
+                        {
+                            "type": "month_range",
+                            "start": months.index(mentioned[0].group()) + 1,
+                            "end": months.index(mentioned[-1].group()) + 1,
+                        }
+                    )
         if temporal is not None:
             named_campaigns = {
                 match.value
@@ -209,13 +266,33 @@ class TerbieCompiler:
     ) -> AnalyticalHypothesis:
         dimensions = self._context_resolver.explicit_grouping(question)
         filters = list(hypothesis.filters)
+        for label, field in [("campanha", "nm_promocao"), ("shopping", "nm_empreendimento")]:
+            inherited = re.search(
+                r"considerando " + label + r'\s*=\s*"([^"]+)"', question, re.IGNORECASE
+            )
+            if inherited:
+                filters = [item for item in filters if item.get("field") != field]
+                filters.append(
+                    {
+                        "type": "filter",
+                        "field": field,
+                        "operator": "equals",
+                        "value": inherited.group(1),
+                    }
+                )
         campaign = re.search(
             r'["“]((?:Promoção|Promocao|Campanha)\s+[^"”]+)["”]', question, re.IGNORECASE
         )
         if campaign and hypothesis.analysis_type != "comparison":
             filters = [item for item in filters if item.get("field") != "nm_promocao"]
-            filters.append({"type": "filter", "field": "nm_promocao",
-                            "operator": "equals", "value": campaign.group(1)})
+            filters.append(
+                {
+                    "type": "filter",
+                    "field": "nm_promocao",
+                    "operator": "equals",
+                    "value": campaign.group(1),
+                }
+            )
         updates = {"filters": self._deduplicate_filters(filters)}
         if dimensions and (hypothesis.metric or hypothesis.metrics):
             updates["dimensions"] = [item.field for item in dimensions]

@@ -14,6 +14,7 @@ from app.conversation.models import (
 )
 from app.memory.models import ConversationSession
 from app.narrator.models import ExecuteResponse
+from app.semantic.explicit_query import is_explicit_query
 from app.semantic.temporal import TemporalSelection, resolve_temporal_reference
 
 logger = logging.getLogger(__name__)
@@ -71,6 +72,11 @@ class ConversationDirector:
                     analyses=[AnalysisQuestion(title="Campanha por data", question=resolved)],
                 )
                 if temporal
+                else AnalysisDecision(
+                    goal="Responder ao recorte solicitado",
+                    analyses=[AnalysisQuestion(title="Análise solicitada", question=resolved)],
+                )
+                if is_explicit_query(resolved)
                 else self._provider.decide(context, timeout_ms=self._remaining(deadline))
             )
         except Exception:

@@ -224,6 +224,50 @@ function formatExecuteResponse(payload) {
   return lines.join("\n");
 }
 
+function appendAnalysisChart(message, payload) {
+  const chart = payload.metadata?.chart;
+  if (!chart || chart.type !== "line" || !Array.isArray(payload.data)) return;
+  const rows = payload.data.filter(row => /^\d{4}-\d{2}$/.test(row[chart.x]) &&
+    typeof row[chart.y] === "number" && Number.isFinite(row[chart.y]));
+  if (!rows.length) return;
+  const ns = "http://www.w3.org/2000/svg";
+  const element = (name, attributes, text) => {
+    const node = document.createElementNS(ns, name);
+    Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const svg = element("svg", {viewBox: "0 0 720 280", role: "img",
+    "aria-label": `${chart.title}: evolução mensal; valores detalhados na tabela.`,
+    width: "100%"});
+  const monthNumber = row => Number(row[chart.x].slice(0, 4)) * 12 + Number(row[chart.x].slice(5));
+  rows.sort((a, b) => monthNumber(a) - monthNumber(b));
+  const start = monthNumber(rows[0]);
+  const span = Math.max(1, monthNumber(rows[rows.length - 1]) - start);
+  const low = Math.min(0, ...rows.map(row => row[chart.y]));
+  const high = Math.max(1, ...rows.map(row => row[chart.y]));
+  const x = row => 100 + (monthNumber(row) - start) / span * 570;
+  const y = row => 225 - (row[chart.y] - low) / (high - low) * 180;
+  svg.appendChild(element("text", {x: 100, y: 22, fill: "currentColor", "font-size": 16}, chart.title));
+  [low, (low + high) / 2, high].forEach(value => {
+    const position = 225 - (value - low) / (high - low) * 180;
+    svg.appendChild(element("line", {x1: 95, x2: 680, y1: position, y2: position,
+      stroke: "currentColor", opacity: 0.15}));
+    svg.appendChild(element("text", {x: 90, y: position + 4, "text-anchor": "end",
+      fill: "currentColor", "font-size": 11}, value.toLocaleString("pt-BR", {maximumFractionDigits: 0})));
+  });
+  svg.appendChild(element("polyline", {points: rows.map(row => `${x(row)},${y(row)}`).join(" "),
+    fill: "none", stroke: "#3679d6", "stroke-width": 2}));
+  rows.forEach(row => {
+    const point = element("circle", {cx: x(row), cy: y(row), r: 4, fill: "#3679d6"});
+    point.appendChild(element("title", {}, `${row[chart.x]}: ${row[chart.y].toLocaleString("pt-BR")}`));
+    svg.appendChild(point);
+    svg.appendChild(element("text", {x: x(row), y: 252, "text-anchor": "middle",
+      fill: "currentColor", "font-size": 10}, row[chart.x]));
+  });
+  message.querySelector(".message-bubble").appendChild(svg);
+}
+
 function appendFollowUpSuggestions(message, payload) {
   const suggestions = Array.isArray(payload.suggestions) ? payload.suggestions.slice(0, 2) : [];
   if (!suggestions.length) return;
@@ -364,6 +408,7 @@ chatForm.addEventListener("submit", (event) => {
     .then((payload) => {
       if (requestSession !== conversationSessionId()) return;
       updateMessage(pendingMessage, formatExecuteResponse(payload));
+      appendAnalysisChart(pendingMessage, payload);
       appendFollowUpSuggestions(pendingMessage, payload);
     })
     .catch((error) =>

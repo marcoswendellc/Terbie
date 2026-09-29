@@ -1,11 +1,12 @@
 from app.executor.operations.aggregate import AggregateOperation
 from app.executor.operations.base import BaseOperation
-from app.executor.operations.campaign_detail import CampaignDetailOperation
 from app.executor.operations.campaign_context_comparison import (
     CampaignContextComparisonOperation,
 )
-from app.executor.operations.derived_metric import DerivedMetricOperation
+from app.executor.operations.campaign_detail import CampaignDetailOperation
 from app.executor.operations.derive_demographics import DeriveDemographicsOperation
+from app.executor.operations.derive_month import DeriveMonthOperation
+from app.executor.operations.derived_metric import DerivedMetricOperation
 from app.executor.operations.distinct import DistinctOperation
 from app.executor.operations.filter import FilterOperation
 from app.executor.operations.filter_group import FilterGroupOperation
@@ -28,6 +29,7 @@ class OperationRegistry:
         self.register(FilterOperation())
         self.register(FilterGroupOperation())
         self.register(DeriveDemographicsOperation())
+        self.register(DeriveMonthOperation())
         self.register(PersonaProfileOperation())
         self.register(PersonaComparisonOperation())
         self.register(CampaignDetailOperation())

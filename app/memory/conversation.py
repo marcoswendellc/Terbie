@@ -4,6 +4,7 @@ import unicodedata
 from datetime import UTC, datetime
 from typing import Any
 
+from app.context_resolution.context_resolver import ContextResolver
 from app.conversation.models import FollowUpSuggestion
 from app.memory.base import BaseMemory
 from app.memory.models import (
@@ -12,6 +13,8 @@ from app.memory.models import (
     ConversationState,
     ConversationTurn,
 )
+from app.planner.models import ExecutionPlan, PlanOperation
+from app.semantic.explicit_query import is_explicit_query
 from app.semantic.temporal import TemporalSelection, resolve_temporal_reference
 
 
@@ -72,6 +75,45 @@ class ConversationMemoryService:
                 clarification=clarification,
             )
         rewritten = question.strip()
+        if (is_explicit_query(question) or ContextResolver().explicit_grouping(question)) and (
+            normalized.startswith("e ")
+            or re.search(r"\b(nessa|dessa|essa|nesse|desse)\b", normalized)
+        ):
+            if not self._has_metric(normalized) and session.recent_turns:
+                prior_rows = session.recent_turns[-1].result_data
+                labels = {
+                    "faturamento": "faturamento",
+                    "quantidade_compras": "quantidade de compras",
+                    "clientes_unicos": "clientes únicos",
+                    "ticket_medio_por_compra": "ticket médio por compra",
+                    "ticket_medio_por_cliente": "ticket médio por cliente",
+                }
+                metrics = [
+                    labels[key] for key in (prior_rows[0] if prior_rows else {}) if key in labels
+                ]
+                if metrics:
+                    rewritten += "; indicadores: " + ", ".join(metrics)
+            if "campanha" in normalized and not state.campanha:
+                return ContextualQuestion(
+                    original_question=question,
+                    rewritten_question=question,
+                    summary=self._conversation_context(session),
+                    state=state,
+                    clarification="Qual campanha você deseja detalhar?",
+                )
+            for key, label in [("campanha", "campanha"), ("empreendimento", "shopping")]:
+                value = getattr(state, key)
+                explicit_name = re.search(r"\b" + label + r'\s+(?!em\b|por\b)[\w"“]', normalized)
+                if value and not explicit_name:
+                    rewritten += f'; considerando {label} = "{value}"'
+            if state.periodo_inicio and not re.search(r"\b(?:19|20)\d{2}\b", normalized):
+                rewritten += f" em {state.periodo_inicio}"
+            return ContextualQuestion(
+                original_question=question,
+                rewritten_question=rewritten,
+                summary=self._conversation_context(session),
+                state=state,
+            )
         unresolved: list[str] = []
 
         ranked_reference = self._resolve_ranked_reference(
@@ -165,8 +207,25 @@ class ConversationMemoryService:
         suggestions: list[FollowUpSuggestion] | None = None,
         analysis_questions: list[str] | None = None,
         goal: str = "",
+        execution_metadata: dict[str, Any] | None = None,
     ) -> ConversationSession:
         session = self.get(session_id)
+        if plan is None and execution_metadata:
+            trace = execution_metadata.get("operation_trace", [])
+            plan = ExecutionPlan(
+                operations=[
+                    PlanOperation(
+                        type="filter",
+                        field=item.get("field"),
+                        parameters={
+                            "operator": item.get("operator", "equals"),
+                            "value": item.get("resolved_value") or item.get("requested_value"),
+                        },
+                    )
+                    for item in trace
+                    if item.get("operation") == "filter"
+                ]
+            )
         updates: dict[str, Any] = {
             "ultima_pergunta": context.original_question,
             "ultima_resposta": answer,

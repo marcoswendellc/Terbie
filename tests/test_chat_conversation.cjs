@@ -17,7 +17,7 @@ function harness() {
     replaceChildren(...children) { this.children = children; }
     addEventListener(type, handler) { this.listeners[type] = handler; }
     focus() {}
-    setAttribute() {}
+    setAttribute(name, value) { this[name] = value; }
     querySelector() { return this; }
     querySelectorAll() { return []; }
     requestSubmit() { this.submitted = true; }
@@ -25,6 +25,7 @@ function harness() {
   const nodes = new Map();
   const document = {
     createElement: () => new Element(),
+    createElementNS: () => new Element(),
     querySelector: selector => {
       if (!nodes.has(selector)) nodes.set(selector, new Element());
       return nodes.get(selector);
@@ -67,6 +68,30 @@ test('no placeholder suggestions when none were returned', () => {
   const {context, Element} = harness();
   const message = new Element();
   context.appendFollowUpSuggestions(message, {suggestions: []});
+  assert.equal(message.children.length, 0);
+});
+
+test('monthly chart renders every computed point and an accessible label', () => {
+  const {context, Element} = harness();
+  const message = new Element();
+  context.appendAnalysisChart(message, {
+    metadata: {chart: {type: 'line', x: 'mes', y: 'faturamento', title: 'Faturamento'}},
+    data: [{mes: '2026-01', faturamento: 10}, {mes: '2026-02', faturamento: 30},
+      {mes: '2026-08', faturamento: 20}],
+  });
+  const svg = message.children[0];
+  assert.equal(svg.role, 'img');
+  assert.match(svg['aria-label'], /Faturamento/);
+  assert.equal(svg.children.filter(child => child.r === '4').length, 3);
+  assert.equal(svg.children.filter(child => child.textContent?.startsWith('2026-')).length, 3);
+});
+
+test('monthly chart ignores invalid or missing analytical data', () => {
+  const {context, Element} = harness();
+  const message = new Element();
+  context.appendAnalysisChart(message, {metadata: {}, data: []});
+  context.appendAnalysisChart(message, {metadata: {chart: {x: 'mes', y: 'faturamento'}},
+    data: [{mes: '2026-01', faturamento: 'invalid'}]});
   assert.equal(message.children.length, 0);
 });
 

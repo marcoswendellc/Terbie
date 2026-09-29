@@ -130,9 +130,8 @@ class ContextResolver:
         for concept_name, pattern in patterns:
             if not re.search(pattern, normalized_question):
                 continue
-            if (
-                concept_name == "cliente"
-                and re.search(r"\bticket\s+medio\s+por\s+cliente\b", normalized_question)
+            if concept_name == "cliente" and re.search(
+                r"\bticket\s+medio\s+por\s+cliente\b", normalized_question
             ):
                 continue
 
@@ -154,7 +153,10 @@ class ContextResolver:
             "segmento": ("segmentos?|nm_segmento", "nm_segmento"),
             "bairro": ("bairros?", "bairro"),
             "cidade": ("cidades?", "cidade"),
-            "empreendimento": ("shoppings?|empreendimentos?|nm_empreendimento", "nm_empreendimento"),
+            "empreendimento": (
+                "shoppings?|empreendimentos?|nm_empreendimento",
+                "nm_empreendimento",
+            ),
             "genero": ("generos?|sexo|cd_sexo", "genero"),
             "faixa_etaria": ("faixas? etarias?|faixa_etaria", "faixa_etaria"),
         }
@@ -201,7 +203,7 @@ class ContextResolver:
                 continue
 
             # "por segmento (nm_segmento)" declares a grouping, not a value filter.
-            prefix = question[:match.start()]
+            prefix = question[: match.start()]
             if re.search(r"\bpor\s*$", prefix, flags=re.IGNORECASE):
                 continue
 

@@ -21,6 +21,7 @@ class PlanValidator:
         "outlier",
         "campaign_detail",
         "derive_demographics",
+        "derive_month",
         "persona_profile",
         "persona_comparison",
         "campaign_context_comparison",
@@ -57,10 +58,16 @@ class PlanValidator:
                 continue
             keys: list[tuple[str, str]] = []
             for context in contexts:
-                if not isinstance(context, dict) or not context.get("promotion") or not context.get("shopping"):
+                if (
+                    not isinstance(context, dict)
+                    or not context.get("promotion")
+                    or not context.get("shopping")
+                ):
                     warnings.append("Campanha e shopping são obrigatórios em cada item comparado.")
                     continue
-                keys.append((str(context["promotion"]).casefold(), str(context["shopping"]).casefold()))
+                keys.append(
+                    (str(context["promotion"]).casefold(), str(context["shopping"]).casefold())
+                )
             if len(keys) != len(set(keys)):
                 warnings.append("A comparação contém itens duplicados.")
         return warnings

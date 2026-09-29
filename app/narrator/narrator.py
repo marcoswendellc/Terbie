@@ -54,22 +54,47 @@ class TerbieNarrator:
         if context.intent == "metric_query" and context.dimension_columns:
             columns = [*context.dimension_columns, *context.metric_columns]
             labels = {
-                "nm_segmento": "Segmento", "nm_fantasa": "Loja", "genero": "Gênero",
-                "bairro": "Bairro", "cidade": "Cidade", "faixa_etaria": "Faixa etária",
-                "nm_empreendimento": "Shopping", **ComparisonStrategy._METRIC_LABELS,
+                "mes": "Mês",
+                "nm_segmento": "Segmento",
+                "nm_fantasa": "Loja",
+                "genero": "Gênero",
+                "bairro": "Bairro",
+                "cidade": "Cidade",
+                "faixa_etaria": "Faixa etária",
+                "nm_empreendimento": "Shopping",
+                **ComparisonStrategy._METRIC_LABELS,
             }
             lines = [
                 "| " + " | ".join(labels.get(column, column) for column in columns) + " |",
                 "| " + " | ".join("---" for _ in columns) + " |",
             ]
             for row in context.data:
-                lines.append("| " + " | ".join(
-                    self._formatter.value(column, row.get(column)).replace("|", "\\|")
-                    for column in columns
-                ) + " |")
+                lines.append(
+                    "| "
+                    + " | ".join(
+                        self._formatter.value(column, row.get(column)).replace("|", "\\|")
+                        for column in columns
+                    )
+                    + " |"
+                )
+            metadata = {**self._metadata(context), "narrative_provider": "deterministic_table"}
+            if context.dimension_columns == ["mes"] and context.metric_columns:
+                metadata["chart"] = {
+                    "type": "line",
+                    "x": "mes",
+                    "y": context.metric_columns[0],
+                    "title": labels.get(context.metric_columns[0], context.metric_columns[0]),
+                }
+                lines.insert(
+                    0,
+                    "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n",
+                )
             return NarratorResponse(
-                answer="\n".join(lines), summary=None, highlights=[], warnings=context.warnings,
-                metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
+                answer="\n".join(lines),
+                summary=None,
+                highlights=[],
+                warnings=context.warnings,
+                metadata=metadata,
             )
 
         if context.intent in {

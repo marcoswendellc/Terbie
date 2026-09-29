@@ -1,0 +1,213 @@
+{
+  "mode": "configured-providers-local-fallback",
+  "source_rows": 78164,
+  "seed": 20260929,
+  "passed": 25,
+  "total": 25,
+  "cases": [
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Clientes únicos |\n| --- | --- |\n| Feminino | 5.668 |\n| Masculino | 1.976 |\n| Outros | 73 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por bairro em 2026?",
+      "passed": true,
+      "expected_rows": 552,
+      "actual_rows": 552,
+      "answer": "Foram identificados 12 clientes únicos.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento (nm_segmento) em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "O faturamento no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026 foi de R$ 6.842,03.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Quantidade de compras |\n| --- | --- |\n| Feminino | 13.832 |\n| Masculino | 3.900 |\n| Outros | 117 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por loja em 2026?",
+      "passed": true,
+      "expected_rows": 197,
+      "actual_rows": 197,
+      "answer": "| Loja | Faturamento |\n| --- | --- |\n| 1890 BISTRO | R$ 533,00 |\n| 5 À SEC | R$ 445,00 |\n| ACIUM BURITI | R$ 7.789,00 |\n| ADCOS | R$ 21.429,00 |\n| ALCATEIA (Promoção Mães E Namorados 2026) | R$ 9.640,40 |\n| AMOR DE MÃE | R$ 1.904,30 |\n| ANACAPRI | R$ 22.731,38 |\n| ANDABELLA | R$ 20.295,26 |\n| ANDROID CELULAR | R$ 25.334,83 |\n| ARAMIS | R$ 10.788,24 |\n| AREZZO | R$ 13.950,37 |\n| ARTESA FOLHEADOS | R$ 1.770,00 |\n| AZUL VIAGENS | R$ 388.489,37 |\n| BABOO BURITI | R$ 408,40 |\n| BAGAGGIO | R$ 20.976,54 |\n| BAUMMER | R$ 5.869,50 |\n| BEM CASEIRINHO | R$ 360,40 |\n| BIBI CALCADOS | R$ 9.195,80 |\n| BISTRÔGONOFE | R$ 1.368,12 |\n| BOBS | R$ 319,57 |\n| BORELLI | R$ 3.857,50 |\n| BRASIL 70 | R$ 565,90 |\n| BRASIL CACAU | R$ 903,84 |\n| BURGER KING | R$ 4.261,41 |\n| BYBLOS | R$ 51.900,16 |\n| Bio Mundo | R$ 1.267,22 |\n| C&A MODAS | R$ 253.951,59 |\n| CACAU SHOW | R$ 22.852,47 |\n| CASA DO CELULAR | R$ 9.282,33 |\n| CASAS BAHIA | R$ 209.556,85 |\n| CELL 7 | R$ 3.587,57 |\n| CENTAURO | R$ 85.690,27 |\n| CHILLI BEANS | R$ 10.040,99 |\n| CHIQUINHO SORVETES | R$ 562,00 |\n| CIA DO TERNO | R$ 59.529,00 |\n| CLARO | R$ 56.028,82 |\n| CLUBE MELISSA | R$ 13.531,25 |\n| COMANDO AIRSOFT | R$ 4.897,12 |\n| CONEXÃO ORIGINAL | R$ 35.670,77 |\n| CONSTANCE | R$ 67.857,36 |\n| CONTÉM MULTIMAKES | R$ 22.065,70 |\n| COXINHA EXPRESS | R$ 61,30 |\n| CROCS | R$ 30.676,36 |\n| CVC TURISMO | R$ 172.439,83 |\n| Camarada Camarão | R$ 21.201,95 |\n| DAISO | R$ 18.388,98 |\n| DECK DO CHOPP LOUNGE (Promoção Mães E Namorados 2026) | R$ 44,00 |\n| DEMOCRATA | R$ 25.391,05 |\n| DEVILLE JOIAS | R$ 150.115,90 |\n| DI SANTINI | R$ 4.772,90 |\n| DIVINO FOGÃO | R$ 2.040,52 |\n| DOCE PALADAR | R$ 7.297,40 |\n| DRILL | R$ 8.473,86 |\n| DROGASIL | R$ 8.384,08 |\n| DUNKIN DONUTS | R$ 460,90 |\n| EMPADA CAPITAL | R$ 140,98 |\n| EMPORIO DAS CAPAS | R$ 345,00 |\n| ESPUMARIA | R$ 3.054,28 |\n| FABRICA DI CHOCOLATE | R$ 138,35 |\n| FASHION BIJU | R$ 3.356,67 |\n| FIT DISTRIBUIDORA LTDA | R$ 1.269,00 |\n| FLAVIO´S CALÇADOS | R$ 300.336,52 |\n| FOX SUPLEMENTOS DISTRIBUIDORA | R$ 1.208,41 |\n| FRANGO NO POTE (Promoção Mães E Namorados 2026) | R$ 305,50 |\n| FRIDA DE LUXE | R$ 8.498,37 |\n| FUJIOKA | R$ 84.874,60 |\n| Facinatus | R$ 5.549,98 |\n| Florenza semi joias | R$ 5.338,54 |\n| GENTLEMAN | R$ 112.050,70 |\n| GIO LASER | R$ 1.080,00 |\n| GIRAFFAS | R$ 49,00 |\n| GIRAFFAS (Promoção Mães E Namorados 2026) | R$ 3.354,90 |\n| GO JUICE | R$ 508,90 |\n| GRANADO | R$ 38.210,29 |\n| GRILETTO | R$ 600,30 |\n| GROOVE FRANQUIAS | R$ 1.978,28 |\n| GYN SORVETES | R$ 24,00 |\n| Goiás Store | R$ 5.787,20 |\n| HAVAIANAS | R$ 6.607,96 |\n| HERING STORE | R$ 24.088,07 |\n| HI FLY | R$ 16.426,72 |\n| HOPE | R$ 14.024,75 |\n| HUMAI 1 ALIMENTACAO EIRELI | R$ 462,00 |\n| INOVAR COSMÉTICOS | R$ 46.197,35 |\n| INTIWEAR | R$ 13.398,63 |\n| JAH AÇAÍ | R$ 537,27 |\n| JEAN DARROT | R$ 172.647,48 |\n| JUDITE BERENICE | R$ 6.053,23 |\n| KALUNGA | R$ 19.658,37 |\n| KAZZU AZZE | R$ 22.304,51 |\n| KLIN | R$ 11.608,99 |\n| KOMIKETO | R$ 856,73 |\n| KOPENHAGEN | R$ 1.398,31 |\n| LE SENECHAL | R$ 18.751,00 |\n| LES CHEMISES | R$ 30.269,00 |\n| LIFE BY VIVARA (Promoção Mães E Namorados 2026) | R$ 67.960,20 |\n| LINDA DE SE VER | R$ 3.669,50 |\n| LOJAS AMERICANAS | R$ 72.919,20 |\n| LOJAS MARISA | R$ 44.840,50 |\n| LOUNGERIE | R$ 6.283,54 |\n| LUPO | R$ 28.041,61 |\n| Leitura | R$ 23.826,75 |\n| L’CCOCITANE | R$ 13.111,73 |\n| M. ADRIANE | R$ 1.860,00 |\n| MALWEE BRASILEIRINHOS | R$ 16.322,30 |\n| MANGILI | R$ 2.078,50 |\n| MAREYE | R$ 599,90 |\n| MAROLA SURF WEAR | R$ 1.020,00 |\n| MAX SUSHI | R$ 1.496,76 |\n| MC DONALD | R$ 50,50 |\n| MC DONALDS | R$ 7.442,27 |\n| MCDONALD'S | R$ 62,00 |\n| MEGA CELL | R$ 570,00 |\n| MILANO | R$ 101.909,50 |\n| MILKY MOO | R$ 1.000,80 |\n| MILON | R$ 20.565,29 |\n| MINI KALZONE | R$ 1.639,20 |\n| MISS MAKE (Promoção Mães E Namorados 2026) | R$ 7.645,01 |\n| MOLEMANIA | R$ 20.436,03 |\n| MOVIE | R$ 420,00 |\n| MOYA JOALHEIROS | R$ 46.992,00 |\n| MR. BROOK | R$ 29.487,40 |\n| MR. FOOT | R$ 11.204,61 |\n| Magazine Luiza | R$ 221.051,57 |\n| Meu Crepe | R$ 291,90 |\n| Murano | R$ 238,85 |\n| NATURA COSMÉTICOS | R$ 42.370,46 |\n| NAÇÃO COLORADA | R$ 4.310,49 |\n| NAÇÃO RUBRO NEGRA | R$ 21.308,94 |\n| NOVO MUNDO | R$ 66.389,91 |\n| NÉCTAR LANCHES | R$ 4.874,75 |\n| O BOTICÁRIO | R$ 255.124,80 |\n| ONE STORE | R$ 1.904,74 |\n| OPHICINA | R$ 10.054,95 |\n| ORTOBOM | R$ 11.307,74 |\n| OTICA DINIZ | R$ 10.699,00 |\n| OTICAS CHILLI BEANS | R$ 23.343,96 |\n| OTICAS VIDA | R$ 41.661,68 |\n| Outback | R$ 20.162,25 |\n| PANDORA | R$ 20.306,60 |\n| PERNAMBUCANAS | R$ 86.905,34 |\n| PEROLAS MAKE QUIOSQUE | R$ 2.824,99 |\n| PEZINHO E CIA | R$ 20.623,54 |\n| PITICAS | R$ 1.141,40 |\n| PIZZA HUT | R$ 781,70 |\n| PLANET PARK | R$ 150,00 |\n| POLO WEAR | R$ 18.226,29 |\n| PONTO FRIO | R$ 77.484,26 |\n| POPCORN GOURMET | R$ 20,00 |\n| POPEYES | R$ 7.299,10 |\n| PROBEL | R$ 7.340,00 |\n| PROGRAM | R$ 7.476,76 |\n| Pimenta verde KFC | R$ 1.665,40 |\n| PÉROLAS MAKE | R$ 10.649,88 |\n| QG JEITINHO BRASILEIRO | R$ 2.214,35 |\n| QÓCULOS | R$ 55.586,00 |\n| REALME | R$ 280,00 |\n| REFEITORIA | R$ 518,00 |\n| RENNER | R$ 314.573,48 |\n| RHOMA | R$ 2.124,10 |\n| RI HAPPY | R$ 33.781,08 |\n| RIACHUELO | R$ 236.401,51 |\n| ROMMANEL | R$ 18.921,00 |\n| SAFE COVER | R$ 3.320,00 |\n| SAMSUNG | R$ 51.166,00 |\n| SANTA LOLLA | R$ 26.079,70 |\n| SCAMBOO | R$ 29.963,20 |\n| SEMPRE BARBARA | R$ 677,06 |\n| SESTINI | R$ 19.647,53 |\n| SHERIFE | R$ 9.452,99 |\n| SPACE TECHNOLOGY | R$ 1.494,00 |\n| SPOLETO | R$ 2.568,65 |\n| STANLEY | R$ 5.923,45 |\n| STILO A | R$ 330.754,57 |\n| SUBWAY | R$ 493,85 |\n| SUSHILOKO | R$ 1.121,70 |\n| Shopping dos cosméticos | R$ 28.918,88 |\n| TENNIS SHOES | R$ 75.697,84 |\n| TIM | R$ 6.797,00 |\n| TIM BRASIL | R$ 17.626,00 |\n| TING EXPRESS | R$ 1.621,80 |\n| TOUTI BURITI | R$ 1.982,75 |\n| TXC | R$ 4.508,70 |\n| USAFLEX | R$ 29.948,99 |\n| VIA VÊNETO | R$ 15.980,42 |\n| VISTAVIE | R$ 9.539,96 |\n| VIVARA | R$ 85.984,31 |\n| VIVO | R$ 59.850,60 |\n| VIZZARD JÓIAS | R$ 15.000,00 |\n| WE PINK BURITI SHOPPING | R$ 59.663,46 |\n| WILLY BOLSAS E ACESSORIOS BURITI | R$ 2.914,10 |\n| WORLD PULSEIRAS | R$ 359,97 |\n| WORLD TENNIS | R$ 21.476,48 |\n| YOUCOM | R$ 24.800,10 |\n| fini | R$ 399,28 |\n| ÓTICAS BRASIL | R$ 90.982,86 |\n| ÓTICAS PARIS (Promoção Mães E Namorados 2026) | R$ 9.371,00 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "O faturamento no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026 foi de R$ 6.842,03.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por bairro em 2026?",
+      "passed": true,
+      "expected_rows": 552,
+      "actual_rows": 552,
+      "answer": "Foram cadastradas 40 notas no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento (nm_segmento) em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "Foram identificados 111 clientes únicos.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por bairro em 2026?",
+      "passed": true,
+      "expected_rows": 552,
+      "actual_rows": 552,
+      "answer": "O faturamento no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026 foi de R$ 8.970,59.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero (genero) em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Clientes únicos |\n| --- | --- |\n| Feminino | 5.668 |\n| Masculino | 1.976 |\n| Outros | 73 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero (genero) em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Faturamento |\n| --- | --- |\n| Feminino | R$ 4.316.544,34 |\n| Masculino | R$ 1.787.170,42 |\n| Outros | R$ 52.776,08 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "Foram cadastradas 140 notas no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o faturamento da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Faturamento |\n| --- | --- |\n| Feminino | R$ 4.316.544,34 |\n| Masculino | R$ 1.787.170,42 |\n| Outros | R$ 52.776,08 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento (nm_segmento) em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "Foram cadastradas 140 notas no empreendimento Buriti Shopping na campanha Promoção Mães E Namorados 2026.",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por loja em 2026?",
+      "passed": true,
+      "expected_rows": 197,
+      "actual_rows": 197,
+      "answer": "| Loja | Quantidade de compras |\n| --- | --- |\n| 1890 BISTRO | 10 |\n| 5 À SEC | 1 |\n| ACIUM BURITI | 18 |\n| ADCOS | 46 |\n| ALCATEIA (Promoção Mães E Namorados 2026) | 26 |\n| AMOR DE MÃE | 6 |\n| ANACAPRI | 95 |\n| ANDABELLA | 81 |\n| ANDROID CELULAR | 18 |\n| ARAMIS | 20 |\n| AREZZO | 37 |\n| ARTESA FOLHEADOS | 16 |\n| AZUL VIAGENS | 62 |\n| BABOO BURITI | 5 |\n| BAGAGGIO | 45 |\n| BAUMMER | 25 |\n| BEM CASEIRINHO | 15 |\n| BIBI CALCADOS | 21 |\n| BISTRÔGONOFE | 27 |\n| BOBS | 23 |\n| BORELLI | 97 |\n| BRASIL 70 | 2 |\n| BRASIL CACAU | 27 |\n| BURGER KING | 74 |\n| BYBLOS | 66 |\n| Bio Mundo | 16 |\n| C&A MODAS | 920 |\n| CACAU SHOW | 347 |\n| CASA DO CELULAR | 9 |\n| CASAS BAHIA | 175 |\n| CELL 7 | 19 |\n| CENTAURO | 234 |\n| CHILLI BEANS | 23 |\n| CHIQUINHO SORVETES | 24 |\n| CIA DO TERNO | 93 |\n| CLARO | 25 |\n| CLUBE MELISSA | 53 |\n| COMANDO AIRSOFT | 13 |\n| CONEXÃO ORIGINAL | 79 |\n| CONSTANCE | 226 |\n| CONTÉM MULTIMAKES | 117 |\n| COXINHA EXPRESS | 2 |\n| CROCS | 62 |\n| CVC TURISMO | 23 |\n| Camarada Camarão | 75 |\n| DAISO | 278 |\n| DECK DO CHOPP LOUNGE (Promoção Mães E Namorados 2026) | 3 |\n| DEMOCRATA | 59 |\n| DEVILLE JOIAS | 98 |\n| DI SANTINI | 20 |\n| DIVINO FOGÃO | 37 |\n| DOCE PALADAR | 75 |\n| DRILL | 15 |\n| DROGASIL | 99 |\n| DUNKIN DONUTS | 16 |\n| EMPADA CAPITAL | 7 |\n| EMPORIO DAS CAPAS | 2 |\n| ESPUMARIA | 21 |\n| FABRICA DI CHOCOLATE | 3 |\n| FASHION BIJU | 66 |\n| FIT DISTRIBUIDORA LTDA | 1 |\n| FLAVIO´S CALÇADOS | 703 |\n| FOX SUPLEMENTOS DISTRIBUIDORA | 9 |\n| FRANGO NO POTE (Promoção Mães E Namorados 2026) | 8 |\n| FRIDA DE LUXE | 49 |\n| FUJIOKA | 104 |\n| Facinatus | 51 |\n| Florenza semi joias | 63 |\n| GENTLEMAN | 210 |\n| GIO LASER | 1 |\n| GIRAFFAS | 1 |\n| GIRAFFAS (Promoção Mães E Namorados 2026) | 57 |\n| GO JUICE | 18 |\n| GRANADO | 146 |\n| GRILETTO | 12 |\n| GROOVE FRANQUIAS | 38 |\n| GYN SORVETES | 2 |\n| Goiás Store | 15 |\n| HAVAIANAS | 72 |\n| HERING STORE | 75 |\n| HI FLY | 31 |\n| HOPE | 47 |\n| HUMAI 1 ALIMENTACAO EIRELI | 16 |\n| INOVAR COSMÉTICOS | 353 |\n| INTIWEAR | 42 |\n| JAH AÇAÍ | 23 |\n| JEAN DARROT | 179 |\n| JUDITE BERENICE | 30 |\n| KALUNGA | 175 |\n| KAZZU AZZE | 87 |\n| KLIN | 40 |\n| KOMIKETO | 14 |\n| KOPENHAGEN | 35 |\n| LE SENECHAL | 132 |\n| LES CHEMISES | 67 |\n| LIFE BY VIVARA (Promoção Mães E Namorados 2026) | 85 |\n| LINDA DE SE VER | 11 |\n| LOJAS AMERICANAS | 979 |\n| LOJAS MARISA | 245 |\n| LOUNGERIE | 27 |\n| LUPO | 131 |\n| Leitura | 209 |\n| L’CCOCITANE | 56 |\n| M. ADRIANE | 8 |\n| MALWEE BRASILEIRINHOS | 64 |\n| MANGILI | 11 |\n| MAREYE | 2 |\n| MAROLA SURF WEAR | 3 |\n| MAX SUSHI | 21 |\n| MC DONALD | 3 |\n| MC DONALDS | 159 |\n| MCDONALD'S | 7 |\n| MEGA CELL | 1 |\n| MILANO | 325 |\n| MILKY MOO | 35 |\n| MILON | 60 |\n| MINI KALZONE | 69 |\n| MISS MAKE (Promoção Mães E Namorados 2026) | 65 |\n| MOLEMANIA | 146 |\n| MOVIE | 14 |\n| MOYA JOALHEIROS | 49 |\n| MR. BROOK | 65 |\n| MR. FOOT | 25 |\n| Magazine Luiza | 102 |\n| Meu Crepe | 8 |\n| Murano | 7 |\n| NATURA COSMÉTICOS | 216 |\n| NAÇÃO COLORADA | 17 |\n| NAÇÃO RUBRO NEGRA | 60 |\n| NOVO MUNDO | 54 |\n| NÉCTAR LANCHES | 69 |\n| O BOTICÁRIO | 921 |\n| ONE STORE | 5 |\n| OPHICINA | 25 |\n| ORTOBOM | 4 |\n| OTICA DINIZ | 9 |\n| OTICAS CHILLI BEANS | 29 |\n| OTICAS VIDA | 27 |\n| Outback | 83 |\n| PANDORA | 18 |\n| PERNAMBUCANAS | 415 |\n| PEROLAS MAKE QUIOSQUE | 92 |\n| PEZINHO E CIA | 68 |\n| PITICAS | 12 |\n| PIZZA HUT | 20 |\n| PLANET PARK | 2 |\n| POLO WEAR | 74 |\n| PONTO FRIO | 81 |\n| POPCORN GOURMET | 1 |\n| POPEYES | 143 |\n| PROBEL | 2 |\n| PROGRAM | 19 |\n| Pimenta verde KFC | 38 |\n| PÉROLAS MAKE | 199 |\n| QG JEITINHO BRASILEIRO | 40 |\n| QÓCULOS | 26 |\n| REALME | 1 |\n| REFEITORIA | 14 |\n| RENNER | 1.095 |\n| RHOMA | 8 |\n| RI HAPPY | 192 |\n| RIACHUELO | 913 |\n| ROMMANEL | 39 |\n| SAFE COVER | 10 |\n| SAMSUNG | 19 |\n| SANTA LOLLA | 78 |\n| SCAMBOO | 52 |\n| SEMPRE BARBARA | 4 |\n| SESTINI | 47 |\n| SHERIFE | 36 |\n| SPACE TECHNOLOGY | 6 |\n| SPOLETO | 49 |\n| STANLEY | 20 |\n| STILO A | 1.194 |\n| SUBWAY | 11 |\n| SUSHILOKO | 15 |\n| Shopping dos cosméticos | 209 |\n| TENNIS SHOES | 130 |\n| TIM | 6 |\n| TIM BRASIL | 11 |\n| TING EXPRESS | 31 |\n| TOUTI BURITI | 11 |\n| TXC | 11 |\n| USAFLEX | 78 |\n| VIA VÊNETO | 10 |\n| VISTAVIE | 32 |\n| VIVARA | 51 |\n| VIVO | 13 |\n| VIZZARD JÓIAS | 10 |\n| WE PINK BURITI SHOPPING | 311 |\n| WILLY BOLSAS E ACESSORIOS BURITI | 10 |\n| WORLD PULSEIRAS | 2 |\n| WORLD TENNIS | 46 |\n| YOUCOM | 73 |\n| fini | 25 |\n| ÓTICAS BRASIL | 104 |\n| ÓTICAS PARIS (Promoção Mães E Namorados 2026) | 8 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o quantidade de compras da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero (genero) em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Quantidade de compras |\n| --- | --- |\n| Feminino | 13.832 |\n| Masculino | 3.900 |\n| Outros | 117 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por loja em 2026?",
+      "passed": true,
+      "expected_rows": 197,
+      "actual_rows": 197,
+      "answer": "| Loja | Clientes únicos |\n| --- | --- |\n| 1890 BISTRO | 8 |\n| 5 À SEC | 1 |\n| ACIUM BURITI | 18 |\n| ADCOS | 43 |\n| ALCATEIA (Promoção Mães E Namorados 2026) | 24 |\n| AMOR DE MÃE | 6 |\n| ANACAPRI | 89 |\n| ANDABELLA | 75 |\n| ANDROID CELULAR | 16 |\n| ARAMIS | 20 |\n| AREZZO | 35 |\n| ARTESA FOLHEADOS | 16 |\n| AZUL VIAGENS | 59 |\n| BABOO BURITI | 5 |\n| BAGAGGIO | 43 |\n| BAUMMER | 23 |\n| BEM CASEIRINHO | 12 |\n| BIBI CALCADOS | 20 |\n| BISTRÔGONOFE | 18 |\n| BOBS | 23 |\n| BORELLI | 79 |\n| BRASIL 70 | 2 |\n| BRASIL CACAU | 25 |\n| BURGER KING | 64 |\n| BYBLOS | 61 |\n| Bio Mundo | 16 |\n| C&A MODAS | 786 |\n| CACAU SHOW | 295 |\n| CASA DO CELULAR | 9 |\n| CASAS BAHIA | 153 |\n| CELL 7 | 18 |\n| CENTAURO | 225 |\n| CHILLI BEANS | 23 |\n| CHIQUINHO SORVETES | 20 |\n| CIA DO TERNO | 93 |\n| CLARO | 20 |\n| CLUBE MELISSA | 51 |\n| COMANDO AIRSOFT | 12 |\n| CONEXÃO ORIGINAL | 69 |\n| CONSTANCE | 215 |\n| CONTÉM MULTIMAKES | 109 |\n| COXINHA EXPRESS | 2 |\n| CROCS | 61 |\n| CVC TURISMO | 19 |\n| Camarada Camarão | 69 |\n| DAISO | 228 |\n| DECK DO CHOPP LOUNGE (Promoção Mães E Namorados 2026) | 3 |\n| DEMOCRATA | 56 |\n| DEVILLE JOIAS | 96 |\n| DI SANTINI | 20 |\n| DIVINO FOGÃO | 26 |\n| DOCE PALADAR | 61 |\n| DRILL | 13 |\n| DROGASIL | 88 |\n| DUNKIN DONUTS | 16 |\n| EMPADA CAPITAL | 4 |\n| EMPORIO DAS CAPAS | 2 |\n| ESPUMARIA | 20 |\n| FABRICA DI CHOCOLATE | 3 |\n| FASHION BIJU | 64 |\n| FIT DISTRIBUIDORA LTDA | 1 |\n| FLAVIO´S CALÇADOS | 624 |\n| FOX SUPLEMENTOS DISTRIBUIDORA | 7 |\n| FRANGO NO POTE (Promoção Mães E Namorados 2026) | 5 |\n| FRIDA DE LUXE | 46 |\n| FUJIOKA | 98 |\n| Facinatus | 48 |\n| Florenza semi joias | 49 |\n| GENTLEMAN | 195 |\n| GIO LASER | 1 |\n| GIRAFFAS | 1 |\n| GIRAFFAS (Promoção Mães E Namorados 2026) | 35 |\n| GO JUICE | 10 |\n| GRANADO | 127 |\n| GRILETTO | 7 |\n| GROOVE FRANQUIAS | 30 |\n| GYN SORVETES | 2 |\n| Goiás Store | 13 |\n| HAVAIANAS | 69 |\n| HERING STORE | 73 |\n| HI FLY | 30 |\n| HOPE | 42 |\n| HUMAI 1 ALIMENTACAO EIRELI | 14 |\n| INOVAR COSMÉTICOS | 320 |\n| INTIWEAR | 41 |\n| JAH AÇAÍ | 13 |\n| JEAN DARROT | 161 |\n| JUDITE BERENICE | 30 |\n| KALUNGA | 144 |\n| KAZZU AZZE | 84 |\n| KLIN | 36 |\n| KOMIKETO | 13 |\n| KOPENHAGEN | 22 |\n| LE SENECHAL | 101 |\n| LES CHEMISES | 65 |\n| LIFE BY VIVARA (Promoção Mães E Namorados 2026) | 81 |\n| LINDA DE SE VER | 10 |\n| LOJAS AMERICANAS | 678 |\n| LOJAS MARISA | 224 |\n| LOUNGERIE | 26 |\n| LUPO | 126 |\n| Leitura | 168 |\n| L’CCOCITANE | 49 |\n| M. ADRIANE | 7 |\n| MALWEE BRASILEIRINHOS | 60 |\n| MANGILI | 11 |\n| MAREYE | 2 |\n| MAROLA SURF WEAR | 3 |\n| MAX SUSHI | 16 |\n| MC DONALD | 3 |\n| MC DONALDS | 126 |\n| MCDONALD'S | 7 |\n| MEGA CELL | 1 |\n| MILANO | 311 |\n| MILKY MOO | 29 |\n| MILON | 54 |\n| MINI KALZONE | 43 |\n| MISS MAKE (Promoção Mães E Namorados 2026) | 60 |\n| MOLEMANIA | 129 |\n| MOVIE | 9 |\n| MOYA JOALHEIROS | 48 |\n| MR. BROOK | 60 |\n| MR. FOOT | 24 |\n| Magazine Luiza | 90 |\n| Meu Crepe | 7 |\n| Murano | 6 |\n| NATURA COSMÉTICOS | 206 |\n| NAÇÃO COLORADA | 17 |\n| NAÇÃO RUBRO NEGRA | 57 |\n| NOVO MUNDO | 53 |\n| NÉCTAR LANCHES | 30 |\n| O BOTICÁRIO | 876 |\n| ONE STORE | 5 |\n| OPHICINA | 24 |\n| ORTOBOM | 4 |\n| OTICA DINIZ | 9 |\n| OTICAS CHILLI BEANS | 29 |\n| OTICAS VIDA | 27 |\n| Outback | 73 |\n| PANDORA | 17 |\n| PERNAMBUCANAS | 350 |\n| PEROLAS MAKE QUIOSQUE | 84 |\n| PEZINHO E CIA | 65 |\n| PITICAS | 11 |\n| PIZZA HUT | 15 |\n| PLANET PARK | 2 |\n| POLO WEAR | 71 |\n| PONTO FRIO | 71 |\n| POPCORN GOURMET | 1 |\n| POPEYES | 106 |\n| PROBEL | 2 |\n| PROGRAM | 17 |\n| Pimenta verde KFC | 33 |\n| PÉROLAS MAKE | 179 |\n| QG JEITINHO BRASILEIRO | 31 |\n| QÓCULOS | 26 |\n| REALME | 1 |\n| REFEITORIA | 8 |\n| RENNER | 890 |\n| RHOMA | 8 |\n| RI HAPPY | 172 |\n| RIACHUELO | 760 |\n| ROMMANEL | 37 |\n| SAFE COVER | 10 |\n| SAMSUNG | 18 |\n| SANTA LOLLA | 74 |\n| SCAMBOO | 52 |\n| SEMPRE BARBARA | 4 |\n| SESTINI | 47 |\n| SHERIFE | 35 |\n| SPACE TECHNOLOGY | 6 |\n| SPOLETO | 43 |\n| STANLEY | 19 |\n| STILO A | 1.092 |\n| SUBWAY | 11 |\n| SUSHILOKO | 15 |\n| Shopping dos cosméticos | 184 |\n| TENNIS SHOES | 122 |\n| TIM | 4 |\n| TIM BRASIL | 11 |\n| TING EXPRESS | 26 |\n| TOUTI BURITI | 11 |\n| TXC | 11 |\n| USAFLEX | 71 |\n| VIA VÊNETO | 10 |\n| VISTAVIE | 31 |\n| VIVARA | 47 |\n| VIVO | 10 |\n| VIZZARD JÓIAS | 10 |\n| WE PINK BURITI SHOPPING | 270 |\n| WILLY BOLSAS E ACESSORIOS BURITI | 10 |\n| WORLD PULSEIRAS | 2 |\n| WORLD TENNIS | 44 |\n| YOUCOM | 67 |\n| fini | 25 |\n| ÓTICAS BRASIL | 76 |\n| ÓTICAS PARIS (Promoção Mães E Namorados 2026) | 7 |",
+      "warnings": []
+    },
+    {
+      "question": "Qual o clientes únicos da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "Foram identificados 111 clientes únicos.",
+      "warnings": []
+    },
+    {
+      "question": "bom dia terbie, faça um gráfico evolutivo da quantidade de notas cadastradas em 2026 por mês",
+      "passed": true,
+      "expected_rows": 7,
+      "actual_rows": 7,
+      "answer": "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n\n| Mês | Quantidade de compras |\n| --- | --- |\n| 2026-01 | 5.736 |\n| 2026-03 | 3.701 |\n| 2026-04 | 7.589 |\n| 2026-05 | 32.802 |\n| 2026-06 | 13.831 |\n| 2026-07 | 8.775 |\n| 2026-08 | 5.730 |",
+      "warnings": []
+    },
+    {
+      "question": "qual a evolução mensal do faturamento nas campanhas em 2026?",
+      "passed": true,
+      "expected_rows": 7,
+      "actual_rows": 7,
+      "answer": "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n\n| Mês | Faturamento |\n| --- | --- |\n| 2026-01 | R$ 1.746.399,16 |\n| 2026-03 | R$ 1.213.144,02 |\n| 2026-04 | R$ 2.489.351,85 |\n| 2026-05 | R$ 11.318.124,63 |\n| 2026-06 | R$ 4.957.683,89 |\n| 2026-07 | R$ 2.558.435,47 |\n| 2026-08 | R$ 1.668.443,84 |",
+      "warnings": []
+    },
+    {
+      "question": "Mostre o faturamento por mês em 2026",
+      "passed": true,
+      "expected_rows": 7,
+      "actual_rows": 7,
+      "answer": "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n\n| Mês | Faturamento |\n| --- | --- |\n| 2026-01 | R$ 1.746.399,16 |\n| 2026-03 | R$ 1.213.144,02 |\n| 2026-04 | R$ 2.489.351,85 |\n| 2026-05 | R$ 11.318.124,63 |\n| 2026-06 | R$ 4.957.683,89 |\n| 2026-07 | R$ 2.558.435,47 |\n| 2026-08 | R$ 1.668.443,84 |",
+      "warnings": []
+    },
+    {
+      "question": "qual campanha apresentou maior faturamento em 2026?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "A melhor campanha em 2026, considerando faturamento, foi Promoção Mães E Namorados 2026, no Buriti Shopping.",
+      "warnings": []
+    },
+    {
+      "question": "olá chat, bom dia! qual foi a campanha com melhor performance em 2026?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "A melhor campanha em 2026, considerando faturamento, foi Promoção Mães E Namorados 2026, no Buriti Shopping.",
+      "warnings": [
+        "A direção conversacional ficou indisponível; usei o planejamento padrão."
+      ]
+    },
+    {
+      "question": "Qual foi o faturamento, a quantidade de compras, os clientes únicos, o ticket médio por compra e o ticket médio por cliente da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por segmento (nm_segmento) em 2026?",
+      "passed": true,
+      "expected_rows": 47,
+      "actual_rows": 47,
+      "answer": "O faturamento foi de R$ 6.842,03, o volume de notas cadastradas foi de 140 compras, os clientes únicos foram 111, o ticket médio por compra foi de R$ 48,87 e o ticket médio por cliente foi de R$ 61,64.",
+      "warnings": []
+    },
+    {
+      "question": "Qual foi o faturamento, a quantidade de compras, os clientes únicos, o ticket médio por compra e o ticket médio por cliente da \"Promoção Mães E Namorados 2026\" do Buriti Shopping por gênero (genero) em 2026?",
+      "passed": true,
+      "expected_rows": 3,
+      "actual_rows": 3,
+      "answer": "| Gênero | Faturamento | Quantidade de compras | Clientes únicos | Ticket médio por compra | Ticket médio por cliente |\n| --- | --- | --- | --- | --- | --- |\n| Feminino | R$ 4.316.544,34 | 13.832 | 5.668 | R$ 312,07 | R$ 761,56 |\n| Masculino | R$ 1.787.170,42 | 3.900 | 1.976 | R$ 458,25 | R$ 904,44 |\n| Outros | R$ 52.776,08 | 117 | 73 | R$ 451,08 | R$ 722,96 |",
+      "warnings": []
+    }
+  ],
+  "external_model_verified": false,
+  "limitation": "ConnectError nas chamadas ao Gemini. Tentativa com rede rejeitada pela revisão automática de aprovação. Nenhuma validação externa concluída."
+}

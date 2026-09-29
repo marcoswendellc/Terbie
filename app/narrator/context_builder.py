@@ -11,6 +11,12 @@ class NarrativeContextBuilder:
         execution_result = ExecutionResult.model_validate(request.execution_result)
         data = execution_result.data
         columns = list(data[0].keys()) if data else []
+        grouped = set(execution_result.metadata.get("group_by_fields", []))
+        metric_columns = [
+            column
+            for column in self._metric_columns(data=data, columns=columns)
+            if column not in grouped
+        ]
 
         return NarrativeContext(
             question=request.question,
@@ -18,8 +24,8 @@ class NarrativeContextBuilder:
             data=data,
             columns=columns,
             top_row=data[0] if data else None,
-            metric_columns=self._metric_columns(data=data, columns=columns),
-            dimension_columns=self._dimension_columns(data=data, columns=columns),
+            metric_columns=metric_columns,
+            dimension_columns=[column for column in columns if column not in metric_columns],
             warnings=execution_result.warnings,
             intent=getattr(request.execution_plan, "intent", None),
             insight_result=request.insight_result,

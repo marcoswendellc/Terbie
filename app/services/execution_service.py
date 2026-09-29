@@ -6,6 +6,7 @@ from time import monotonic
 
 import pandas as pd
 
+from app.context_resolution.context_resolver import ContextResolver
 from app.conversation.budget import remaining_timeout
 from app.conversation.director import ConversationDirector, schema_context
 from app.core.config import Settings
@@ -22,6 +23,7 @@ from app.planner.models import ExecutionPlan
 from app.planner.validator import PlanValidator
 from app.query_plan.models import MultiQueryPlan, QueryPlan
 from app.query_plan.multi import MultiQueryPlanner
+from app.semantic.explicit_query import is_explicit_query
 from app.services.analysis_verifier import AnalysisVerifier
 from app.services.data_service import DataService
 from app.services.narrator_service import NarratorService
@@ -105,6 +107,20 @@ class ExecutionService:
                 response_type="clarification_required",
             )
         resolved_question = selected or question
+        if session is not None and (
+            is_explicit_query(resolved_question)
+            or ContextResolver().explicit_grouping(resolved_question)
+        ):
+            contextual = self._conversation_memory.contextualize(
+                session_id=session_id, question=resolved_question
+            )
+            if contextual.clarification:
+                return self._routed_response(
+                    question,
+                    response=contextual.clarification,
+                    response_type="clarification_required",
+                )
+            resolved_question = contextual.rewritten_question
         guard = self._intent_guard.evaluate(resolved_question)
         if guard.should_stop and guard.intent != "clarification":
             return self._routed_response(
@@ -162,6 +178,7 @@ class ExecutionService:
                 suggestions=response.suggestions,
                 analysis_questions=questions,
                 goal=response.metadata.get("goal", ""),
+                execution_metadata=response.metadata,
             )
             response = response.model_copy(
                 update={
@@ -740,6 +757,9 @@ class ExecutionService:
                     columns.add(column)
 
         for operation in plan.operations:
+            if operation.type == "derive_month":
+                columns.add(operation.field)
+                continue
             if operation.type in {"filter", "group_by"} and operation.field is not None:
                 columns.add(
                     self._resolve_required_source_column(
@@ -779,6 +799,8 @@ class ExecutionService:
                     if isinstance(metric, dict) and isinstance(metric.get("field"), str):
                         columns.add(metric["field"])
 
+        if any(operation.type == "derive_month" for operation in plan.operations):
+            columns.discard("mes")
         return {column for column in columns if column}
 
     def _resolve_dimension_column(

@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
 from app.core.exceptions import AnalyticalExecutionError
-
 from app.executor.context import ExecutionContext
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation

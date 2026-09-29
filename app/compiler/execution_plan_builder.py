@@ -124,6 +124,23 @@ class ExecutionPlanBuilder:
             ]
 
         demographic_fields = {"genero", "idade", "faixa_etaria"}
+        if "mes" in group_fields:
+            month_range = next(
+                (item for item in analytical_plan.filters if item.get("type") == "month_range"), {}
+            )
+            operations.append(
+                PlanOperation(
+                    type="derive_month",
+                    field="dt_registro_mos",
+                    parameters={
+                        "year": int(analytical_plan.time_scope)
+                        if analytical_plan.time_scope and analytical_plan.time_scope.isdigit()
+                        else None,
+                        "start_month": month_range.get("start", 1),
+                        "end_month": month_range.get("end", 12),
+                    },
+                )
+            )
         if demographic_fields.intersection(group_fields):
             operations.append(PlanOperation(type="derive_demographics"))
 
@@ -200,6 +217,10 @@ class ExecutionPlanBuilder:
             if operation is not None:
                 operations.append(operation)
 
+        if "mes" in group_fields:
+            operations.append(
+                PlanOperation(type="sort", field="mes", parameters={"direction": "asc"})
+            )
         return operations
 
     def _campaign_detail_operation(self) -> PlanOperation:
