@@ -23,6 +23,7 @@ from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
 from app.semantic.explicit_query import is_explicit_query
 from app.semantic.models import SemanticResolution
+from app.semantic.purchase_scope import is_customer_profile, purchase_period, ticket_geography
 from app.semantic.temporal import TemporalSelection
 
 logger = logging.getLogger(__name__)
@@ -130,7 +131,27 @@ class TerbieCompiler:
             semantic_resolution=semantic_resolution,
         )
         hypothesis = self._normalize_explicit_breakdown(request.question, hypothesis)
+        geographic_filter = ticket_geography(request.question)
+        if geographic_filter:
+            geographic_dimensions = self._context_resolver.explicit_grouping(request.question)
+            hypothesis = hypothesis.model_copy(
+                update={
+                    "analysis_type": "metric_query",
+                    "business_entity": geographic_dimensions[0].label
+                    if geographic_dimensions
+                    else None,
+                    "dimensions": [item.field for item in geographic_dimensions],
+                    "filters": [
+                        item
+                        for item in hypothesis.filters
+                        if item.get("field") not in {"cidade", "localidade", "uf"}
+                    ]
+                    + [geographic_filter],
+                }
+            )
         normalized = self._context_resolver._normalize_text(request.question)
+        if hypothesis.analysis_type == "ranking" and "bairro" in hypothesis.dimensions:
+            hypothesis.filters.append({"type": "filter", "field": "bairro", "operator": "not_null"})
         if re.search(r"\b(por mes|mensal|mensais|mes a mes)\b", normalized):
             metrics = [
                 m
@@ -186,6 +207,31 @@ class TerbieCompiler:
                             "end": months.index(mentioned[-1].group()) + 1,
                         }
                     )
+        period = purchase_period(request.question)
+        if "mes" not in hypothesis.dimensions:
+            if period is None and not re.search(r"\b(campanhas?|promocao|promocoes)\b", normalized):
+                year = re.search(r"\bem\s+(20\d{2})\b", normalized)
+                if year:
+                    period = {
+                        "type": "filter",
+                        "field": "dt_registro_mos",
+                        "operator": "date_between",
+                        "value": year.group(1) + "-01-01",
+                        "end_value": year.group(1) + "-12-31",
+                    }
+            if period:
+                hypothesis = hypothesis.model_copy(
+                    update={
+                        "filters": [
+                            *[
+                                item
+                                for item in hypothesis.filters
+                                if item.get("field") != "dt_registro_mos"
+                            ],
+                            period,
+                        ]
+                    }
+                )
         if temporal is not None:
             named_campaigns = {
                 match.value
@@ -379,7 +425,10 @@ class TerbieCompiler:
         hypothesis: AnalyticalHypothesis,
     ) -> AnalyticalHypothesis:
         normalized = self._context_resolver._normalize_text(question)
-        if not re.search(r"\bpersona\b|\bperfil\s+(?:do\s+)?publico\b", normalized):
+        if not (
+            is_customer_profile(question)
+            or re.search(r"\bpersona\b|\bperfil\s+(?:do\s+)?publico\b", normalized)
+        ):
             return hypothesis
 
         has_comparison_term = bool(
@@ -907,6 +956,8 @@ class TerbieCompiler:
 
         if hypothesis.analysis_type in {
             "comparison",
+            "persona",
+            "persona_comparison",
             "summary",
             "campaign_detail",
             "campaign_summary",

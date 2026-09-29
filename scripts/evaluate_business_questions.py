@@ -10,6 +10,7 @@ import json
 import logging
 import math
 import random
+import unicodedata
 from pathlib import Path
 
 import pandas as pd
@@ -22,8 +23,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--limit", type=int, default=40)
+    parser.add_argument("--start", type=int, default=0)
     args = parser.parse_args()
-    logging.disable(logging.CRITICAL)
+    provider_failures = {}
+
+    class ProviderFailureCounter(logging.Handler):
+        def emit(self, record):
+            if record.name == "app.conversation.gemini" and record.args:
+                name = str(record.args[0])
+                provider_failures[name] = provider_failures.get(name, 0) + 1
+
+    logging.disable(logging.NOTSET)
+    logging.getLogger().handlers = [ProviderFailureCounter()]
+    logging.getLogger().setLevel(logging.WARNING)
     settings = Settings() if args.live else Settings(_env_file=None)
     if args.live and (settings.reasoning_provider != "gemini" or not settings.gemini_api_key):
         raise SystemExit("Modelo Gemini não configurado; avaliação online não executada.")
@@ -151,6 +163,82 @@ def main():
         expected["ticket_medio_por_compra"] = expected.faturamento / expected.quantidade_compras
         expected["ticket_medio_por_cliente"] = expected.faturamento / expected.clientes_unicos
         cases.append((f"E por {label}?", expected, [field], list(expected.columns[1:])))
+
+    def normalize(value):
+        return "".join(
+            char
+            for char in unicodedata.normalize("NFKD", str(value).casefold())
+            if not unicodedata.combining(char)
+        ).strip()
+
+    for place, field, value in [
+        ("goiânia", "localidade", "goiania"),
+        ("aparecida de goiânia", "localidade", "aparecida de goiania"),
+        ("GO", "uf", "go"),
+        ("SP", "uf", "sp"),
+        ("estado de SP", "uf", "sp"),
+    ]:
+        selected = frame.loc[frame[field].map(normalize).eq(value)]
+        expected = pd.DataFrame(
+            [{"ticket_medio_por_compra": selected.vl_compra.sum() / selected.cd_compra.nunique()}]
+        )
+        cases.append(
+            (f"Qual o ticket médio de {place}?", expected, [], ["ticket_medio_por_compra"])
+        )
+    selected = frame.loc[frame.uf.map(normalize).eq("go")]
+    cases.append(
+        (
+            "e do GO?",
+            pd.DataFrame(
+                [
+                    {
+                        "ticket_medio_por_compra": selected.vl_compra.sum()
+                        / selected.cd_compra.nunique()
+                    }
+                ]
+            ),
+            [],
+            ["ticket_medio_por_compra"],
+        )
+    )
+    selected = frame.loc[
+        dates.dt.year.eq(2026)
+        & frame.bairro.notna()
+        & ~frame.bairro.map(normalize).isin(["", "null", "none", "nan", "nao informado"])
+    ]
+    expected = (
+        selected.groupby("bairro")
+        .agg(quantidade_compras=("cd_compra", "nunique"))
+        .reset_index()
+        .sort_values("quantidade_compras", ascending=False)
+        .head(1)
+    )
+    cases.append(
+        (
+            "qual bairro apresentou maior volume de notas cadastradas em 2026?",
+            expected,
+            ["bairro"],
+            ["quantidade_compras"],
+        )
+    )
+    selected = frame.loc[dates.dt.year.eq(2026) & dates.dt.month.eq(5)]
+    expected = pd.DataFrame(
+        [
+            {
+                "clientes_unicos": selected.sk_cliente.nunique(),
+                "quantidade_compras": selected.cd_compra.nunique(),
+            }
+        ]
+    )
+    cases.append(
+        (
+            "qual o perfil dos clientes das compras em maio/26?",
+            expected,
+            [],
+            ["clientes_unicos", "quantidade_compras"],
+        )
+    )
+    cases = cases[args.start :]
     report = []
     for index, (question, expected, dimensions, indicators) in enumerate(cases[: args.limit]):
         try:
@@ -196,12 +284,15 @@ def main():
     output = Path("evals") / (
         "business-live-results.json" if args.live else "business-local-results.json"
     )
+    if args.start:
+        output = output.with_stem(output.stem + f"-{args.start}")
     output.parent.mkdir(exist_ok=True)
     output.write_text(
         json.dumps(
             {
                 "mode": "configured-providers-local-data" if args.live else "offline",
                 "model_activity": model_activity,
+                "provider_failure_types": provider_failures,
                 "source_rows": len(frame),
                 "seed": 20260929,
                 "passed": sum(item["passed"] for item in report),

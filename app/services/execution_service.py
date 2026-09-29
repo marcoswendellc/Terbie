@@ -110,6 +110,9 @@ class ExecutionService:
         if session is not None and (
             is_explicit_query(resolved_question)
             or ContextResolver().explicit_grouping(resolved_question)
+            or re.fullmatch(
+                r"e\s+(?:do|de|da)\s+[A-Za-z]{2}[?!.]?", resolved_question.strip(), re.IGNORECASE
+            )
         ):
             contextual = self._conversation_memory.contextualize(
                 session_id=session_id, question=resolved_question
@@ -693,6 +696,12 @@ class ExecutionService:
                     "a resposta usou o último cache válido."
                 )
                 return {name: frame.copy() for name, frame in stale.items()}
+        loaded = {
+            name: frame.assign(cidade=frame["localidade"])
+            if "localidade" in frame.columns and "cidade" not in frame.columns
+            else frame
+            for name, frame in loaded.items()
+        }
         if ttl > 0:
             with self._cache_lock:
                 self._dataframe_cache = (

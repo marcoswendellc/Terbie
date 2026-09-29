@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from app.executor.context import ExecutionContext
+from app.executor.numeric import numeric_series
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
 
@@ -35,6 +36,26 @@ class PersonaProfileOperation(BaseOperation):
         )
         locality, locality_share, locality_count = self._dominant(locality_series)
         context.metadata["persona_visitors"] = len(visitors)
+        context.metadata["profile_missing"] = {
+            column: int(
+                (
+                    visitors[column].isna()
+                    | visitors[column]
+                    .astype("string")
+                    .str.strip()
+                    .str.casefold()
+                    .isin(["", "null", "none", "nan", "não informado"])
+                ).sum()
+            )
+            for column in ["genero", "faixa_etaria", "cidade", "uf", "bairro"]
+            if column in visitors
+        }
+        purchases = int(dataframe["cd_compra"].nunique()) if "cd_compra" in dataframe else None
+        revenue = (
+            float(numeric_series(dataframe["vl_compra"]).sum())
+            if "vl_compra" in dataframe
+            else None
+        )
 
         return pd.DataFrame(
             [
@@ -49,6 +70,12 @@ class PersonaProfileOperation(BaseOperation):
                     "percentual_localidade": locality_share,
                     "quantidade_localidade": locality_count,
                     "clientes_unicos": len(visitors),
+                    **({"quantidade_compras": purchases} if purchases is not None else {}),
+                    **(
+                        {"faturamento": revenue, "ticket_medio_por_compra": revenue / purchases}
+                        if revenue is not None and purchases
+                        else {}
+                    ),
                 },
             ],
         )

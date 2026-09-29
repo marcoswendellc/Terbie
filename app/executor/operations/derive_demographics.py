@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from app.executor.context import ExecutionContext
+from app.executor.dates import date_series
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
 
@@ -35,7 +36,7 @@ class DeriveDemographicsOperation(BaseOperation):
             context.warnings.append("Campo demográfico não encontrado: cd_sexo.")
 
         if "dt_nascimento" in result.columns:
-            birth_dates = pd.to_datetime(result["dt_nascimento"], errors="coerce", dayfirst=True)
+            birth_dates = date_series(result["dt_nascimento"])
             today = pd.Timestamp.now().normalize()
             ages = today.year - birth_dates.dt.year
             before_birthday = (birth_dates.dt.month > today.month) | (
@@ -45,11 +46,15 @@ class DeriveDemographicsOperation(BaseOperation):
                 birth_dates.notna() & birth_dates.le(today),
             )
             result["idade"] = ages.astype("Int64")
-            result["faixa_etaria"] = pd.cut(
-                ages,
-                bins=[-1, 17, 24, 34, 44, 59, float("inf")],
-                labels=["0-17", "18-24", "25-34", "35-44", "45-59", "60+"],
-            ).astype("string").fillna("Não informado")
+            result["faixa_etaria"] = (
+                pd.cut(
+                    ages,
+                    bins=[-1, 17, 24, 34, 44, 59, float("inf")],
+                    labels=["0-17", "18-24", "25-34", "35-44", "45-59", "60+"],
+                )
+                .astype("string")
+                .fillna("Não informado")
+            )
         else:
             context.warnings.append("Campo demográfico não encontrado: dt_nascimento.")
 

@@ -97,6 +97,8 @@ class AggregateOperation(BaseOperation):
             return result[[*context.group_by_fields, alias]]
 
         quantity = working_frame[purchase_column].nunique()
+        if working_frame.empty:
+            return pd.DataFrame(columns=[alias])
         value = working_frame[value_column].sum() / quantity if quantity else 0
         return pd.DataFrame([{alias: value}])
 
@@ -169,6 +171,8 @@ class AggregateOperation(BaseOperation):
             )
 
         working_frame = dataframe.assign(**numeric_columns) if numeric_columns else dataframe
+        if working_frame.empty:
+            return pd.DataFrame(columns=[*context.group_by_fields, *aggregations])
         if context.group_by_fields:
             return (
                 working_frame.groupby(context.group_by_fields, dropna=False)

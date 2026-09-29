@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 import pandas as pd
 
 from app.executor.context import ExecutionContext
+from app.executor.dates import date_series
 from app.executor.operations.base import BaseOperation
 from app.planner.models import PlanOperation
 
@@ -30,7 +31,23 @@ class FilterOperation(BaseOperation):
             return dataframe
 
         if operator == "not_null":
-            return dataframe[dataframe[field].notna()]
+            text = dataframe[field].astype("string").str.strip().str.casefold()
+            return dataframe[
+                dataframe[field].notna() & ~text.isin(["", "null", "none", "nan", "não informado"])
+            ]
+        if operator == "normalized_equals":
+            return dataframe[
+                dataframe[field]
+                .astype("string")
+                .fillna("")
+                .map(self._normalize)
+                .eq(self._normalize(str(value)))
+            ]
+        if operator == "date_between":
+            dates = date_series(dataframe[field]).dt.normalize()
+            return dataframe[
+                dates.between(pd.Timestamp(value), pd.Timestamp(operation.parameters["end_value"]))
+            ]
 
         if value is None:
             context.warnings.append("Filtro sem valor definido.")
@@ -38,7 +55,9 @@ class FilterOperation(BaseOperation):
 
         if operator == "contains":
             return dataframe[
-                dataframe[field].astype("string").str.contains(
+                dataframe[field]
+                .astype("string")
+                .str.contains(
                     str(value),
                     case=False,
                     na=False,

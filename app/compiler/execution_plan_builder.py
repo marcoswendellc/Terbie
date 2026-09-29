@@ -261,6 +261,8 @@ class ExecutionPlanBuilder:
             end_field = filter_item.get("end_field")
             if end_field is not None:
                 parameters["end_field"] = end_field
+            if "end_value" in filter_item:
+                parameters["end_value"] = filter_item["end_value"]
 
             operations.append(
                 PlanOperation(

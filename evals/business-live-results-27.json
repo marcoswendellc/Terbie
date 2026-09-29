@@ -1,0 +1,89 @@
+{
+  "mode": "configured-providers-local-data",
+  "model_activity": {
+    "attempted": 8,
+    "responses_received": 1
+  },
+  "provider_failure_types": {
+    "ClientError": 6,
+    "ServerError": 1
+  },
+  "source_rows": 78164,
+  "seed": 20260929,
+  "passed": 8,
+  "total": 8,
+  "cases": [
+    {
+      "question": "Qual o ticket médio de goiânia?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio de Goiânia é de R$ 312,30.",
+      "warnings": [
+        "Nenhuma entidade de negócio identificada."
+      ]
+    },
+    {
+      "question": "Qual o ticket médio de aparecida de goiânia?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio por compra foi de R$ 317,56.",
+      "warnings": [
+        "Nenhuma entidade de negócio identificada."
+      ]
+    },
+    {
+      "question": "Qual o ticket médio de GO?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio por compra foi de R$ 332,72.",
+      "warnings": [
+        "Nenhuma entidade de negócio identificada."
+      ]
+    },
+    {
+      "question": "Qual o ticket médio de SP?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio por compra foi de R$ 303,87.",
+      "warnings": [
+        "Nenhuma entidade de negócio identificada."
+      ]
+    },
+    {
+      "question": "Qual o ticket médio de estado de SP?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio por compra foi de R$ 303,87.",
+      "warnings": []
+    },
+    {
+      "question": "e do GO?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O ticket médio por compra foi de R$ 332,72.",
+      "warnings": []
+    },
+    {
+      "question": "qual bairro apresentou maior volume de notas cadastradas em 2026?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "O bairro com maior participação em volume de notas foi Parque Amazônia, com 3.257 notas cadastradas.",
+      "warnings": []
+    },
+    {
+      "question": "qual o perfil dos clientes das compras em maio/26?",
+      "passed": true,
+      "expected_rows": 1,
+      "actual_rows": 1,
+      "answer": "Perfil dos clientes com compras registradas entre 2026-05-01 e 2026-05-31: 17.966 clientes únicos e 32.802 compras.\n\nO ticket médio por compra foi de R$ 345,04.\n\nForam 1,83 compras por cliente, em média.\n\nEntre os clientes com informação preenchida, o gênero mais frequente é Feminino (72,47%); a faixa etária mais frequente é 35-44 (30,85%); e a origem mais frequente é Goiânia (18,64%). São distribuições separadas, não a identificação de um único grupo combinado.\n\nDados não informados: cidade em 1088 clientes; UF em 3 clientes; bairro em 1888 clientes.\n\nA idade é calculada na data da análise. Este perfil descreve clientes com compras registradas, não todos os visitantes.",
+      "warnings": []
+    }
+  ]
+}

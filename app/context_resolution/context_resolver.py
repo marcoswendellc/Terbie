@@ -153,6 +153,7 @@ class ContextResolver:
             "segmento": ("segmentos?|nm_segmento", "nm_segmento"),
             "bairro": ("bairros?", "bairro"),
             "cidade": ("cidades?", "cidade"),
+            "uf": ("ufs?|estados?", "uf"),
             "empreendimento": (
                 "shoppings?|empreendimentos?|nm_empreendimento",
                 "nm_empreendimento",
@@ -206,6 +207,8 @@ class ContextResolver:
             prefix = question[: match.start()]
             if re.search(r"\bpor\s*$", prefix, flags=re.IGNORECASE):
                 continue
+            if re.search(r"\b(?:qual|quais)\s*$", prefix, flags=re.IGNORECASE):
+                continue
 
             value = match.group(1).strip(" .?!,;:")
             if not value:
@@ -241,6 +244,7 @@ class ContextResolver:
             "menor",
             "teve",
             "tiveram",
+            "apresentou",
         }
 
     def _metrics(

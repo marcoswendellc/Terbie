@@ -15,6 +15,7 @@ from app.memory.models import (
 )
 from app.planner.models import ExecutionPlan, PlanOperation
 from app.semantic.explicit_query import is_explicit_query
+from app.semantic.purchase_scope import MONTHS, STATES, purchase_period
 from app.semantic.temporal import TemporalSelection, resolve_temporal_reference
 
 
@@ -75,6 +76,30 @@ class ConversationMemoryService:
                 clarification=clarification,
             )
         rewritten = question.strip()
+        state_follow_up = re.fullmatch(r"e\s+(?:do|de|da)\s+([a-z]{2})[?!.]?", normalized)
+        if state_follow_up and state_follow_up.group(1).upper() in STATES:
+            previous = session.recent_turns[-1].rewritten_question if session.recent_turns else ""
+            if "ticket" in self._normalize(previous):
+                denominator = (
+                    "por cliente" if "por cliente" in self._normalize(previous) else "por compra"
+                )
+                period = purchase_period(previous)
+                suffix = ""
+                if period:
+                    suffix = f" em {MONTHS[int(period['value'][5:7]) - 1]} de {period['value'][:4]}"
+                else:
+                    year = re.search(r"\bem\s+(20\d{2})\b", self._normalize(previous))
+                    if year:
+                        suffix = f" em {year.group(1)}"
+                return ContextualQuestion(
+                    original_question=question,
+                    rewritten_question=(
+                        f"Qual o ticket médio {denominator} do estado de "
+                        f"{state_follow_up.group(1).upper()}{suffix}?"
+                    ),
+                    summary=self._conversation_context(session),
+                    state=state,
+                )
         if (is_explicit_query(question) or ContextResolver().explicit_grouping(question)) and (
             normalized.startswith("e ")
             or re.search(r"\b(nessa|dessa|essa|nesse|desse)\b", normalized)

@@ -215,6 +215,62 @@ class PersonaStrategy(ResponseStrategy):
         locality = str(row.get("localidade_predominante", "Não informado"))
         locality_share = self._percentage(row.get("percentual_localidade"))
 
+        from app.semantic.purchase_scope import is_customer_profile, purchase_period
+
+        if is_customer_profile(context.question):
+            period = purchase_period(context.question)
+            scope = (
+                f" entre {period['value']} e {period['end_value']}"
+                if period
+                else " no recorte solicitado"
+            )
+            lines = [
+                f"Perfil dos clientes com compras registradas{scope}: "
+                f"{self._integer(row.get('clientes_unicos'))} clientes únicos e "
+                f"{self._integer(row.get('quantidade_compras'))} compras."
+            ]
+            if row.get("ticket_medio_por_compra") is not None:
+                ticket = self._formatter.value(
+                    "ticket_medio_por_compra", row["ticket_medio_por_compra"]
+                )
+                lines.append(f"O ticket médio por compra foi de {ticket}.")
+            if row.get("clientes_unicos") and row.get("quantidade_compras"):
+                frequency = row["quantidade_compras"] / row["clientes_unicos"]
+                lines.append(
+                    f"Foram {frequency:.2f} compras por cliente, em média.".replace(
+                        f"{frequency:.2f}", f"{frequency:.2f}".replace(".", ",")
+                    )
+                )
+            lines.append(
+                f"Entre os clientes com informação preenchida, o gênero mais frequente é {gender} "
+                f"({gender_share}); a faixa etária mais frequente é {age_band} ({age_share}); "
+                f"e a origem mais frequente é {locality} ({locality_share}). "
+                "São distribuições separadas, não a identificação de um único grupo combinado."
+            )
+            missing = context.execution_metadata.get("profile_missing", {})
+            labels = {
+                "genero": "gênero",
+                "faixa_etaria": "faixa etária",
+                "cidade": "cidade",
+                "uf": "UF",
+                "bairro": "bairro",
+            }
+            if any(missing.values()):
+                lines.append(
+                    "Dados não informados: "
+                    + "; ".join(
+                        f"{labels.get(key, key)} em {value} clientes"
+                        for key, value in missing.items()
+                        if value
+                    )
+                    + "."
+                )
+            lines.append(
+                "A idade é calculada na data da análise. Este perfil descreve clientes "
+                "com compras registradas, não todos os visitantes."
+            )
+            return "\n\n".join(lines)
+
         answer = (
             f"No {shopping}, o público predominante é do gênero {gender} "
             f"({gender_share}), da faixa etária de {age_band} ({age_share}) "
