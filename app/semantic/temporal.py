@@ -83,9 +83,34 @@ class TemporalSelection:
         }
 
 
+def is_campaign_listing(question: str) -> bool:
+    text = normalize_temporal_text(question)
+    return bool(
+        re.search(r"\b(quais|liste|listar|mostre|mostrar)\b", text)
+        and re.search(r"\b(campanhas|promocoes)\b", text)
+        and not re.search(
+            r"\b(compare|comparar|maior|menor|melhor|pior|faturamento|receita|ticket|compras|clientes|notas|performance)\b",
+            text,
+        )
+    )
+
+
 def resolve_temporal_reference(question: str, previous_question: str) -> str | None:
     """Restore the preceding question's scope only for a bare correction."""
     normalized = normalize_temporal_text(question).strip(" .!?")
+    year_reference = re.fullmatch(r"e\s+(?:em\s+)?((?:19|20)\d{2})", normalized)
+    if year_reference and is_campaign_listing(previous_question):
+        # Replace a period, never a year embedded in a campaign name.
+        return (
+            re.sub(
+                r"\bem\s+(?:19|20)\d{2}\b",
+                f"em {year_reference.group(1)}",
+                previous_question,
+                flags=re.IGNORECASE,
+            )
+            if re.search(r"\bem\s+(?:19|20)\d{2}\b", previous_question, re.IGNORECASE)
+            else None
+        )
     if re.fullmatch(
         r"(?:e\s+)?qual\s+(?:foi\s+)?a\s+(?:mais\s+)?(?:recente|ultima|antiga)", normalized
     ):

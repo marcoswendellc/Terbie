@@ -238,6 +238,43 @@ def main():
             ["clientes_unicos", "quantidade_compras"],
         )
     )
+    # Replay listing -> year-only follow-up -> comparison in the same session.
+    listing_fields = ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]
+    for year, question in [
+        (2025, "olá terbie, quais campanhas ocorreram em 2025?"),
+        (2026, "e em 2026 ?"),
+        (2026, "quais campanhas ocorreram em 2026?"),
+    ]:
+        selected = frame.loc[
+            starts.le(f"{year}-12-31") & ends.ge(f"{year}-01-01") & frame.cd_promocao.notna(),
+            listing_fields,
+        ].drop_duplicates()
+        cases.append((question, selected, ["nm_promocao", "nm_empreendimento"], []))
+    comparison = []
+    for year in (2025, 2026):
+        selected = frame.loc[
+            frame.nm_promocao.eq(f"Promoção Pais {year}")
+            & frame.nm_empreendimento.eq("Buriti Shopping")
+        ]
+        revenue = selected.vl_compra.sum()
+        purchases = selected.cd_compra.nunique()
+        comparison.append(
+            {
+                "campanha_contexto": f"Promoção Pais {year} — Buriti Shopping",
+                "faturamento": revenue,
+                "quantidade_compras": purchases,
+                "clientes_unicos": selected.sk_cliente.nunique(),
+                "ticket_medio": revenue / purchases,
+            }
+        )
+    cases.append(
+        (
+            "compare a campanha de pais de 2025 com a campanha de pais de 2026 do buriti shopping",
+            pd.DataFrame(comparison),
+            ["campanha_contexto"],
+            ["faturamento", "quantidade_compras", "clientes_unicos", "ticket_medio"],
+        )
+    )
     cases = cases[args.start :]
     report = []
     for index, (question, expected, dimensions, indicators) in enumerate(cases[: args.limit]):
@@ -251,6 +288,7 @@ def main():
 
             actual = {key(row): row for row in response.data}
             correct = len(response.data) == len(expected)
+            correct &= set(actual) == {key(row) for row in expected.to_dict("records")}
             for row in expected.to_dict("records"):
                 got = actual.get(key(row), {})
                 correct &= all(

@@ -125,11 +125,7 @@ class TerbieNarrator:
                 metadata={**self._metadata(context), "narrative_provider": "deterministic_table"},
             )
 
-        if (
-            context.intent == "list_distinct"
-            and "nm_promocao" in context.columns
-            and any(term in self._normalize(context.question) for term in ("tabela", "quadro"))
-        ):
+        if context.intent == "list_distinct" and "nm_promocao" in context.columns:
             strategy = ListingStrategy(self._formatter)
             return NarratorResponse(
                 answer=strategy.answer(context),

@@ -4,11 +4,20 @@ import re
 
 from app.context_resolution.context_resolver import ContextResolver
 from app.semantic.purchase_scope import is_customer_profile, ticket_geography
-from app.semantic.temporal import normalize_temporal_text
+from app.semantic.temporal import is_campaign_listing, normalize_temporal_text
 
 
 def is_explicit_query(question: str) -> bool:
     normalized = normalize_temporal_text(question)
+    if is_campaign_listing(question):
+        return True
+    if re.search(
+        r"\bcompare(?:\s+em\s+(?:uma\s+)?tabela)?\s+a\s+"
+        r"(?:campanha|promocao)\s+.+?\s+com\s+a\s+.+?\s+"
+        r"(?:do|da|no|na)\s+.+",
+        normalized,
+    ):
+        return True
     if is_customer_profile(question) or ticket_geography(question):
         return True
     if re.search(r"\b(compare|comparar|comparacao)\b", normalized):

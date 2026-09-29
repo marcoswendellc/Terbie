@@ -374,9 +374,9 @@ def test_listing_strategy_answers_campaign_question_directly() -> None:
 
     assert response.answer.startswith("Em 2026 ocorreram duas campanhas:")
     assert "Promoção Verão no Arca Parque 2026" in response.answer
-    assert "(14/01/2026 a 15/02/2026)" in response.answer
+    assert "| 14/01/2026 | 15/02/2026 |" in response.answer
     assert "No Pelo 360 com Hugo e Guilherme e Buriti Shopping" in response.answer
-    assert "(19/03/2026 a 18/04/2026)" in response.answer
+    assert "| 19/03/2026 | 18/04/2026 |" in response.answer
     assert "Encontrei" not in response.answer
     assert "fallback determinístico" not in response.answer
     assert response.metadata["technical_warnings"] == ["fallback determinístico."]
@@ -415,7 +415,10 @@ def test_campaign_listing_requested_as_table_includes_shopping_and_period() -> N
 
     assert "| Campanha | Shopping | Início | Fim |" in response.answer
     assert "| Promoção Mães 2026 | Shopping Sul | 23/04/2026 | 10/05/2026 |" in response.answer
-    assert "| Promoção Mães 2026 | Buriti Shopping Guará | 24/04/2026 | 15/05/2026 |" in response.answer
+    assert (
+        "| Promoção Mães 2026 | Buriti Shopping Guará | 24/04/2026 | 15/05/2026 |"
+        in response.answer
+    )
     assert response.metadata["narrative_provider"] == "deterministic_table"
 
 

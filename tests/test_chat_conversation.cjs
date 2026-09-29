@@ -108,3 +108,24 @@ test('fallback keeps the originating chat session', async () => {
   assert.equal(bodies[0].session_id, 'original-chat');
   assert.equal(bodies[1].session_id, 'original-chat');
 });
+
+test('campaign listing keeps four separate headers and shopping and dates in each row', () => {
+  const {context, Element} = harness();
+  const content = new Element();
+  context.renderMessageContent(content, [
+    'Em 2026 ocorreram duas campanhas:', '',
+    '| Campanha | Shopping | Início | Fim |', '|---|---|---:|---:|',
+    '| Promoção Pais 2026 | Buriti Shopping | 22/07/2026 | 23/08/2026 |',
+    '| Promoção Pais 2026 | Shopping Sul | 04/08/2026 | 11/08/2026 |',
+    '', 'Inclui campanhas com vigência em 2026.',
+  ].join('\n'), 'assistant');
+  const table = content.children.find(child => child.className === 'table-scroll').children[0];
+  assert.deepEqual(Array.from(table.children[0].children[0].children, cell => cell.textContent),
+    ['Campanha', 'Shopping', 'Início', 'Fim']);
+  const rows = table.children[1].children;
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].children.length, 4);
+  assert.equal(rows[0].children[1].textContent, 'Buriti Shopping');
+  assert.equal(rows[1].children[1].textContent, 'Shopping Sul');
+  assert.equal(rows[1].children[3].textContent, '11/08/2026');
+});

@@ -22,6 +22,7 @@ class AnalysisVerifier:
             "percentages_valid": self._percentages_valid(result),
             "dominant_values_valid": self._dominant_values_valid(result),
             "comparison_cardinality_valid": self._comparison_cardinality_valid(plan, result),
+            "comparison_entities_distinct": self._comparison_entities_distinct(plan, result),
         }
         if not checks["has_rows"]:
             # Empty results are valid business outcomes; the narrator handles them safely.
@@ -33,13 +34,17 @@ class AnalysisVerifier:
         if not checks["dominant_values_valid"]:
             warnings.append("O perfil predominante contém valor nulo ou não informado.")
         if not checks["comparison_cardinality_valid"]:
-            warnings.append("A quantidade de itens retornados não corresponde à comparação solicitada.")
+            warnings.append(
+                "A quantidade de itens retornados não corresponde à comparação solicitada."
+            )
+        if not checks["comparison_entities_distinct"]:
+            warnings.append(
+                "A comparação resolveu mais de um item para a mesma campanha e shopping."
+            )
         return VerificationResult(passed=all(checks.values()), warnings=warnings, checks=checks)
 
     def _filters_preserved(self, plan: ExecutionPlan, result: ExecutionResult) -> bool:
-        planned = sum(
-            operation.type in {"filter", "filter_group"} for operation in plan.operations
-        )
+        planned = sum(operation.type in {"filter", "filter_group"} for operation in plan.operations)
         traced = sum(
             item.get("operation") in {"filter", "filter_group"}
             for item in result.metadata.get("operation_trace", [])
@@ -72,3 +77,13 @@ class AnalysisVerifier:
             contexts = operation.parameters.get("contexts", [])
             return isinstance(contexts, list) and result.rows_returned == len(contexts)
         return True
+
+    def _comparison_entities_distinct(self, plan: ExecutionPlan, result: ExecutionResult) -> bool:
+        if not any(op.type == "campaign_context_comparison" for op in plan.operations):
+            return True
+        labels = [
+            row.get("campanha_contexto")
+            for row in result.data
+            if row.get("faturamento") is not None
+        ]
+        return len(labels) == len(set(labels))

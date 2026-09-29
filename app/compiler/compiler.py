@@ -520,6 +520,9 @@ class TerbieCompiler:
                 "analysis_type": "comparison",
                 "business_entity": "promocao",
                 "comparison_entities": contexts,
+                # Each requested campaign carries its own period. Applying the
+                # first mentioned year here would remove the other side.
+                "time_scope": None,
                 "items": [
                     AnalysisItem(
                         entity="promocao",

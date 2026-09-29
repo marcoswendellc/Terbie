@@ -109,28 +109,23 @@ class ListingStrategy(ResponseStrategy):
         else:
             intro = f"Em {year} ocorreram {count_text}:"
 
-        if self._asks_for_table(context.question):
-            lines = [
-                "| Campanha | Shopping | Início | Fim |",
-                "|---|---|---:|---:|",
-            ]
-            for row in context.data:
-                name = self._cell(row.get("nm_promocao") or row.get("cd_promocao"))
-                shopping = self._cell(row.get("nm_empreendimento") or "Não informado")
-                start = self._date(row.get("sk_dtinicio")) or "Não informado"
-                end = self._date(row.get("sk_dtfim")) or "Não informado"
-                lines.append(f"| {name} | {shopping} | {start} | {end} |")
-            return intro + "\n\n" + "\n".join(lines)
-
-        items = []
+        lines = [
+            "| Campanha | Shopping | Início | Fim |",
+            "|---|---|---:|---:|",
+        ]
         for row in context.data:
-            name = row.get("nm_promocao") or row.get("cd_promocao")
-            start = self._date(row.get("sk_dtinicio"))
-            end = self._date(row.get("sk_dtfim"))
-            period = f"\n({start} a {end})" if start and end else ""
-            items.append(f"• {name}{period}")
-
-        return "\n\n".join([intro, *items])
+            name = self._cell(row.get("nm_promocao") or row.get("cd_promocao"))
+            shopping = self._cell(row.get("nm_empreendimento") or "Não informado")
+            start = self._date(row.get("sk_dtinicio")) or "Não informado"
+            end = self._date(row.get("sk_dtfim")) or "Não informado"
+            lines.append(f"| {name} | {shopping} | {start} | {end} |")
+        scope = (
+            f"Inclui campanhas com vigência em qualquer parte de {year}, "
+            "mesmo que tenham começado no ano anterior."
+            if year
+            else ""
+        )
+        return "\n\n".join(part for part in (intro, "\n".join(lines), scope) if part)
 
     def _asks_for_table(self, question: str) -> bool:
         normalized = "".join(

@@ -66,8 +66,17 @@ class FilterOperation(BaseOperation):
             ]
 
         if operator == "entity_match":
+            context.metadata.setdefault("resolved_entities", {}).pop(field, None)
             requested = self._normalize(str(value))
             candidates = dataframe[field].dropna().astype("string").unique().tolist()
+            if field == "nm_promocao":
+                requested_years = set(re.findall(r"\b(?:19|20)\d{2}\b", requested))
+                if requested_years:
+                    candidates = [
+                        candidate
+                        for candidate in candidates
+                        if requested_years.issubset(re.findall(r"\b(?:19|20)\d{2}\b", candidate))
+                    ]
             scored = [
                 (
                     self._entity_similarity(
