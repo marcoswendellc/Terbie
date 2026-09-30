@@ -1,118 +1,62 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Terbie</title>
-    <link rel="stylesheet" href="/ui/styles.css" />
-  </head>
-  <body>
-    <main class="app-shell">
-      <section class="login-view" data-view="login" aria-labelledby="login-title">
-        <div class="brand-panel" aria-hidden="true">
-          <div class="brand-mark">T</div>
-          <div>
-            <p class="eyebrow">Terral BI Copilot</p>
-            <h1>Terbie</h1>
-          </div>
-          <p class="brand-copy">
-            Inteligencia de negocio em formato de conversa, pronta para transformar
-            perguntas em direcao analitica.
-          </p>
-        </div>
-
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ee7629" />
+  <title>TERBIE — Copiloto de Dados da Terral</title>
+  <link rel="stylesheet" href="/ui/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="login-view" data-view="login" aria-labelledby="login-title">
+      <div class="login-main">
+        <div class="wordmark" aria-label="Terbie">terbie<span>.</span><small>YOUR DATA COMPASS</small></div>
         <form class="login-card" data-login-form>
-          <div class="form-heading">
-            <span class="mini-mark">T</span>
-            <div>
-              <p class="eyebrow">Acesso seguro</p>
-              <h2 id="login-title">Entrar no Terbie</h2>
-            </div>
-          </div>
-
-          <label>
-            <span>Usuario</span>
-            <input
-              name="username"
-              type="text"
-              autocomplete="username"
-              placeholder="Digite seu usuario"
-              required
-            />
-          </label>
-
-          <label>
-            <span>Senha</span>
-            <input
-              name="password"
-              type="password"
-              autocomplete="current-password"
-              placeholder="Digite sua senha"
-              required
-            />
-          </label>
-
+          <h1 id="login-title">Transforme informação em <em>direção.</em></h1>
+          <p class="login-intro">Seu copiloto para analisar dados, encontrar respostas e apoiar decisões.</p>
+          <label><span>Usuário</span><input name="username" type="text" autocomplete="username" placeholder="Digite seu usuário" required /></label>
+          <label><span>Senha</span><input name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required /></label>
           <p class="error-message" data-login-error role="alert"></p>
-          <button class="primary-button" type="submit">Entrar</button>
+          <button class="primary-button" type="submit">Entrar no Terbie <span aria-hidden="true">→</span></button>
+          <p class="login-note">Acesso às informações de acordo com suas permissões.</p>
         </form>
-      </section>
-
-      <section class="chat-view is-hidden" data-view="chat" aria-label="Chat Terbie">
-        <aside class="sidebar">
-          <div class="sidebar-brand">
-            <span class="mini-mark">T</span>
-            <div>
-              <strong>Terbie</strong>
-              <small>Copilot analitico</small>
+        <footer class="login-footer"><strong>TERRAL</strong><span>Shopping Centers</span></footer>
+      </div>
+      <aside class="brand-panel" aria-label="Copiloto de dados Terral">
+        <div class="brand-orbit" aria-hidden="true"><span>t.</span></div>
+        <div class="brand-copy"><p class="eyebrow">INTELIGÊNCIA QUE APONTA CAMINHOS</p><h2>Seus dados.<br>Novas perspectivas.</h2><p>Encontre respostas. Explore possibilidades.<br>Transforme informação em decisão.</p></div>
+      </aside>
+    </section>
+    <section class="chat-view is-hidden" data-view="chat" aria-label="Chat Terbie">
+      <aside class="sidebar" id="navigation">
+        <div class="sidebar-brand"><div class="wordmark">terbie<span>.</span><small>YOUR DATA COMPASS</small></div></div>
+        <button class="new-chat-button" type="button" data-new-chat><span aria-hidden="true">＋</span> Nova conversa</button>
+        <button class="nav-home" type="button" data-home><span aria-hidden="true">⌂</span> Início</button>
+        <div class="sidebar-section"><p class="eyebrow">CONVERSA ATUAL</p><button class="current-chat" type="button" data-chat-title>Nova conversa</button><p class="sidebar-hint">Explore seus dados em uma conversa com o Terbie.</p></div>
+        <div class="sidebar-bottom"><span class="account-avatar" aria-hidden="true">T</span><div><strong>Terral</strong><small>Copiloto de dados</small></div><button class="ghost-button" type="button" data-logout>Sair</button></div>
+      </aside>
+      <div class="conversation-shell">
+        <header class="chat-header"><button class="menu-button" type="button" data-menu aria-label="Abrir menu" aria-controls="navigation" aria-expanded="false">☰</button><span class="header-label">Copiloto de dados</span><span class="access-badge"><span aria-hidden="true">◈</span> Acesso corporativo</span></header>
+        <div class="conversation-body">
+          <section class="welcome" data-welcome aria-labelledby="welcome-title">
+            <h2 id="welcome-title">Olá. Como posso ajudar?</h2>
+            <p class="scope-note">Explore as informações disponíveis para o seu acesso.</p>
+            <h3>Transforme informação em <span>direção.</span></h3>
+            <p class="welcome-description">Seu copiloto para analisar dados, encontrar respostas e apoiar decisões.</p>
+            <div class="suggestion-grid">
+              <button type="button" data-suggestion="Qual foi o total de vendas por mês?">Qual foi o total de vendas por mês?<span aria-hidden="true">›</span></button>
+              <button type="button" data-suggestion="Quais campanhas tiveram o melhor desempenho?">Quais campanhas tiveram o melhor desempenho?<span aria-hidden="true">›</span></button>
+              <button type="button" data-suggestion="Qual é o perfil dos participantes das campanhas?">Qual é o perfil dos participantes das campanhas?<span aria-hidden="true">›</span></button>
+              <button type="button" data-suggestion="Compare o desempenho das campanhas.">Compare o desempenho das campanhas.<span aria-hidden="true">›</span></button>
             </div>
-          </div>
-
-          <button class="new-chat-button" type="button" data-new-chat>Nova conversa</button>
-
-          <div class="sidebar-block">
-            <span>Status</span>
-            <strong>Resposta simulada</strong>
-          </div>
-        </aside>
-
-        <div class="conversation-shell">
-          <header class="chat-header">
-            <div>
-              <p class="eyebrow">Prompt conversacional</p>
-              <h2>Converse com seus dados</h2>
-            </div>
-            <button class="ghost-button" type="button" data-logout>Sair</button>
-          </header>
-
-          <div class="messages" data-messages aria-live="polite">
-            <article class="message message-app">
-              <div class="avatar">T</div>
-              <div class="message-bubble">
-                <span class="message-author">Terbie</span>
-                <p>
-                  Bom dia! Sou o Terbie, seu cientista de dados.
-                  Estou pronto para analisar os dados e gerar insights estratégicos.
-                  O que você gostaria de explorar hoje?
-                </p>
-              </div>
-            </article>
-          </div>
-
-          <form class="composer" data-chat-form>
-            <textarea
-              data-message-input
-              rows="1"
-              placeholder="Pergunte algo sobre o negocio..."
-              aria-label="Mensagem"
-            ></textarea>
-            <button class="send-button" type="submit" aria-label="Enviar mensagem">
-              <span>Enviar</span>
-            </button>
-          </form>
+          </section>
+          <div class="messages is-hidden" data-messages aria-live="polite" aria-label="Mensagens da conversa"></div>
         </div>
-      </section>
-    </main>
-
-    <script src="/ui/app.js" defer></script>
-  </body>
+        <div class="composer-area"><form class="composer" data-chat-form><textarea data-message-input rows="1" placeholder="Pergunte ao Terbie..." aria-label="Mensagem"></textarea><button class="send-button" type="submit" aria-label="Enviar mensagem"><span aria-hidden="true">↑</span></button></form><p class="privacy-note">Não compartilhe informações sensíveis da Terral em ferramentas externas não autorizadas.</p></div>
+      </div>
+    </section>
+  </main>
+  <script src="/ui/app.js" defer></script>
+</body>
 </html>

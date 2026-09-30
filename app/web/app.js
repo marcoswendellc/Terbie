@@ -14,6 +14,20 @@ const messageInput = document.querySelector("[data-message-input]");
 const messages = document.querySelector("[data-messages]");
 const logoutButton = document.querySelector("[data-logout]");
 const newChatButton = document.querySelector("[data-new-chat]");
+const welcome = document.querySelector("[data-welcome]");
+const menuButton = document.querySelector("[data-menu]");
+
+function closeMenu() {
+  chatView.classList.remove("menu-open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "Abrir menu");
+}
+
+function showWelcome() {
+  welcome.classList.remove("is-hidden");
+  messages.classList.add("is-hidden");
+  closeMenu();
+}
 
 function showChat() {
   loginView.classList.add("is-hidden");
@@ -137,6 +151,8 @@ function createMessage(role, text) {
 }
 
 function appendMessage(role, text) {
+  welcome.classList.add("is-hidden");
+  messages.classList.remove("is-hidden");
   const message = createMessage(role, text);
   messages.appendChild(message);
   scrollConversation();
@@ -343,12 +359,13 @@ async function askBackend(question, sessionId = conversationSessionId()) {
 }
 
 function resetConversation() {
+  if (messageInput.disabled) return;
   sessionStorage.setItem(CHAT_SESSION_KEY, crypto.randomUUID());
   messages.innerHTML = "";
-  appendMessage(
-    "app",
-    "Nova conversa iniciada. Pergunte sobre campanhas, vendas, promocoes ou desempenho operacional."
-  );
+  messageInput.value = "";
+  document.querySelector("[data-chat-title]").textContent = "Nova conversa";
+  showWelcome();
+  messageInput.focus();
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -388,6 +405,7 @@ loginForm.addEventListener("submit", async (event) => {
 
 chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (messageInput.disabled) return;
   const question = messageInput.value.trim();
 
   if (!question) {
@@ -395,11 +413,16 @@ chatForm.addEventListener("submit", (event) => {
     return;
   }
 
+  closeMenu();
+  if (!messages.children.length) {
+    document.querySelector("[data-chat-title]").textContent = question.slice(0, 70);
+  }
   appendMessage("user", question);
   messages.querySelectorAll(".follow-up-button").forEach((button) => { button.disabled = true; });
   messageInput.value = "";
   messageInput.style.height = "auto";
   messageInput.disabled = true;
+  newChatButton.disabled = true;
   chatForm.querySelector("button").disabled = true;
   const pendingMessage = appendMessage("app", "Consultando...");
   const requestSession = conversationSessionId();
@@ -419,6 +442,7 @@ chatForm.addEventListener("submit", (event) => {
     )
     .finally(() => {
       messageInput.disabled = false;
+      newChatButton.disabled = false;
       chatForm.querySelector("button").disabled = false;
       messageInput.focus();
     });
@@ -439,10 +463,37 @@ messageInput.addEventListener("keydown", (event) => {
 logoutButton.addEventListener("click", () => {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.setItem(CHAT_SESSION_KEY, crypto.randomUUID());
+  messages.replaceChildren();
+  messageInput.value = "";
+  document.querySelector("[data-chat-title]").textContent = "Nova conversa";
+  showWelcome();
   showLogin();
 });
 
 newChatButton.addEventListener("click", resetConversation);
+document.querySelector("[data-home]").addEventListener("click", showWelcome);
+document.querySelector("[data-chat-title]").addEventListener("click", () => {
+  if (!messages.children.length) return;
+  welcome.classList.add("is-hidden");
+  messages.classList.remove("is-hidden");
+  closeMenu();
+});
+document.querySelectorAll("[data-suggestion]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (messageInput.disabled) return;
+    messageInput.value = button.dataset.suggestion;
+    chatForm.requestSubmit();
+  });
+});
+menuButton.addEventListener("click", () => {
+  const open = chatView.classList.toggle("menu-open");
+  menuButton.setAttribute("aria-expanded", String(open));
+  menuButton.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+});
+chatView.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeMenu();
+});
 
 if (sessionStorage.getItem(SESSION_KEY) === "true") {
   showChat();
