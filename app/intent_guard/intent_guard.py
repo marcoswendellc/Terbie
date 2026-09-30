@@ -16,6 +16,22 @@ CAPABILITY_RESPONSE = (
 CLARIFICATION_RESPONSE = (
     "Pode especificar a campanha, empreendimento, período ou indicador ao qual você se refere?"
 )
+ROI_LIMIT_RESPONSE = (
+    "Não é possível calcular ou ordenar campanhas por ROI com a base disponível: "
+    "faltam investimento de marketing, custos da campanha e retorno incremental "
+    "atribuível à ação. O valor das compras registradas não equivale ao retorno "
+    "incremental nem ao lucro. Seriam necessários esses dados e uma estimativa "
+    "do resultado que ocorreria sem a campanha."
+)
+CAUSAL_LIMIT_RESPONSE = (
+    "As compras registradas, isoladamente, não demonstram efeito causal da mídia "
+    "ou da campanha. A base não permite separar esse efeito de sazonalidade, "
+    "promoções e outros fatores; seria necessária uma análise com grupo de "
+    "controle ou outra estratégia de identificação causal. Também não é possível "
+    "confirmar que vendeu mais sem definir uma referência de comparação. "
+    "Posso fazer uma comparação descritiva para a campanha, o shopping e o período "
+    "da sua pergunta, após definir a referência, sem atribuir o resultado à mídia."
+)
 
 
 class IntentGuard:
@@ -111,11 +127,31 @@ class IntentGuard:
         r"\b(conte|contar|me conte) (uma )?(piada|historia)\b",
         r"\b(resultado do jogo|placar do jogo)\b",
     )
+    _ROI_PATTERNS = (
+        r"\broi\b",
+        r"\bretorno (sobre|do) (o )?investimento\b",
+        r"\bretorno incremental\b",
+    )
+    _CAUSAL_PATTERNS = (
+        r"\b(causou|causaram|causado|causada|efeito causal|impacto causal)\b",
+        r"\bpor causa (da|do|das|dos)\b",
+        r"\b(responsavel|responsaveis) (por|pelo|pela|pelos|pelas) "
+        r"(o |a |os |as )?(aumento|queda|crescimento|resultado|resultados|vendas)\b",
+        r"\b(por que|porque|explique|explicar|motivo)\b.*\b"
+        r"(vendeu|venderam|vendas|cresceu|cresceram|aumento|queda|resultado)\b",
+    )
 
     def evaluate(self, question: str) -> IntentGuardResult:
         normalized = self._normalize_text(question)
         if normalized == "":
             return self._clarification("empty_question", confidence=0.99)
+
+        # Unsupported analytical objectives must stop before an ordinary metric
+        # or ranking can silently replace the requested ROI/causal analysis.
+        if self._matches(normalized, self._ROI_PATTERNS):
+            return self._analytical_limit("roi_inputs_unavailable", ROI_LIMIT_RESPONSE)
+        if self._matches(normalized, self._CAUSAL_PATTERNS):
+            return self._analytical_limit("causal_evidence_unavailable", CAUSAL_LIMIT_RESPONSE)
 
         # Mandatory precedence: greeting -> capability -> data_query ->
         # clarification -> out_of_scope.
@@ -182,6 +218,16 @@ class IntentGuard:
         if any(phrase in normalized for phrase in self._ANALYTICAL_PHRASES):
             return True
         return bool(set(normalized.split()).intersection(self._ANALYTICAL_TERMS))
+
+    def _analytical_limit(self, reason: str, response: str) -> IntentGuardResult:
+        return IntentGuardResult(
+            intent="capability",
+            requires_data=False,
+            should_stop=True,
+            confidence=0.95,
+            reason=reason,
+            response=response,
+        )
 
     def _is_social_greeting(self, normalized: str) -> bool:
         starts_with_greeting = bool(

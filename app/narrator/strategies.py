@@ -783,6 +783,10 @@ class ComparisonStrategy(ResponseStrategy):
             label = self._cell(row.get(label_column))
             if label_column == "nm_promocao" and row.get("nm_empreendimento"):
                 label += " — " + self._cell(row["nm_empreendimento"])
+            if row.get("inicio_campanha") and row.get("fim_campanha"):
+                start = datetime.fromisoformat(row["inicio_campanha"])
+                end = datetime.fromisoformat(row["fim_campanha"])
+                label += f" ({start:%d/%m/%Y} a {end:%d/%m/%Y}; {(end - start).days + 1} dias)"
             lines.append(self._metric_row(label, row, metrics))
 
         comparable_metrics = [
@@ -812,6 +816,21 @@ class ComparisonStrategy(ResponseStrategy):
                 ),
             )
 
+        if label_column == "campanha_contexto":
+            missing = [self._cell(row.get(label_column)) for row in context.data if row.get("faturamento") is None]
+            if missing:
+                lines.append("\nNão encontrei dados para: " + "; ".join(missing) + ". A comparação está incompleta; não é possível calcular variações entre os lados.")
+            available = [row for row in context.data if row.get("faturamento") is not None]
+            events = {
+                re.sub(r"\b(?:19|20)\d{2}\b", "", self._normalize(str(row.get(label_column)).split(" — ")[0])).strip()
+                for row in available
+            }
+            durations = {
+                (datetime.fromisoformat(row["fim_campanha"]) - datetime.fromisoformat(row["inicio_campanha"])).days
+                for row in available if row.get("inicio_campanha") and row.get("fim_campanha")
+            }
+            if len(events) > 1 or len(durations) > 1:
+                lines.append("\nAtenção: as campanhas abrangem eventos ou durações diferentes. Os totais e as variações não representam uma comparação homogênea; considere as datas e o escopo de cada campanha.")
         return "\n".join(lines)
 
     def _metric_row(

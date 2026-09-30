@@ -57,8 +57,9 @@ class TemporalSelection:
             text,
         ):
             return "Qual ano devo considerar para identificar a campanha?"
+        shopping_scope = re.sub(r"\bem\s+qual\s+(?:shopping|empreendimento)\b", "", text)
         if re.search(
-            r"\b(?:do|no|da|na|para|em)\s+(?:\w+\s+){0,4}(?:shopping|empreendimento)\b", text
+            r"\b(?:do|no|da|na|para|em)\s+(?:\w+\s+){0,4}(?:shopping|empreendimento)\b", shopping_scope
         ) and not any(item.get("field") == "nm_empreendimento" for item in filters):
             return "Não identifiquei o shopping solicitado. Qual é o nome completo?"
         return None
@@ -103,12 +104,12 @@ def resolve_temporal_reference(question: str, previous_question: str) -> str | N
         # Replace a period, never a year embedded in a campaign name.
         return (
             re.sub(
-                r"\bem\s+(?:19|20)\d{2}\b",
-                f"em {year_reference.group(1)}",
+                r"\b(em|de)\s+(?:19|20)\d{2}\b",
+                lambda match: f"{match.group(1)} {year_reference.group(1)}",
                 previous_question,
                 flags=re.IGNORECASE,
             )
-            if re.search(r"\bem\s+(?:19|20)\d{2}\b", previous_question, re.IGNORECASE)
+            if re.search(r"\b(?:em|de)\s+(?:19|20)\d{2}\b", previous_question, re.IGNORECASE)
             else None
         )
     if re.fullmatch(

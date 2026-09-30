@@ -1,9 +1,10 @@
 import json
 import logging
+from contextvars import ContextVar
 from datetime import date
 from typing import Any, TypeVar
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, ValidationError
 
 from app.conversation.models import AnalysisDecision, FollowUpSuggestion, SuggestionResponse
 
@@ -66,6 +67,14 @@ class GeminiConversationProvider:
         self._model = model
         self._timeout_ms = timeout_ms
         self._client = client
+        self._status: ContextVar[dict[str, Any] | None] = ContextVar(
+            "conversation_provider_status", default=None
+        )
+
+    @property
+    def last_status(self) -> dict[str, Any] | None:
+        status = self._status.get()
+        return dict(status) if status is not None else None
 
     def decide(self, context: dict[str, Any], *, timeout_ms: int) -> AnalysisDecision | None:
         return self._generate(_DECISION_PROMPT, context, AnalysisDecision, timeout_ms)
@@ -81,7 +90,11 @@ class GeminiConversationProvider:
         schema: type[ResponseModel],
         timeout_ms: int,
     ) -> ResponseModel | None:
-        if timeout_ms <= 0 or (self._client is None and self._api_key is None):
+        if min(timeout_ms, self._timeout_ms) <= 0:
+            self._status.set({"state": "skipped", "reason": "budget_exhausted"})
+            return None
+        if self._client is None and not self._api_key:
+            self._status.set({"state": "skipped", "reason": "not_configured"})
             return None
         try:
             from google import genai
@@ -112,11 +125,50 @@ class GeminiConversationProvider:
                         ),
                     ),
                 )
-                return schema.model_validate_json(response.text)
+                parsed = getattr(response, "parsed", None)
+                result = (
+                    schema.model_validate(parsed)
+                    if parsed is not None
+                    else schema.model_validate_json(response.text)
+                )
+                if isinstance(result, AnalysisDecision) and not (
+                    result.analyses or (result.clarification or "").strip()
+                ):
+                    self._status.set({"state": "failed", "reason": "invalid_response"})
+                    return None
+                self._status.set({"state": "ok"})
+                return result
             finally:
                 if self._client is None:
                     client.close()
         except Exception as exc:
             # No payload or credentials in logs, including SDK error messages.
-            logger.warning("Conversation provider failed: %s", type(exc).__name__)
+            code = getattr(exc, "code", None)
+            code = code if isinstance(code, int) and 100 <= code <= 599 else None
+            reason = "provider_error"
+            if isinstance(exc, ValidationError):
+                reason = "invalid_response"
+            elif isinstance(exc, TimeoutError) or type(exc).__name__ in {
+                "ReadTimeout", "ConnectTimeout", "WriteTimeout", "PoolTimeout"
+            }:
+                reason = "timeout"
+            elif isinstance(exc, ImportError):
+                reason = "dependency_unavailable"
+            elif code in {408, 504}:
+                reason = "timeout"
+            elif code == 429:
+                reason = "rate_limited"
+            elif code == 401:
+                reason = "authentication"
+            elif code == 403:
+                reason = "permission_denied"
+            elif code is not None and code >= 500:
+                reason = "service_unavailable"
+            elif code is not None and code >= 400:
+                reason = "request_rejected"
+            status = {"state": "failed", "reason": reason, "error_type": type(exc).__name__}
+            if code is not None:
+                status["code"] = code
+            self._status.set(status)
+            logger.warning("Conversation provider failed: %s", status)
             return None
