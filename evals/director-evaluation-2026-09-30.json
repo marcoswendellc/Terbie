@@ -1,0 +1,3867 @@
+{
+  "started_at": "2026-09-30T13:50:27.225926",
+  "mode": "local-current-code-configured-providers-live-google-sheets",
+  "source_rows": 236728,
+  "shoppings": 11,
+  "campaign_shopping_pairs": 38,
+  "model": "gemini-2.5-flash",
+  "director_activity": {
+    "attempted": 14,
+    "received": 2
+  },
+  "cases": [
+    {
+      "id": "D01",
+      "question": "Quais campanhas tiveram o melhor desempenho?",
+      "kind": "general",
+      "seconds": 42.6,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": [
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1182169.2,
+          "quantidade_compras": 4977,
+          "clientes_unicos": 1539,
+          "ticket_medio_por_compra": 237.52646172393005,
+          "ticket_medio_por_cliente": 768.1411306042885
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1856641.11,
+          "quantidade_compras": 5687,
+          "clientes_unicos": 2576,
+          "ticket_medio_por_compra": 326.4710937225251,
+          "ticket_medio_por_cliente": 720.745772515528
+        },
+        {
+          "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 34118.6,
+          "quantidade_compras": 99,
+          "clientes_unicos": 54,
+          "ticket_medio_por_compra": 344.63232323232324,
+          "ticket_medio_por_cliente": 631.8259259259258
+        },
+        {
+          "nm_promocao": "Promoção Férias 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 975928.53,
+          "quantidade_compras": 3143,
+          "clientes_unicos": 1469,
+          "ticket_medio_por_compra": 310.5086000636335,
+          "ticket_medio_por_cliente": 664.3488972089857
+        },
+        {
+          "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 151018.91,
+          "quantidade_compras": 529,
+          "clientes_unicos": 478,
+          "ticket_medio_por_compra": 285.4799810964083,
+          "ticket_medio_por_cliente": 315.9391422594142
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Bay Market",
+          "faturamento": 856028.3,
+          "quantidade_compras": 1644,
+          "clientes_unicos": 740,
+          "ticket_medio_por_compra": 520.6984793187348,
+          "ticket_medio_por_cliente": 1156.795
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 3177673.7,
+          "quantidade_compras": 6456,
+          "clientes_unicos": 3193,
+          "ticket_medio_por_compra": 492.20472428748457,
+          "ticket_medio_por_cliente": 995.2000313185093
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "faturamento": 1138023.61,
+          "quantidade_compras": 2857,
+          "clientes_unicos": 1089,
+          "ticket_medio_por_compra": 398.3281799089955,
+          "ticket_medio_por_cliente": 1045.0170890725437
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 777077.37,
+          "quantidade_compras": 2526,
+          "clientes_unicos": 1332,
+          "ticket_medio_por_compra": 307.6315795724465,
+          "ticket_medio_por_cliente": 583.3914189189189
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Hortolândia",
+          "faturamento": 707330.12,
+          "quantidade_compras": 1770,
+          "clientes_unicos": 687,
+          "ticket_medio_por_compra": 399.62153672316384,
+          "ticket_medio_por_cliente": 1029.5926055312955
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 1923898.9,
+          "quantidade_compras": 6135,
+          "clientes_unicos": 2996,
+          "ticket_medio_por_compra": 313.5939527302363,
+          "ticket_medio_por_cliente": 642.1558411214953
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "faturamento": 805891.85,
+          "quantidade_compras": 2590,
+          "clientes_unicos": 753,
+          "ticket_medio_por_compra": 311.15515444015443,
+          "ticket_medio_por_cliente": 1070.2415006640106
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 426737.78,
+          "quantidade_compras": 1519,
+          "clientes_unicos": 879,
+          "ticket_medio_por_compra": 280.93336405529953,
+          "ticket_medio_por_cliente": 485.48097838452793
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 10470179.98,
+          "quantidade_compras": 28115,
+          "clientes_unicos": 7800,
+          "ticket_medio_por_compra": 372.4054767917482,
+          "ticket_medio_por_cliente": 1342.3307666666667
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 1488938.78,
+          "quantidade_compras": 5250,
+          "clientes_unicos": 1820,
+          "ticket_medio_por_compra": 283.6073866666667,
+          "ticket_medio_por_cliente": 818.0982307692308
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 2491903.54,
+          "quantidade_compras": 6931,
+          "clientes_unicos": 2922,
+          "ticket_medio_por_compra": 359.5301601500505,
+          "ticket_medio_por_cliente": 852.8075085557837
+        },
+        {
+          "nm_promocao": "Promoção Mês das Mulheres 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 822428.78,
+          "quantidade_compras": 2476,
+          "clientes_unicos": 1537,
+          "ticket_medio_por_compra": 332.1602504038772,
+          "ticket_medio_por_cliente": 535.0870396877033
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 804147.81,
+          "quantidade_compras": 1948,
+          "clientes_unicos": 1146,
+          "ticket_medio_por_compra": 412.8068839835729,
+          "ticket_medio_por_cliente": 701.6996596858639
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 276516.43,
+          "quantidade_compras": 714,
+          "clientes_unicos": 373,
+          "ticket_medio_por_compra": 387.2779131652661,
+          "ticket_medio_por_cliente": 741.3309115281501
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "faturamento": 436471.15,
+          "quantidade_compras": 1366,
+          "clientes_unicos": 741,
+          "ticket_medio_por_compra": 319.52500000000003,
+          "ticket_medio_por_cliente": 589.0298920377868
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 8285361.41,
+          "quantidade_compras": 24455,
+          "clientes_unicos": 10005,
+          "ticket_medio_por_compra": 338.80030300552033,
+          "ticket_medio_por_cliente": 828.12207996002
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 22476361.12,
+          "quantidade_compras": 61724,
+          "clientes_unicos": 18801,
+          "ticket_medio_por_compra": 364.14297712397126,
+          "ticket_medio_por_cliente": 1195.4875336418277
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 451490.58,
+          "quantidade_compras": 1402,
+          "clientes_unicos": 838,
+          "ticket_medio_por_compra": 322.0332239657632,
+          "ticket_medio_por_cliente": 538.7715751789976
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 4225462.69,
+          "quantidade_compras": 11825,
+          "clientes_unicos": 5196,
+          "ticket_medio_por_compra": 357.3329970401692,
+          "ticket_medio_por_cliente": 813.2145284834489
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 1810788.93,
+          "quantidade_compras": 5969,
+          "clientes_unicos": 3086,
+          "ticket_medio_por_compra": 303.3655436421511,
+          "ticket_medio_por_cliente": 586.7754147764095
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "faturamento": 850440.74,
+          "quantidade_compras": 2514,
+          "clientes_unicos": 1192,
+          "ticket_medio_por_compra": 338.2819172633254,
+          "ticket_medio_por_cliente": 713.4569966442953
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 872780.02,
+          "quantidade_compras": 2718,
+          "clientes_unicos": 1385,
+          "ticket_medio_por_compra": 321.11111846946284,
+          "ticket_medio_por_cliente": 630.1660794223827
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 668337.6,
+          "quantidade_compras": 2447,
+          "clientes_unicos": 1141,
+          "ticket_medio_por_compra": 273.1252962811606,
+          "ticket_medio_por_cliente": 585.7472392638036
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 537929.51,
+          "quantidade_compras": 1903,
+          "clientes_unicos": 1171,
+          "ticket_medio_por_compra": 282.6744666316343,
+          "ticket_medio_por_cliente": 459.3761827497865
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 935728.24,
+          "quantidade_compras": 2398,
+          "clientes_unicos": 1159,
+          "ticket_medio_por_compra": 390.21194328607174,
+          "ticket_medio_por_cliente": 807.3582743744607
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 4562298.01,
+          "quantidade_compras": 14727,
+          "clientes_unicos": 5081,
+          "ticket_medio_por_compra": 309.791404223535,
+          "ticket_medio_por_cliente": 897.9134048415666
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 809313.9400000001,
+          "quantidade_compras": 2992,
+          "clientes_unicos": 1418,
+          "ticket_medio_por_compra": 270.49262700534763,
+          "ticket_medio_por_cliente": 570.7432581100142
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 945132.2,
+          "quantidade_compras": 2913,
+          "clientes_unicos": 1672,
+          "ticket_medio_por_compra": 324.4532097493992,
+          "ticket_medio_por_cliente": 565.2704545454545
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 297592.58,
+          "quantidade_compras": 1184,
+          "clientes_unicos": 839,
+          "ticket_medio_por_compra": 251.34508445945949,
+          "ticket_medio_por_cliente": 354.6991418355185
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 1158039.82,
+          "quantidade_compras": 3526,
+          "clientes_unicos": 1237,
+          "ticket_medio_por_compra": 328.42876347135564,
+          "ticket_medio_por_cliente": 936.1680032336297
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 356979.99,
+          "quantidade_compras": 1283,
+          "clientes_unicos": 892,
+          "ticket_medio_por_compra": 278.23849571317226,
+          "ticket_medio_por_cliente": 400.20178251121075
+        },
+        {
+          "nm_promocao": "Promoção Sorte de Verão 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 295189.52,
+          "quantidade_compras": 986,
+          "clientes_unicos": 723,
+          "ticket_medio_por_compra": 299.3808519269777,
+          "ticket_medio_por_cliente": 408.2842600276625
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1585499.68,
+          "quantidade_compras": 5030,
+          "clientes_unicos": 2386,
+          "ticket_medio_por_compra": 315.20868389662024,
+          "ticket_medio_por_cliente": 664.5011232187761
+        }
+      ],
+      "result": {
+        "question": "Quais campanhas tiveram o melhor desempenho?",
+        "answer": "Campanhas com maior faturamento\nO faturamento na campanha No Pelo foi de R$ 1.856.641,11.\n\nCampanhas com mais clientes únicos\nForam identificados 2.576 clientes únicos.\n\nCampanhas com maior quantidade de compras\nForam cadastradas 236.728 notas.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "title": "Campanhas com maior faturamento",
+            "status": "success",
+            "data": [
+              {
+                "faturamento": 1856641.11
+              }
+            ]
+          },
+          {
+            "title": "Campanhas com mais clientes únicos",
+            "status": "success",
+            "data": [
+              {
+                "clientes_unicos": 2576
+              }
+            ]
+          },
+          {
+            "title": "Campanhas com maior quantidade de compras",
+            "status": "success",
+            "data": [
+              {
+                "quantidade_compras": 236728
+              }
+            ]
+          }
+        ],
+        "metadata": {
+          "response_type": "conversational_analysis",
+          "goal": "Avaliar o desempenho das campanhas com base em faturamento, clientes únicos e quantidade de compras registradas, identificando as de melhor performance por nome da promoção e empreendimento.",
+          "analysis_questions": [
+            "Qual foi o faturamento total por nome da promoção (nm_promocao) e nome do empreendimento (nm_empreendimento), para cada promoção, considerando o período de sua duração (sk_dtinicio a sk_dtfim), ordenado de forma decrescente pelo faturamento?",
+            "Qual foi o número de clientes únicos (sk_cliente) por nome da promoção (nm_promocao) e nome do empreendimento (nm_empreendimento), para cada promoção, considerando o período de sua duração (sk_dtinicio a sk_dtfim), ordenado de forma decrescente pelo número de clientes únicos?",
+            "Qual foi a quantidade de compras (cd_compra) por nome da promoção (nm_promocao) e nome do empreendimento (nm_empreendimento), para cada promoção, considerando o período de sua duração (sk_dtinicio a sk_dtfim), ordenado de forma decrescente pela quantidade de compras?"
+          ],
+          "successful_analyses": 3,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D01",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Quais campanhas tiveram o melhor desempenho?",
+            "ultima_resposta": "Campanhas com maior faturamento\nO faturamento na campanha No Pelo foi de R$ 1.856.641,11.\n\nCampanhas com mais clientes únicos\nForam identificados 2.576 clientes únicos.\n\nCampanhas com maior quantidade de compras\nForam cadastradas 236.728 notas.",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [
+          "O 'melhor desempenho' será avaliado pelas métricas de faturamento, clientes únicos e quantidade de compras registradas, conforme as diretrizes para comparação de campanhas sem critério explícito.",
+          "As campanhas serão identificadas pelo nome da promoção e pelo nome do empreendimento, pois campanhas de mesmo nome em shoppings diferentes não podem ser somadas como uma só.",
+          "O período de análise para cada campanha corresponde à sua duração, ou seja, da data de início (sk_dtinicio) à data de fim (sk_dtfim) da promoção.",
+          "Serão consideradas todas as campanhas para as quais há dados de compras registradas (cd_promocao não nulo)."
+        ],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 2,
+        "received": 2
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Crítica",
+        "reason": "Promete comparar campanhas, mas responde apenas sobre No Pelo em faturamento e clientes, e dá um total geral de compras. Não entrega ranking nem shopping. A maior soma registrada é Natal 2025 / Buriti Shopping: R$ 22.476.361,12; No Pelo tem R$ 1.856.641,11 e não lidera esse critério."
+      }
+    },
+    {
+      "id": "D02",
+      "question": "Mostre o faturamento por campanha, do maior para o menor, identificando o shopping.",
+      "kind": "campaign",
+      "seconds": 3.09,
+      "checks": {
+        "identity_columns": true,
+        "complete_rows": false,
+        "values": true,
+        "descending": true
+      },
+      "automatic_pass": false,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 22476361.12
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 10470179.98
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 8285361.41
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 4562298.01
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 4225462.69
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 3177673.7
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 2491903.54
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 1923898.9
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1856641.11
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 1810788.93
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1585499.68
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 1488938.78
+        },
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 1182169.2
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 1158039.82
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "faturamento": 1138023.61
+        },
+        {
+          "nm_promocao": "Promoção Férias 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 975928.53
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 945132.2
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 935728.24
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 872780.02
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Bay Market",
+          "faturamento": 856028.3
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "faturamento": 850440.74
+        },
+        {
+          "nm_promocao": "Promoção Mês das Mulheres 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "faturamento": 822428.78
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "faturamento": 809313.9400000001
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "faturamento": 805891.85
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 804147.81
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 777077.37
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Hortolândia",
+          "faturamento": 707330.12
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 668337.6
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 537929.51
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 451490.58
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "faturamento": 436471.15
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 426737.78
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "faturamento": 356979.99
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 297592.58
+        },
+        {
+          "nm_promocao": "Promoção Sorte de Verão 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 295189.52
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 276516.43
+        },
+        {
+          "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "faturamento": 151018.91
+        },
+        {
+          "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "faturamento": 34118.6
+        }
+      ],
+      "result": {
+        "question": "Mostre o faturamento por campanha, do maior para o menor, identificando o shopping.",
+        "answer": "As 10 campanhas com maior faturamento foram:\n\n1. Promoção Natal 2025 — Buriti Shopping — Valor das compras: R$ 22.476.361,12; Quantidade de compras: 61.724; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Valor das compras: R$ 10.470.179,98; Quantidade de compras: 28.115; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Valor das compras: R$ 8.285.361,41; Quantidade de compras: 24.455; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Valor das compras: R$ 4.562.298,01; Quantidade de compras: 14.727; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Valor das compras: R$ 4.225.462,69; Quantidade de compras: 11.825; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães 2026 — Brasil Park Shopping — Valor das compras: R$ 3.177.673,70; Quantidade de compras: 6.456; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n7. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Valor das compras: R$ 2.491.903,54; Quantidade de compras: 6.931; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n8. Promoção Mães 2026 — Shopping Sul — Valor das compras: R$ 1.923.898,90; Quantidade de compras: 6.135; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Valor das compras: R$ 1.856.641,11; Quantidade de compras: 5.687; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75\n10. Promoção Pais 2025 — Buriti Shopping Guará — Valor das compras: R$ 1.810.788,93; Quantidade de compras: 5.969; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 22476361.12,
+            "quantidade_compras": 61724,
+            "clientes_unicos": 18801,
+            "ticket_medio_por_compra": 364.14297712397126,
+            "ticket_medio_por_cliente": 1195.4875336418277
+          },
+          {
+            "nm_promocao": "Promoção Mães E Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 10470179.98,
+            "quantidade_compras": 28115,
+            "clientes_unicos": 7800,
+            "ticket_medio_por_compra": 372.4054767917482,
+            "ticket_medio_por_cliente": 1342.3307666666667
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 8285361.41,
+            "quantidade_compras": 24455,
+            "clientes_unicos": 10005,
+            "ticket_medio_por_compra": 338.80030300552033,
+            "ticket_medio_por_cliente": 828.12207996002
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 4562298.01,
+            "quantidade_compras": 14727,
+            "clientes_unicos": 5081,
+            "ticket_medio_por_compra": 309.791404223535,
+            "ticket_medio_por_cliente": 897.9134048415666
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 4225462.69,
+            "quantidade_compras": 11825,
+            "clientes_unicos": 5196,
+            "ticket_medio_por_compra": 357.3329970401692,
+            "ticket_medio_por_cliente": 813.2145284834489
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 3177673.7,
+            "quantidade_compras": 6456,
+            "clientes_unicos": 3193,
+            "ticket_medio_por_compra": 492.20472428748457,
+            "ticket_medio_por_cliente": 995.2000313185093
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 2491903.54,
+            "quantidade_compras": 6931,
+            "clientes_unicos": 2922,
+            "ticket_medio_por_compra": 359.5301601500505,
+            "ticket_medio_por_cliente": 852.8075085557837
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 1923898.9,
+            "quantidade_compras": 6135,
+            "clientes_unicos": 2996,
+            "ticket_medio_por_compra": 313.5939527302363,
+            "ticket_medio_por_cliente": 642.1558411214953
+          },
+          {
+            "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1856641.11,
+            "quantidade_compras": 5687,
+            "clientes_unicos": 2576,
+            "ticket_medio_por_compra": 326.4710937225251,
+            "ticket_medio_por_cliente": 720.745772515528
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "faturamento": 1810788.93,
+            "quantidade_compras": 5969,
+            "clientes_unicos": 3086,
+            "ticket_medio_por_compra": 303.3655436421511,
+            "ticket_medio_por_cliente": 586.7754147764095
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "derived_metric",
+            "sort",
+            "limit"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 123.265,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "group_by",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 0.027
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 236728,
+              "rows_after": 38,
+              "duration_ms": 1035.061
+            },
+            {
+              "index": 3,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.928
+            },
+            {
+              "index": 4,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.45
+            },
+            {
+              "index": 5,
+              "operation": "sort",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.45
+            },
+            {
+              "index": 6,
+              "operation": "limit",
+              "rows_before": 38,
+              "rows_after": 10,
+              "duration_ms": 0.105
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "faturamento",
+          "executed_limit": 10,
+          "rows_available_before_limit": 38,
+          "question": "Mostre o faturamento por campanha, do maior para o menor, identificando o shopping.",
+          "selected_table": "Dados_copiloto",
+          "ranking": {
+            "requested_limit": null,
+            "planned_limit": 10,
+            "executed_limit": 10,
+            "order": "desc",
+            "order_by": "faturamento"
+          },
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 10,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "faturamento",
+            "quantidade_compras",
+            "clientes_unicos",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente"
+          ],
+          "narrative_provider": "deterministic_ranking",
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Mostre o faturamento por campanha, do maior para o menor, identificando o shopping."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D02",
+          "session_state": {
+            "campanha": "Promoção Natal 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Mostre o faturamento por campanha, do maior para o menor, identificando o shopping.",
+            "ultima_resposta": "As 10 campanhas com maior faturamento foram:\n\n1. Promoção Natal 2025 — Buriti Shopping — Valor das compras: R$ 22.476.361,12; Quantidade de compras: 61.724; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Valor das compras: R$ 10.470.179,98; Quantidade de compras: 28.115; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Valor das compras: R$ 8.285.361,41; Quantidade de compras: 24.455; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Valor das compras: R$ 4.562.298,01; Quantidade de compras: 14.727; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Valor das compras: R$ 4.225.462,69; Quantidade de compras: 11.825; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães 2026 — Brasil Park Shopping — Valor das compras: R$ 3.177.673,70; Quantidade de compras: 6.456; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n7. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Valor das compras: R$ 2.491.903,54; Quantidade de compras: 6.931; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n8. Promoção Mães 2026 — Shopping Sul — Valor das compras: R$ 1.923.898,90; Quantidade de compras: 6.135; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Valor das compras: R$ 1.856.641,11; Quantidade de compras: 5.687; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75\n10. Promoção Pais 2025 — Buriti Shopping Guará — Valor das compras: R$ 1.810.788,93; Quantidade de compras: 5.969; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78",
+            "filtros": {},
+            "entidades": {
+              "nm_promocao": "Promoção Natal 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Parcial",
+        "priority": "Média",
+        "reason": "Valores, shopping e ordem por faturamento corretos nas 10 linhas exibidas. Há 38 combinações de campanha e shopping; o sistema aplicou top 10 sem solicitação, embora informe que mostra 10."
+      }
+    },
+    {
+      "id": "D03",
+      "question": "Quero comparar clientes únicos por campanha. Identifique o shopping e ordene do maior para o menor.",
+      "kind": "campaign",
+      "seconds": 3.25,
+      "checks": {
+        "identity_columns": true,
+        "complete_rows": true,
+        "values": true,
+        "descending": false
+      },
+      "automatic_pass": false,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 18801
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 10005
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 7800
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 5196
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 5081
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 3193
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "clientes_unicos": 3086
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "clientes_unicos": 2996
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "clientes_unicos": 2922
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 2576
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 2386
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "clientes_unicos": 1820
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "clientes_unicos": 1672
+        },
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "clientes_unicos": 1539
+        },
+        {
+          "nm_promocao": "Promoção Mês das Mulheres 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "clientes_unicos": 1537
+        },
+        {
+          "nm_promocao": "Promoção Férias 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "clientes_unicos": 1469
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "clientes_unicos": 1418
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "clientes_unicos": 1385
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "clientes_unicos": 1332
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "clientes_unicos": 1237
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "clientes_unicos": 1192
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "clientes_unicos": 1171
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 1159
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 1146
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Shopping Sul",
+          "clientes_unicos": 1141
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "clientes_unicos": 1089
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "clientes_unicos": 892
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "clientes_unicos": 879
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "clientes_unicos": 839
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 838
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "clientes_unicos": 753
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "clientes_unicos": 741
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Bay Market",
+          "clientes_unicos": 740
+        },
+        {
+          "nm_promocao": "Promoção Sorte de Verão 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "clientes_unicos": 723
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Hortolândia",
+          "clientes_unicos": 687
+        },
+        {
+          "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "clientes_unicos": 478
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "clientes_unicos": 373
+        },
+        {
+          "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "clientes_unicos": 54
+        }
+      ],
+      "result": {
+        "question": "Quero comparar clientes únicos por campanha. Identifique o shopping e ordene do maior para o menor.",
+        "answer": "| Campanha / comparação | Faturamento | Quantidade de compras | Clientes únicos | Ticket médio |\n|---|---:|---:|---:|---:|\n| Promoção Natal 2025 — Buriti Shopping | R$ 22.476.361,12 | 61.724 | 18.801 | R$ 364,14 |\n| Promoção Mães E Namorados 2026 — Buriti Shopping | R$ 10.470.179,98 | 28.115 | 7.800 | R$ 372,41 |\n| Promoção Natal 2025 — Brasil Park Shopping | R$ 8.285.361,41 | 24.455 | 10.005 | R$ 338,80 |\n| Promoção Pais 2026 — Buriti Shopping | R$ 4.562.298,01 | 14.727 | 5.081 | R$ 309,79 |\n| Promoção Pais 2025 — Buriti Shopping | R$ 4.225.462,69 | 11.825 | 5.196 | R$ 357,33 |\n| Promoção Mães 2026 — Brasil Park Shopping | R$ 3.177.673,70 | 6.456 | 3.193 | R$ 492,20 |\n| Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde | R$ 2.491.903,54 | 6.931 | 2.922 | R$ 359,53 |\n| Promoção Mães 2026 — Shopping Sul | R$ 1.923.898,90 | 6.135 | 2.996 | R$ 313,59 |\n| No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping | R$ 1.856.641,11 | 5.687 | 2.576 | R$ 326,47 |\n| Promoção Pais 2025 — Buriti Shopping Guará | R$ 1.810.788,93 | 5.969 | 3.086 | R$ 303,37 |\n| Promoção Verão no Arca Parque 2026 — Buriti Shopping | R$ 1.585.499,68 | 5.030 | 2.386 | R$ 315,21 |\n| Promoção Mães e Namorados 2026 — Buriti Shopping Guará | R$ 1.488.938,78 | 5.250 | 1.820 | R$ 283,61 |\n| Campanha Gastronômica Buriti Shopping 2026 — Buriti Shopping | R$ 1.182.169,20 | 4.977 | 1.539 | R$ 237,53 |\n| Promoção Pais 2026 — Shopping Sul | R$ 1.158.039,82 | 3.526 | 1.237 | R$ 328,43 |\n| Promoção Mães 2026 — Buriti Shopping Mogi Guaçu | R$ 1.138.023,61 | 2.857 | 1.089 | R$ 398,33 |\n| Promoção Férias 2026 — Shopping Sul | R$ 975.928,53 | 3.143 | 1.469 | R$ 310,51 |\n| Promoção Pais 2026 — Buriti Shopping Rio Verde | R$ 945.132,20 | 2.913 | 1.672 | R$ 324,45 |\n| Promoção Pais 2026 — Brasil Park Shopping | R$ 935.728,24 | 2.398 | 1.159 | R$ 390,21 |\n| Promoção Pais 2025 — Buriti Shopping Rio Verde | R$ 872.780,02 | 2.718 | 1.385 | R$ 321,11 |\n| Promoção Mães 2026 — Bay Market | R$ 856.028,30 | 1.644 | 740 | R$ 520,70 |\n| Promoção Pais 2025 — Buriti Shopping Mogi Guaçu | R$ 850.440,74 | 2.514 | 1.192 | R$ 338,28 |\n| Promoção Mês das Mulheres 2026 — Buriti Shopping Rio Verde | R$ 822.428,78 | 2.476 | 1.537 | R$ 332,16 |\n| Promoção Pais 2026 — Buriti Shopping Guará | R$ 809.313,94 | 2.992 | 1.418 | R$ 270,49 |\n| Promoção Mães 2026 — Shopping Valinhos | R$ 805.891,85 | 2.590 | 753 | R$ 311,16 |\n| Promoção Namorados 2026 — Brasil Park Shopping | R$ 804.147,81 | 1.948 | 1.146 | R$ 412,81 |\n| Promoção Mães 2026 — Portal Shopping | R$ 777.077,37 | 2.526 | 1.332 | R$ 307,63 |\n| Promoção Mães 2026 — Shopping Hortolândia | R$ 707.330,12 | 1.770 | 687 | R$ 399,62 |\n| Promoção Pais 2025 — Shopping Sul | R$ 668.337,60 | 2.447 | 1.141 | R$ 273,13 |\n| Promoção Pais 2025 — Águas Lindas Shopping | R$ 537.929,51 | 1.903 | 1.171 | R$ 282,67 |\n| Promoção Pais 2025 — Brasil Park Shopping | R$ 451.490,58 | 1.402 | 838 | R$ 322,03 |\n| Promoção Namorados 2026 — Shopping Valinhos | R$ 436.471,15 | 1.366 | 741 | R$ 319,53 |\n| Promoção Mães 2026 — Águas Lindas Shopping | R$ 426.737,78 | 1.519 | 879 | R$ 280,93 |\n| Promoção Pais 2026 — Águas Lindas Shopping | R$ 356.979,99 | 1.283 | 892 | R$ 278,24 |\n| Promoção Pais 2026 — Portal Shopping | R$ 297.592,58 | 1.184 | 839 | R$ 251,35 |\n| Promoção Sorte de Verão 2026 — Portal Shopping | R$ 295.189,52 | 986 | 723 | R$ 299,38 |\n| Promoção Namorados 2026 — Shopping Sul | R$ 276.516,43 | 714 | 373 | R$ 387,28 |\n| Promoção Jogue Junto com Hidramais 2026 — Portal Shopping | R$ 151.018,91 | 529 | 478 | R$ 285,48 |\n| Promoção Compre e Ganhe Zé Neto e Cristiano 2026 — Brasil Park Shopping | R$ 34.118,60 | 99 | 54 | R$ 344,63 |",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 22476361.12,
+            "quantidade_compras": 61724,
+            "clientes_unicos": 18801,
+            "ticket_medio": 364.14297712397126
+          },
+          {
+            "nm_promocao": "Promoção Mães E Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 10470179.98,
+            "quantidade_compras": 28115,
+            "clientes_unicos": 7800,
+            "ticket_medio": 372.4054767917482
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 8285361.41,
+            "quantidade_compras": 24455,
+            "clientes_unicos": 10005,
+            "ticket_medio": 338.80030300552033
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 4562298.01,
+            "quantidade_compras": 14727,
+            "clientes_unicos": 5081,
+            "ticket_medio": 309.791404223535
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 4225462.69,
+            "quantidade_compras": 11825,
+            "clientes_unicos": 5196,
+            "ticket_medio": 357.3329970401692
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 3177673.7,
+            "quantidade_compras": 6456,
+            "clientes_unicos": 3193,
+            "ticket_medio": 492.20472428748457
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 2491903.54,
+            "quantidade_compras": 6931,
+            "clientes_unicos": 2922,
+            "ticket_medio": 359.5301601500505
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 1923898.9,
+            "quantidade_compras": 6135,
+            "clientes_unicos": 2996,
+            "ticket_medio": 313.5939527302363
+          },
+          {
+            "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1856641.11,
+            "quantidade_compras": 5687,
+            "clientes_unicos": 2576,
+            "ticket_medio": 326.4710937225251
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "faturamento": 1810788.93,
+            "quantidade_compras": 5969,
+            "clientes_unicos": 3086,
+            "ticket_medio": 303.3655436421511
+          },
+          {
+            "nm_promocao": "Promoção Verão no Arca Parque 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1585499.68,
+            "quantidade_compras": 5030,
+            "clientes_unicos": 2386,
+            "ticket_medio": 315.20868389662024
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "faturamento": 1488938.78,
+            "quantidade_compras": 5250,
+            "clientes_unicos": 1820,
+            "ticket_medio": 283.6073866666667
+          },
+          {
+            "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1182169.2,
+            "quantidade_compras": 4977,
+            "clientes_unicos": 1539,
+            "ticket_medio": 237.52646172393005
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 1158039.82,
+            "quantidade_compras": 3526,
+            "clientes_unicos": 1237,
+            "ticket_medio": 328.42876347135564
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+            "faturamento": 1138023.61,
+            "quantidade_compras": 2857,
+            "clientes_unicos": 1089,
+            "ticket_medio": 398.3281799089955
+          },
+          {
+            "nm_promocao": "Promoção Férias 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 975928.53,
+            "quantidade_compras": 3143,
+            "clientes_unicos": 1469,
+            "ticket_medio": 310.5086000636335
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 945132.2,
+            "quantidade_compras": 2913,
+            "clientes_unicos": 1672,
+            "ticket_medio": 324.4532097493992
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 935728.24,
+            "quantidade_compras": 2398,
+            "clientes_unicos": 1159,
+            "ticket_medio": 390.21194328607174
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 872780.02,
+            "quantidade_compras": 2718,
+            "clientes_unicos": 1385,
+            "ticket_medio": 321.11111846946284
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Bay Market",
+            "faturamento": 856028.3,
+            "quantidade_compras": 1644,
+            "clientes_unicos": 740,
+            "ticket_medio": 520.6984793187348
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+            "faturamento": 850440.74,
+            "quantidade_compras": 2514,
+            "clientes_unicos": 1192,
+            "ticket_medio": 338.2819172633254
+          },
+          {
+            "nm_promocao": "Promoção Mês das Mulheres 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 822428.78,
+            "quantidade_compras": 2476,
+            "clientes_unicos": 1537,
+            "ticket_medio": 332.1602504038772
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "faturamento": 809313.9400000001,
+            "quantidade_compras": 2992,
+            "clientes_unicos": 1418,
+            "ticket_medio": 270.49262700534763
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Valinhos",
+            "faturamento": 805891.85,
+            "quantidade_compras": 2590,
+            "clientes_unicos": 753,
+            "ticket_medio": 311.15515444015443
+          },
+          {
+            "nm_promocao": "Promoção Namorados 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 804147.81,
+            "quantidade_compras": 1948,
+            "clientes_unicos": 1146,
+            "ticket_medio": 412.8068839835729
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Portal Shopping",
+            "faturamento": 777077.37,
+            "quantidade_compras": 2526,
+            "clientes_unicos": 1332,
+            "ticket_medio": 307.6315795724465
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Hortolândia",
+            "faturamento": 707330.12,
+            "quantidade_compras": 1770,
+            "clientes_unicos": 687,
+            "ticket_medio": 399.62153672316384
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 668337.6,
+            "quantidade_compras": 2447,
+            "clientes_unicos": 1141,
+            "ticket_medio": 273.1252962811606
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Águas Lindas Shopping",
+            "faturamento": 537929.51,
+            "quantidade_compras": 1903,
+            "clientes_unicos": 1171,
+            "ticket_medio": 282.6744666316343
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 451490.58,
+            "quantidade_compras": 1402,
+            "clientes_unicos": 838,
+            "ticket_medio": 322.0332239657632
+          },
+          {
+            "nm_promocao": "Promoção Namorados 2026",
+            "nm_empreendimento": "Shopping Valinhos",
+            "faturamento": 436471.15,
+            "quantidade_compras": 1366,
+            "clientes_unicos": 741,
+            "ticket_medio": 319.52500000000003
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Águas Lindas Shopping",
+            "faturamento": 426737.78,
+            "quantidade_compras": 1519,
+            "clientes_unicos": 879,
+            "ticket_medio": 280.93336405529953
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Águas Lindas Shopping",
+            "faturamento": 356979.99,
+            "quantidade_compras": 1283,
+            "clientes_unicos": 892,
+            "ticket_medio": 278.23849571317226
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Portal Shopping",
+            "faturamento": 297592.58,
+            "quantidade_compras": 1184,
+            "clientes_unicos": 839,
+            "ticket_medio": 251.34508445945949
+          },
+          {
+            "nm_promocao": "Promoção Sorte de Verão 2026",
+            "nm_empreendimento": "Portal Shopping",
+            "faturamento": 295189.52,
+            "quantidade_compras": 986,
+            "clientes_unicos": 723,
+            "ticket_medio": 299.3808519269777
+          },
+          {
+            "nm_promocao": "Promoção Namorados 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 276516.43,
+            "quantidade_compras": 714,
+            "clientes_unicos": 373,
+            "ticket_medio": 387.2779131652661
+          },
+          {
+            "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+            "nm_empreendimento": "Portal Shopping",
+            "faturamento": 151018.91,
+            "quantidade_compras": 529,
+            "clientes_unicos": 478,
+            "ticket_medio": 285.4799810964083
+          },
+          {
+            "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 34118.6,
+            "quantidade_compras": 99,
+            "clientes_unicos": 54,
+            "ticket_medio": 344.63232323232324
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "sort"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 124.143,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "group_by",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 0.022
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 236728,
+              "rows_after": 38,
+              "duration_ms": 1029.662
+            },
+            {
+              "index": 3,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.829
+            },
+            {
+              "index": 4,
+              "operation": "sort",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.379
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "faturamento",
+          "question": "Quero comparar clientes únicos por campanha. Identifique o shopping e ordene do maior para o menor.",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 38,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "faturamento",
+            "quantidade_compras",
+            "clientes_unicos",
+            "ticket_medio"
+          ],
+          "narrative_provider": "deterministic_table",
+          "session_id": "director-eval-D03",
+          "rewritten_question": "Quero comparar clientes únicos por campanha. Identifique o shopping e ordene do maior para o menor.",
+          "conversation_summary": "",
+          "session_state": {
+            "campanha": "Promoção Natal 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": "clientes_unicos",
+            "ultima_pergunta": "Quero comparar clientes únicos por campanha. Identifique o shopping e ordene do maior para o menor.",
+            "ultima_resposta": "| Campanha / comparação | Faturamento | Quantidade de compras | Clientes únicos | Ticket médio |\n|---|---:|---:|---:|---:|\n| Promoção Natal 2025 — Buriti Shopping | R$ 22.476.361,12 | 61.724 | 18.801 | R$ 364,14 |\n| Promoção Mães E Namorados 2026 — Buriti Shopping | R$ 10.470.179,98 | 28.115 | 7.800 | R$ 372,41 |\n| Promoção Natal 2025 — Brasil Park Shopping | R$ 8.285.361,41 | 24.455 | 10.005 | R$ 338,80 |\n| Promoção Pais 2026 — Buriti Shopping | R$ 4.562.298,01 | 14.727 | 5.081 | R$ 309,79 |\n| Promoção Pais 2025 — Buriti Shopping | R$ 4.225.462,69 | 11.825 | 5.196 | R$ 357,33 |\n| Promoção Mães 2026 — Brasil Park Shopping | R$ 3.177.673,70 | 6.456 | 3.193 | R$ 492,20 |\n| Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde | R$ 2.491.903,54 | 6.931 | 2.922 | R$ 359,53 |\n| Promoção Mães 2026 — Shopping Sul | R$ 1.923.898,90 | 6.135 | 2.996 | R$ 313,59 |\n| No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping | R$ 1.856.641,11 | 5.687 | 2.576 | R$ 326,47 |\n| Promoção Pais 2025 — Buriti Shopping Guará | R$ 1.810.788,93 | 5.969 | 3.086 | R$ 303,37 |\n| Promoção Verão no Arca Parque 2026 — Buriti Shopping | R$ 1.585.499,68 | 5.030 | 2.386 | R$ 315,21 |\n| Promoção Mães e Namorados 2026 — Buriti Shopping Guará | R$ 1.488.938,78 | 5.250 | 1.820 | R$ 283,61 |\n| Campanha Gastronômica Buriti Shopping 2026 — Buriti Shopping | R$ 1.182.169,20 | 4.977 | 1.539 | R$ 237,53 |\n| Promoção Pais 2026 — Shopping Sul | R$ 1.158.039,82 | 3.526 | 1.237 | R$ 328,43 |\n| Promoção Mães 2026 — Buriti Shopping Mogi Guaçu | R$ 1.138.023,61 | 2.857 | 1.089 | R$ 398,33 |\n| Promoção Férias 2026 — Shopping Sul | R$ 975.928,53 | 3.143 | 1.469 | R$ 310,51 |\n| Promoção Pais 2026 — Buriti Shopping Rio Verde | R$ 945.132,20 | 2.913 | 1.672 | R$ 324,45 |\n| Promoção Pais 2026 — Brasil Park Shopping | R$ 935.728,24 | 2.398 | 1.159 | R$ 390,21 |\n| Promoção Pais 2025 — Buriti Shopping Rio Verde | R$ 872.780,02 | 2.718 | 1.385 | R$ 321,11 |\n| Promoção Mães 2026 — Bay Market | R$ 856.028,30 | 1.644 | 740 | R$ 520,70 |\n| Promoção Pais 2025 — Buriti Shopping Mogi Guaçu | R$ 850.440,74 | 2.514 | 1.192 | R$ 338,28 |\n| Promoção Mês das Mulheres 2026 — Buriti Shopping Rio Verde | R$ 822.428,78 | 2.476 | 1.537 | R$ 332,16 |\n| Promoção Pais 2026 — Buriti Shopping Guará | R$ 809.313,94 | 2.992 | 1.418 | R$ 270,49 |\n| Promoção Mães 2026 — Shopping Valinhos | R$ 805.891,85 | 2.590 | 753 | R$ 311,16 |\n| Promoção Namorados 2026 — Brasil Park Shopping | R$ 804.147,81 | 1.948 | 1.146 | R$ 412,81 |\n| Promoção Mães 2026 — Portal Shopping | R$ 777.077,37 | 2.526 | 1.332 | R$ 307,63 |\n| Promoção Mães 2026 — Shopping Hortolândia | R$ 707.330,12 | 1.770 | 687 | R$ 399,62 |\n| Promoção Pais 2025 — Shopping Sul | R$ 668.337,60 | 2.447 | 1.141 | R$ 273,13 |\n| Promoção Pais 2025 — Águas Lindas Shopping | R$ 537.929,51 | 1.903 | 1.171 | R$ 282,67 |\n| Promoção Pais 2025 — Brasil Park Shopping | R$ 451.490,58 | 1.402 | 838 | R$ 322,03 |\n| Promoção Namorados 2026 — Shopping Valinhos | R$ 436.471,15 | 1.366 | 741 | R$ 319,53 |\n| Promoção Mães 2026 — Águas Lindas Shopping | R$ 426.737,78 | 1.519 | 879 | R$ 280,93 |\n| Promoção Pais 2026 — Águas Lindas Shopping | R$ 356.979,99 | 1.283 | 892 | R$ 278,24 |\n| Promoção Pais 2026 — Portal Shopping | R$ 297.592,58 | 1.184 | 839 | R$ 251,35 |\n| Promoção Sorte de Verão 2026 — Portal Shopping | R$ 295.189,52 | 986 | 723 | R$ 299,38 |\n| Promoção Namorados 2026 — Shopping Sul | R$ 276.516,43 | 714 | 373 | R$ 387,28 |\n| Promoção Jogue Junto com Hidramais 2026 — Portal Shopping | R$ 151.018,91 | 529 | 478 | R$ 285,48 |\n| Promoção Compre e Ganhe Zé Neto e Cristiano 2026 — Brasil Park Shopping | R$ 34.118,60 | 99 | 54 | R$ 344,63 |",
+            "filtros": {},
+            "entidades": {
+              "nm_promocao": "Promoção Natal 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": "comparison",
+            "dimensao": "promocao"
+          }
+        },
+        "warnings": [
+          "A direção conversacional ficou indisponível; usei o planejamento padrão."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Alta",
+        "reason": "Clientes únicos calculados corretamente, mas tabela ordenada por faturamento. Natal / Brasil Park tem 10.005 clientes e deveria preceder Mães e Namorados / Buriti, com 7.800."
+      }
+    },
+    {
+      "id": "D04",
+      "question": "Mostre a quantidade de compras por campanha, do maior para o menor, com o shopping.",
+      "kind": "campaign",
+      "seconds": 3.09,
+      "checks": {
+        "identity_columns": true,
+        "complete_rows": false,
+        "values": true,
+        "descending": true
+      },
+      "automatic_pass": false,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 61724
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 28115
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 24455
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 14727
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 11825
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "quantidade_compras": 6931
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 6456
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "quantidade_compras": 6135
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "quantidade_compras": 5969
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 5687
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "quantidade_compras": 5250
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 5030
+        },
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "quantidade_compras": 4977
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "quantidade_compras": 3526
+        },
+        {
+          "nm_promocao": "Promoção Férias 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "quantidade_compras": 3143
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "quantidade_compras": 2992
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "quantidade_compras": 2913
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "quantidade_compras": 2857
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "quantidade_compras": 2718
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "quantidade_compras": 2590
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "quantidade_compras": 2526
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "quantidade_compras": 2514
+        },
+        {
+          "nm_promocao": "Promoção Mês das Mulheres 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "quantidade_compras": 2476
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Shopping Sul",
+          "quantidade_compras": 2447
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 2398
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 1948
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "quantidade_compras": 1903
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Hortolândia",
+          "quantidade_compras": 1770
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Bay Market",
+          "quantidade_compras": 1644
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "quantidade_compras": 1519
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 1402
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "quantidade_compras": 1366
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "quantidade_compras": 1283
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "quantidade_compras": 1184
+        },
+        {
+          "nm_promocao": "Promoção Sorte de Verão 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "quantidade_compras": 986
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "quantidade_compras": 714
+        },
+        {
+          "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "quantidade_compras": 529
+        },
+        {
+          "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "quantidade_compras": 99
+        }
+      ],
+      "result": {
+        "question": "Mostre a quantidade de compras por campanha, do maior para o menor, com o shopping.",
+        "answer": "As 10 campanhas com maior participação em volume de notas foram:\n\nContagem: notas únicas cadastradas (cd_compra distinto).\n\n1. Promoção Natal 2025 — Buriti Shopping — Quantidade de compras: 61.724; Valor das compras: R$ 22.476.361,12; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Quantidade de compras: 28.115; Valor das compras: R$ 10.470.179,98; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Quantidade de compras: 24.455; Valor das compras: R$ 8.285.361,41; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Quantidade de compras: 14.727; Valor das compras: R$ 4.562.298,01; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Quantidade de compras: 11.825; Valor das compras: R$ 4.225.462,69; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Quantidade de compras: 6.931; Valor das compras: R$ 2.491.903,54; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Brasil Park Shopping — Quantidade de compras: 6.456; Valor das compras: R$ 3.177.673,70; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n8. Promoção Mães 2026 — Shopping Sul — Quantidade de compras: 6.135; Valor das compras: R$ 1.923.898,90; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. Promoção Pais 2025 — Buriti Shopping Guará — Quantidade de compras: 5.969; Valor das compras: R$ 1.810.788,93; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78\n10. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Quantidade de compras: 5.687; Valor das compras: R$ 1.856.641,11; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 61724,
+            "faturamento": 22476361.12,
+            "clientes_unicos": 18801,
+            "ticket_medio_por_compra": 364.14297712397126,
+            "ticket_medio_por_cliente": 1195.4875336418277
+          },
+          {
+            "nm_promocao": "Promoção Mães E Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 28115,
+            "faturamento": 10470179.98,
+            "clientes_unicos": 7800,
+            "ticket_medio_por_compra": 372.4054767917482,
+            "ticket_medio_por_cliente": 1342.3307666666667
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "quantidade_compras": 24455,
+            "faturamento": 8285361.41,
+            "clientes_unicos": 10005,
+            "ticket_medio_por_compra": 338.80030300552033,
+            "ticket_medio_por_cliente": 828.12207996002
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 14727,
+            "faturamento": 4562298.01,
+            "clientes_unicos": 5081,
+            "ticket_medio_por_compra": 309.791404223535,
+            "ticket_medio_por_cliente": 897.9134048415666
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 11825,
+            "faturamento": 4225462.69,
+            "clientes_unicos": 5196,
+            "ticket_medio_por_compra": 357.3329970401692,
+            "ticket_medio_por_cliente": 813.2145284834489
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "quantidade_compras": 6931,
+            "faturamento": 2491903.54,
+            "clientes_unicos": 2922,
+            "ticket_medio_por_compra": 359.5301601500505,
+            "ticket_medio_por_cliente": 852.8075085557837
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "quantidade_compras": 6456,
+            "faturamento": 3177673.7,
+            "clientes_unicos": 3193,
+            "ticket_medio_por_compra": 492.20472428748457,
+            "ticket_medio_por_cliente": 995.2000313185093
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "quantidade_compras": 6135,
+            "faturamento": 1923898.9,
+            "clientes_unicos": 2996,
+            "ticket_medio_por_compra": 313.5939527302363,
+            "ticket_medio_por_cliente": 642.1558411214953
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "quantidade_compras": 5969,
+            "faturamento": 1810788.93,
+            "clientes_unicos": 3086,
+            "ticket_medio_por_compra": 303.3655436421511,
+            "ticket_medio_por_cliente": 586.7754147764095
+          },
+          {
+            "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 5687,
+            "faturamento": 1856641.11,
+            "clientes_unicos": 2576,
+            "ticket_medio_por_compra": 326.4710937225251,
+            "ticket_medio_por_cliente": 720.745772515528
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "derived_metric",
+            "sort",
+            "limit"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 128.862,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "group_by",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 0.023
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 236728,
+              "rows_after": 38,
+              "duration_ms": 1032.299
+            },
+            {
+              "index": 3,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.949
+            },
+            {
+              "index": 4,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.465
+            },
+            {
+              "index": 5,
+              "operation": "sort",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.417
+            },
+            {
+              "index": 6,
+              "operation": "limit",
+              "rows_before": 38,
+              "rows_after": 10,
+              "duration_ms": 0.197
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "quantidade_compras",
+          "executed_limit": 10,
+          "rows_available_before_limit": 38,
+          "question": "Mostre a quantidade de compras por campanha, do maior para o menor, com o shopping.",
+          "selected_table": "Dados_copiloto",
+          "ranking": {
+            "requested_limit": null,
+            "planned_limit": 10,
+            "executed_limit": 10,
+            "order": "desc",
+            "order_by": "quantidade_compras"
+          },
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 10,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "quantidade_compras",
+            "faturamento",
+            "clientes_unicos",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente"
+          ],
+          "narrative_provider": "deterministic_ranking",
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Mostre a quantidade de compras por campanha, do maior para o menor, com o shopping."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D04",
+          "session_state": {
+            "campanha": "Promoção Natal 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Mostre a quantidade de compras por campanha, do maior para o menor, com o shopping.",
+            "ultima_resposta": "As 10 campanhas com maior participação em volume de notas foram:\n\nContagem: notas únicas cadastradas (cd_compra distinto).\n\n1. Promoção Natal 2025 — Buriti Shopping — Quantidade de compras: 61.724; Valor das compras: R$ 22.476.361,12; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Quantidade de compras: 28.115; Valor das compras: R$ 10.470.179,98; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Quantidade de compras: 24.455; Valor das compras: R$ 8.285.361,41; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Quantidade de compras: 14.727; Valor das compras: R$ 4.562.298,01; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Quantidade de compras: 11.825; Valor das compras: R$ 4.225.462,69; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Quantidade de compras: 6.931; Valor das compras: R$ 2.491.903,54; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Brasil Park Shopping — Quantidade de compras: 6.456; Valor das compras: R$ 3.177.673,70; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n8. Promoção Mães 2026 — Shopping Sul — Quantidade de compras: 6.135; Valor das compras: R$ 1.923.898,90; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. Promoção Pais 2025 — Buriti Shopping Guará — Quantidade de compras: 5.969; Valor das compras: R$ 1.810.788,93; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78\n10. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Quantidade de compras: 5.687; Valor das compras: R$ 1.856.641,11; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75",
+            "filtros": {},
+            "entidades": {
+              "nm_promocao": "Promoção Natal 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Parcial",
+        "priority": "Média",
+        "reason": "Contagem de compras, identificação e ordem corretas, mas repete o corte automático em 10 de 38 campanhas."
+      }
+    },
+    {
+      "id": "D05",
+      "question": "Qual o ticket médio por compra por campanha? Mostre também o shopping, do maior para o menor.",
+      "kind": "campaign",
+      "seconds": 3.1,
+      "checks": {
+        "identity_columns": true,
+        "complete_rows": false,
+        "values": true,
+        "descending": false
+      },
+      "automatic_pass": false,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Bay Market",
+          "ticket_medio_por_compra": 520.6984793187348
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 492.20472428748457
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 412.8068839835729
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Hortolândia",
+          "ticket_medio_por_compra": 399.62153672316384
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "ticket_medio_por_compra": 398.3281799089955
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 390.21194328607174
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "ticket_medio_por_compra": 387.2779131652661
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 372.4054767917482
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 364.14297712397126
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "ticket_medio_por_compra": 359.5301601500505
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 357.3329970401692
+        },
+        {
+          "nm_promocao": "Promoção Compre e Ganhe Zé Neto e Cristiano 2026",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 344.63232323232324
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 338.80030300552033
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Mogi Guaçu",
+          "ticket_medio_por_compra": 338.2819172633254
+        },
+        {
+          "nm_promocao": "Promoção Mês das Mulheres 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "ticket_medio_por_compra": 332.1602504038772
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "ticket_medio_por_compra": 328.42876347135564
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 326.4710937225251
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "ticket_medio_por_compra": 324.4532097493992
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Brasil Park Shopping",
+          "ticket_medio_por_compra": 322.0332239657632
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Rio Verde",
+          "ticket_medio_por_compra": 321.11111846946284
+        },
+        {
+          "nm_promocao": "Promoção Namorados 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "ticket_medio_por_compra": 319.52500000000003
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 315.20868389662024
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "ticket_medio_por_compra": 313.5939527302363
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Valinhos",
+          "ticket_medio_por_compra": 311.15515444015443
+        },
+        {
+          "nm_promocao": "Promoção Férias 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "ticket_medio_por_compra": 310.5086000636335
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 309.791404223535
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "ticket_medio_por_compra": 307.6315795724465
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "ticket_medio_por_compra": 303.3655436421511
+        },
+        {
+          "nm_promocao": "Promoção Sorte de Verão 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "ticket_medio_por_compra": 299.3808519269777
+        },
+        {
+          "nm_promocao": "Promoção Jogue Junto com Hidramais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "ticket_medio_por_compra": 285.4799810964083
+        },
+        {
+          "nm_promocao": "Promoção Mães e Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "ticket_medio_por_compra": 283.6073866666667
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "ticket_medio_por_compra": 282.6744666316343
+        },
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "ticket_medio_por_compra": 280.93336405529953
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Águas Lindas Shopping",
+          "ticket_medio_por_compra": 278.23849571317226
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Shopping Sul",
+          "ticket_medio_por_compra": 273.1252962811606
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping Guará",
+          "ticket_medio_por_compra": 270.49262700534763
+        },
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Portal Shopping",
+          "ticket_medio_por_compra": 251.34508445945949
+        },
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "ticket_medio_por_compra": 237.52646172393005
+        }
+      ],
+      "result": {
+        "question": "Qual o ticket médio por compra por campanha? Mostre também o shopping, do maior para o menor.",
+        "answer": "As 10 campanhas com maior participação em volume de notas foram:\n\nContagem: notas únicas cadastradas (cd_compra distinto).\n\n1. Promoção Natal 2025 — Buriti Shopping — Quantidade de compras: 61.724; Valor das compras: R$ 22.476.361,12; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Quantidade de compras: 28.115; Valor das compras: R$ 10.470.179,98; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Quantidade de compras: 24.455; Valor das compras: R$ 8.285.361,41; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Quantidade de compras: 14.727; Valor das compras: R$ 4.562.298,01; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Quantidade de compras: 11.825; Valor das compras: R$ 4.225.462,69; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Quantidade de compras: 6.931; Valor das compras: R$ 2.491.903,54; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Brasil Park Shopping — Quantidade de compras: 6.456; Valor das compras: R$ 3.177.673,70; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n8. Promoção Mães 2026 — Shopping Sul — Quantidade de compras: 6.135; Valor das compras: R$ 1.923.898,90; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. Promoção Pais 2025 — Buriti Shopping Guará — Quantidade de compras: 5.969; Valor das compras: R$ 1.810.788,93; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78\n10. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Quantidade de compras: 5.687; Valor das compras: R$ 1.856.641,11; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 61724,
+            "faturamento": 22476361.12,
+            "clientes_unicos": 18801,
+            "ticket_medio_por_compra": 364.14297712397126,
+            "ticket_medio_por_cliente": 1195.4875336418277
+          },
+          {
+            "nm_promocao": "Promoção Mães E Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 28115,
+            "faturamento": 10470179.98,
+            "clientes_unicos": 7800,
+            "ticket_medio_por_compra": 372.4054767917482,
+            "ticket_medio_por_cliente": 1342.3307666666667
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "quantidade_compras": 24455,
+            "faturamento": 8285361.41,
+            "clientes_unicos": 10005,
+            "ticket_medio_por_compra": 338.80030300552033,
+            "ticket_medio_por_cliente": 828.12207996002
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 14727,
+            "faturamento": 4562298.01,
+            "clientes_unicos": 5081,
+            "ticket_medio_por_compra": 309.791404223535,
+            "ticket_medio_por_cliente": 897.9134048415666
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 11825,
+            "faturamento": 4225462.69,
+            "clientes_unicos": 5196,
+            "ticket_medio_por_compra": 357.3329970401692,
+            "ticket_medio_por_cliente": 813.2145284834489
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "quantidade_compras": 6931,
+            "faturamento": 2491903.54,
+            "clientes_unicos": 2922,
+            "ticket_medio_por_compra": 359.5301601500505,
+            "ticket_medio_por_cliente": 852.8075085557837
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "quantidade_compras": 6456,
+            "faturamento": 3177673.7,
+            "clientes_unicos": 3193,
+            "ticket_medio_por_compra": 492.20472428748457,
+            "ticket_medio_por_cliente": 995.2000313185093
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "quantidade_compras": 6135,
+            "faturamento": 1923898.9,
+            "clientes_unicos": 2996,
+            "ticket_medio_por_compra": 313.5939527302363,
+            "ticket_medio_por_cliente": 642.1558411214953
+          },
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "quantidade_compras": 5969,
+            "faturamento": 1810788.93,
+            "clientes_unicos": 3086,
+            "ticket_medio_por_compra": 303.3655436421511,
+            "ticket_medio_por_cliente": 586.7754147764095
+          },
+          {
+            "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+            "nm_empreendimento": "Buriti Shopping",
+            "quantidade_compras": 5687,
+            "faturamento": 1856641.11,
+            "clientes_unicos": 2576,
+            "ticket_medio_por_compra": 326.4710937225251,
+            "ticket_medio_por_cliente": 720.745772515528
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "derived_metric",
+            "sort",
+            "limit"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 124.835,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "group_by",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 0.019
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 236728,
+              "rows_after": 38,
+              "duration_ms": 1024.976
+            },
+            {
+              "index": 3,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.817
+            },
+            {
+              "index": 4,
+              "operation": "derived_metric",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.372
+            },
+            {
+              "index": 5,
+              "operation": "sort",
+              "rows_before": 38,
+              "rows_after": 38,
+              "duration_ms": 0.393
+            },
+            {
+              "index": 6,
+              "operation": "limit",
+              "rows_before": 38,
+              "rows_after": 10,
+              "duration_ms": 0.158
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "quantidade_compras",
+          "executed_limit": 10,
+          "rows_available_before_limit": 38,
+          "question": "Qual o ticket médio por compra por campanha? Mostre também o shopping, do maior para o menor.",
+          "selected_table": "Dados_copiloto",
+          "ranking": {
+            "requested_limit": null,
+            "planned_limit": 10,
+            "executed_limit": 10,
+            "order": "desc",
+            "order_by": "quantidade_compras"
+          },
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 10,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "quantidade_compras",
+            "faturamento",
+            "clientes_unicos",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente"
+          ],
+          "narrative_provider": "deterministic_ranking",
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Qual o ticket médio por compra por campanha? Mostre também o shopping, do maior para o menor."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D05",
+          "session_state": {
+            "campanha": "Promoção Natal 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Qual o ticket médio por compra por campanha? Mostre também o shopping, do maior para o menor.",
+            "ultima_resposta": "As 10 campanhas com maior participação em volume de notas foram:\n\nContagem: notas únicas cadastradas (cd_compra distinto).\n\n1. Promoção Natal 2025 — Buriti Shopping — Quantidade de compras: 61.724; Valor das compras: R$ 22.476.361,12; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Quantidade de compras: 28.115; Valor das compras: R$ 10.470.179,98; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Quantidade de compras: 24.455; Valor das compras: R$ 8.285.361,41; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Quantidade de compras: 14.727; Valor das compras: R$ 4.562.298,01; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Pais 2025 — Buriti Shopping — Quantidade de compras: 11.825; Valor das compras: R$ 4.225.462,69; Clientes únicos: 5.196; Ticket médio por compra: R$ 357,33; Ticket médio por cliente: R$ 813,21\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Quantidade de compras: 6.931; Valor das compras: R$ 2.491.903,54; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Brasil Park Shopping — Quantidade de compras: 6.456; Valor das compras: R$ 3.177.673,70; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n8. Promoção Mães 2026 — Shopping Sul — Quantidade de compras: 6.135; Valor das compras: R$ 1.923.898,90; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n9. Promoção Pais 2025 — Buriti Shopping Guará — Quantidade de compras: 5.969; Valor das compras: R$ 1.810.788,93; Clientes únicos: 3.086; Ticket médio por compra: R$ 303,37; Ticket médio por cliente: R$ 586,78\n10. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Quantidade de compras: 5.687; Valor das compras: R$ 1.856.641,11; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75",
+            "filtros": {},
+            "entidades": {
+              "nm_promocao": "Promoção Natal 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Alta",
+        "reason": "Pedi ticket por compra; recebeu ranking por quantidade de compras. A líder pelo ticket é Mães 2026 / Bay Market, R$ 520,70, e não Natal / Buriti, R$ 364,14."
+      }
+    },
+    {
+      "id": "D06",
+      "question": "Compare a campanha de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Shopping Sul.",
+      "kind": "comparison",
+      "seconds": 1.92,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Mães 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "faturamento": 1923898.9,
+          "quantidade_compras": 6135,
+          "clientes_unicos": 2996,
+          "ticket_medio_por_compra": 313.5939527302363,
+          "ticket_medio_por_cliente": 642.1558411214953
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 10470179.98,
+          "quantidade_compras": 28115,
+          "clientes_unicos": 7800,
+          "ticket_medio_por_compra": 372.4054767917482,
+          "ticket_medio_por_cliente": 1342.3307666666667
+        }
+      ],
+      "result": {
+        "question": "Compare a campanha de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Shopping Sul.",
+        "answer": "| Campanha / comparação | Faturamento | Quantidade de compras | Clientes únicos | Ticket médio |\n|---|---:|---:|---:|---:|\n| Promoção Mães E Namorados 2026 — Buriti Shopping | R$ 10.470.179,98 | 28.115 | 7.800 | R$ 372,41 |\n| Promoção Mães 2026 — Shopping Sul | R$ 1.923.898,90 | 6.135 | 2.996 | R$ 313,59 |\n| Variação absoluta | R$ -8.546.281,08 | -21.980 | -4.804 | R$ -58,81 |\n| Variação percentual | -81,62% | -78,18% | -61,59% | -15,79% |",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "campanha_contexto": "Promoção Mães E Namorados 2026 — Buriti Shopping",
+            "faturamento": 10470179.98,
+            "quantidade_compras": 28115,
+            "clientes_unicos": 7800,
+            "ticket_medio": 372.4054767917482
+          },
+          {
+            "campanha_contexto": "Promoção Mães 2026 — Shopping Sul",
+            "faturamento": 1923898.9,
+            "quantidade_compras": 6135,
+            "clientes_unicos": 2996,
+            "ticket_medio": 313.5939527302363
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "campaign_context_comparison"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 122.483,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "campaign_context_comparison",
+              "rows_before": 236728,
+              "rows_after": 2,
+              "duration_ms": 581.786
+            }
+          ],
+          "resolved_entities": {
+            "nm_empreendimento": "Shopping Sul",
+            "nm_promocao": "Promoção Mães 2026"
+          },
+          "question": "Compare a campanha de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Shopping Sul.",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 2,
+          "columns": [
+            "campanha_contexto",
+            "faturamento",
+            "quantidade_compras",
+            "clientes_unicos",
+            "ticket_medio"
+          ],
+          "narrative_provider": "deterministic_table",
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Compare a campanha de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Shopping Sul."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D06",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Compare a campanha de mães 2026 do Buriti Shopping com a campanha de mães 2026 do Shopping Sul.",
+            "ultima_resposta": "| Campanha / comparação | Faturamento | Quantidade de compras | Clientes únicos | Ticket médio |\n|---|---:|---:|---:|---:|\n| Promoção Mães E Namorados 2026 — Buriti Shopping | R$ 10.470.179,98 | 28.115 | 7.800 | R$ 372,41 |\n| Promoção Mães 2026 — Shopping Sul | R$ 1.923.898,90 | 6.135 | 2.996 | R$ 313,59 |\n| Variação absoluta | R$ -8.546.281,08 | -21.980 | -4.804 | R$ -58,81 |\n| Variação percentual | -81,62% | -78,18% | -61,59% | -15,79% |",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Parcial",
+        "priority": "Média",
+        "reason": "Valores das duas campanhas e variações estão corretos: Buriti R$ 10.470.179,98; Sul R$ 1.923.898,90. Identifica os shoppings. Deve avisar que o Buriti tem campanha conjunta Mães e Namorados, enquanto o Sul tem Mães; não é comparação homogênea de eventos/duração."
+      }
+    },
+    {
+      "id": "D07",
+      "question": "Qual é o perfil dos participantes das campanhas?",
+      "kind": "profile",
+      "seconds": 3.88,
+      "checks": {
+        "unique_customers": true,
+        "purchase_count": true
+      },
+      "automatic_pass": true,
+      "expected": [
+        {
+          "clientes_unicos": 76857,
+          "quantidade_compras": 236728
+        }
+      ],
+      "result": {
+        "question": "Qual é o perfil dos participantes das campanhas?",
+        "answer": "Perfil dos clientes com compras registradas no recorte solicitado: 76.857 clientes únicos e 236.728 compras.\n\nO ticket médio por compra foi de R$ 346,08.\n\nForam 3,08 compras por cliente, em média.\n\nEntre os clientes com informação preenchida, o gênero mais frequente é Feminino (67,15%); a faixa etária mais frequente é 35-44 (29,57%); e a origem mais frequente é Goiânia (24,60%). São distribuições separadas, não a identificação de um único grupo combinado.\n\nDados não informados: gênero em 841 clientes; faixa etária em 125 clientes; cidade em 4320 clientes; UF em 531 clientes; bairro em 8368 clientes.\n\nA idade é calculada na data da análise. Este perfil descreve clientes com compras registradas, não todos os visitantes.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "genero_predominante": "Feminino",
+            "percentual_genero": 0.6715,
+            "quantidade_genero": 51043,
+            "faixa_etaria_predominante": "35-44",
+            "percentual_faixa_etaria": 0.2957,
+            "quantidade_faixa_etaria": 22688,
+            "localidade_predominante": "Goiânia",
+            "percentual_localidade": 0.246,
+            "quantidade_localidade": 17844,
+            "clientes_unicos": 76857,
+            "quantidade_compras": 236728,
+            "faturamento": 81927851.03,
+            "ticket_medio_por_compra": 346.0843289767159
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "derive_demographics",
+            "persona_profile"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 121.263,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "derive_demographics",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 965.318
+            },
+            {
+              "index": 2,
+              "operation": "persona_profile",
+              "rows_before": 236728,
+              "rows_after": 1,
+              "duration_ms": 1485.094
+            }
+          ],
+          "persona_visitors": 76857,
+          "profile_missing": {
+            "genero": 841,
+            "faixa_etaria": 125,
+            "cidade": 4320,
+            "uf": 531,
+            "bairro": 8368
+          },
+          "question": "Qual é o perfil dos participantes das campanhas?",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 1,
+          "columns": [
+            "genero_predominante",
+            "percentual_genero",
+            "quantidade_genero",
+            "faixa_etaria_predominante",
+            "percentual_faixa_etaria",
+            "quantidade_faixa_etaria",
+            "localidade_predominante",
+            "percentual_localidade",
+            "quantidade_localidade",
+            "clientes_unicos",
+            "quantidade_compras",
+            "faturamento",
+            "ticket_medio_por_compra"
+          ],
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Qual é o perfil dos participantes das campanhas?"
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D07",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Qual é o perfil dos participantes das campanhas?",
+            "ultima_resposta": "Perfil dos clientes com compras registradas no recorte solicitado: 76.857 clientes únicos e 236.728 compras.\n\nO ticket médio por compra foi de R$ 346,08.\n\nForam 3,08 compras por cliente, em média.\n\nEntre os clientes com informação preenchida, o gênero mais frequente é Feminino (67,15%); a faixa etária mais frequente é 35-44 (29,57%); e a origem mais frequente é Goiânia (24,60%). São distribuições separadas, não a identificação de um único grupo combinado.\n\nDados não informados: gênero em 841 clientes; faixa etária em 125 clientes; cidade em 4320 clientes; UF em 531 clientes; bairro em 8368 clientes.\n\nA idade é calculada na data da análise. Este perfil descreve clientes com compras registradas, não todos os visitantes.",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "De acordo",
+        "priority": "—",
+        "reason": "Conferidos 76.857 clientes, 236.728 compras, ticket R$ 346,08, gênero feminino 67,15%, faixa 35–44 29,57% e Goiânia 24,60%. Explica dados ausentes e que participantes não representam todos os visitantes."
+      }
+    },
+    {
+      "id": "D08",
+      "question": "Mostre o faturamento por mês em 2026. Quero entender a evolução ao longo do ano.",
+      "kind": "monthly",
+      "seconds": 3.08,
+      "checks": {
+        "months": true,
+        "values": true,
+        "chronological": true
+      },
+      "automatic_pass": true,
+      "expected": [
+        {
+          "mes": "2026-01",
+          "faturamento": 5909855.45
+        },
+        {
+          "mes": "2026-03",
+          "faturamento": 1530279.75
+        },
+        {
+          "mes": "2026-04",
+          "faturamento": 2821305.19
+        },
+        {
+          "mes": "2026-05",
+          "faturamento": 18449253.41
+        },
+        {
+          "mes": "2026-06",
+          "faturamento": 6094705.0
+        },
+        {
+          "mes": "2026-07",
+          "faturamento": 3584463.52
+        },
+        {
+          "mes": "2026-08",
+          "faturamento": 7076334.62
+        }
+      ],
+      "result": {
+        "question": "Mostre o faturamento por mês em 2026. Quero entender a evolução ao longo do ano.",
+        "answer": "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n\n| Mês | Faturamento |\n| --- | --- |\n| 2026-01 | R$ 5.909.855,45 |\n| 2026-03 | R$ 1.530.279,75 |\n| 2026-04 | R$ 2.821.305,19 |\n| 2026-05 | R$ 18.449.253,41 |\n| 2026-06 | R$ 6.094.705,00 |\n| 2026-07 | R$ 3.584.463,52 |\n| 2026-08 | R$ 7.076.334,62 |",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "mes": "2026-01",
+            "faturamento": 5909855.45
+          },
+          {
+            "mes": "2026-03",
+            "faturamento": 1530279.75
+          },
+          {
+            "mes": "2026-04",
+            "faturamento": 2821305.19
+          },
+          {
+            "mes": "2026-05",
+            "faturamento": 18449253.41
+          },
+          {
+            "mes": "2026-06",
+            "faturamento": 6094705.0
+          },
+          {
+            "mes": "2026-07",
+            "faturamento": 3584463.52
+          },
+          {
+            "mes": "2026-08",
+            "faturamento": 7076334.62
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "derive_month",
+            "group_by",
+            "aggregate",
+            "select",
+            "sort"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "derive_month",
+              "rows_before": 236728,
+              "rows_after": 131900,
+              "duration_ms": 1406.653
+            },
+            {
+              "index": 1,
+              "operation": "group_by",
+              "rows_before": 131900,
+              "rows_after": 131900,
+              "duration_ms": 0.095
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 131900,
+              "rows_after": 7,
+              "duration_ms": 533.082
+            },
+            {
+              "index": 3,
+              "operation": "select",
+              "rows_before": 7,
+              "rows_after": 7,
+              "duration_ms": 0.644
+            },
+            {
+              "index": 4,
+              "operation": "sort",
+              "rows_before": 7,
+              "rows_after": 7,
+              "duration_ms": 0.279
+            }
+          ],
+          "monthly_scope": {
+            "field": "dt_registro_mos",
+            "year": 2026
+          },
+          "group_by_fields": [
+            "mes"
+          ],
+          "order": "asc",
+          "order_by": "mes",
+          "question": "Mostre o faturamento por mês em 2026. Quero entender a evolução ao longo do ano.",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 7,
+          "columns": [
+            "mes",
+            "faturamento"
+          ],
+          "narrative_provider": "deterministic_table",
+          "chart": {
+            "type": "line",
+            "x": "mes",
+            "y": "faturamento",
+            "title": "Faturamento"
+          },
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Mostre o faturamento por mês em 2026. Quero entender a evolução ao longo do ano."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D08",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Mostre o faturamento por mês em 2026. Quero entender a evolução ao longo do ano.",
+            "ultima_resposta": "Evolução mensal pela data da compra. Meses sem registros não são exibidos.\n\n| Mês | Faturamento |\n| --- | --- |\n| 2026-01 | R$ 5.909.855,45 |\n| 2026-03 | R$ 1.530.279,75 |\n| 2026-04 | R$ 2.821.305,19 |\n| 2026-05 | R$ 18.449.253,41 |\n| 2026-06 | R$ 6.094.705,00 |\n| 2026-07 | R$ 3.584.463,52 |\n| 2026-08 | R$ 7.076.334,62 |",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "oracle_note": "Conferência independente distingue datas ISO de datas brasileiras antes da conversão; primeira leitura genérica do avaliador foi corrigida.",
+      "assessment": {
+        "verdict": "De acordo",
+        "priority": "—",
+        "reason": "Os sete meses apresentados e respectivos totais batem com o cálculo independente pela data da compra. A ordem é cronológica e o texto avisa que meses sem registros não aparecem."
+      }
+    },
+    {
+      "id": "D09",
+      "question": "Qual foi a campanha mais recente e em qual shopping aconteceu?",
+      "kind": "recent",
+      "seconds": 0.16,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Shopping Sul",
+          "sk_dtinicio": "20260804",
+          "sk_dtfim": "20260811"
+        }
+      ],
+      "result": {
+        "question": "Qual foi a campanha mais recente e em qual shopping aconteceu?",
+        "answer": "Campanha por data\nNão identifiquei o shopping solicitado. Qual é o nome completo?",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "title": "Campanha por data",
+            "status": "failed",
+            "data": []
+          }
+        ],
+        "metadata": {
+          "response_type": "analysis_failed",
+          "goal": "Identificar campanha por data",
+          "analysis_questions": [
+            "Qual foi a campanha mais recente e em qual shopping aconteceu?"
+          ],
+          "successful_analyses": 0,
+          "failed_analyses": 1,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D09",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Qual foi a campanha mais recente e em qual shopping aconteceu?",
+            "ultima_resposta": "Campanha por data\nNão identifiquei o shopping solicitado. Qual é o nome completo?",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [
+          "Considero a data de início mais recente até hoje (30/09/2026). Campanhas com a mesma data são apresentadas como empate."
+        ],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 0,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Alta",
+        "reason": "Pedi que identificasse o shopping da campanha mais recente. Ele pediu o nome do shopping como se fosse um filtro obrigatório. A base permite responder: Pais 2026 / Shopping Sul, início em 04/08/2026."
+      }
+    },
+    {
+      "id": "D10",
+      "question": "Liste as campanhas de 2025 no Buriti Shopping.",
+      "kind": "listing",
+      "seconds": 2.28,
+      "checks": {
+        "campaigns": true,
+        "shopping": true,
+        "count": true
+      },
+      "automatic_pass": true,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20251106",
+          "sk_dtfim": "20260111"
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20250716",
+          "sk_dtfim": "20250817"
+        }
+      ],
+      "result": {
+        "question": "Liste as campanhas de 2025 no Buriti Shopping.",
+        "answer": "Em 2025 ocorreram duas campanhas:\n\n| Campanha | Shopping | Início | Fim |\n|---|---|---:|---:|\n| Promoção Pais 2025 | Buriti Shopping | 16/07/2025 | 17/08/2025 |\n| Promoção Natal 2025 | Buriti Shopping | 06/11/2025 | 11/01/2026 |\n\nInclui campanhas com vigência em qualquer parte de 2025, mesmo que tenham começado no ano anterior.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Pais 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "sk_dtinicio": "20250716",
+            "sk_dtfim": "20250817"
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "sk_dtinicio": "20251106",
+            "sk_dtfim": "20260111"
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "filter",
+            "filter",
+            "select",
+            "distinct",
+            "sort"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 124.805,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 132085,
+              "duration_ms": 137.911,
+              "field": "nm_empreendimento",
+              "operator": "equals",
+              "requested_value": "Buriti Shopping",
+              "resolved_value": null
+            },
+            {
+              "index": 2,
+              "operation": "filter",
+              "rows_before": 132085,
+              "rows_after": 73549,
+              "duration_ms": 690.948,
+              "field": "sk_dtinicio",
+              "operator": "year_overlap",
+              "requested_value": 2025,
+              "resolved_value": null
+            },
+            {
+              "index": 3,
+              "operation": "select",
+              "rows_before": 73549,
+              "rows_after": 73549,
+              "duration_ms": 15.514
+            },
+            {
+              "index": 4,
+              "operation": "distinct",
+              "rows_before": 73549,
+              "rows_after": 2,
+              "duration_ms": 54.792
+            },
+            {
+              "index": 5,
+              "operation": "sort",
+              "rows_before": 2,
+              "rows_after": 2,
+              "duration_ms": 0.47
+            }
+          ],
+          "order": "asc",
+          "order_by": "sk_dtinicio",
+          "question": "Liste as campanhas de 2025 no Buriti Shopping.",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 2,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "sk_dtinicio",
+            "sk_dtfim"
+          ],
+          "narrative_provider": "deterministic_table",
+          "response_type": "conversational_analysis",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Liste as campanhas de 2025 no Buriti Shopping."
+          ],
+          "successful_analyses": 1,
+          "failed_analyses": 0,
+          "pending_analyses": 0,
+          "session_id": "director-eval-years",
+          "session_state": {
+            "campanha": "Promoção Pais 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": "2025",
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Liste as campanhas de 2025 no Buriti Shopping.",
+            "ultima_resposta": "Em 2025 ocorreram duas campanhas:\n\n| Campanha | Shopping | Início | Fim |\n|---|---|---:|---:|\n| Promoção Pais 2025 | Buriti Shopping | 16/07/2025 | 17/08/2025 |\n| Promoção Natal 2025 | Buriti Shopping | 06/11/2025 | 11/01/2026 |\n\nInclui campanhas com vigência em qualquer parte de 2025, mesmo que tenham começado no ano anterior.",
+            "filtros": {
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "entidades": {
+              "nm_promocao": "Promoção Pais 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "De acordo",
+        "priority": "—",
+        "reason": "Lista Pais 2025 e Natal 2025 do Buriti Shopping com datas corretas e explica a vigência sobreposta ao ano."
+      }
+    },
+    {
+      "id": "D11",
+      "question": "E em 2026?",
+      "kind": "listing",
+      "seconds": 2.3,
+      "checks": {
+        "campaigns": false,
+        "shopping": true,
+        "count": false
+      },
+      "automatic_pass": false,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Pais 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20260722",
+          "sk_dtfim": "20260823"
+        },
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20251106",
+          "sk_dtfim": "20260111"
+        },
+        {
+          "nm_promocao": "Promoção Mães E Namorados 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20260423",
+          "sk_dtfim": "20260622"
+        },
+        {
+          "nm_promocao": "Promoção Verão no Arca Parque 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20260114",
+          "sk_dtfim": "20260215"
+        },
+        {
+          "nm_promocao": "Campanha Gastronômica Buriti Shopping 2026",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20260617",
+          "sk_dtfim": "20260715"
+        },
+        {
+          "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+          "nm_empreendimento": "Buriti Shopping",
+          "sk_dtinicio": "20260319",
+          "sk_dtfim": "20260418"
+        }
+      ],
+      "result": {
+        "question": "E em 2026?",
+        "answer": "Não consegui executar uma análise válida para esse pedido. Pode especificar o indicador ou o critério desejado?",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [],
+        "metadata": {
+          "data_accessed": false,
+          "response_type": "analysis_failed"
+        },
+        "warnings": [
+          "A direção conversacional ficou indisponível; usei o planejamento padrão."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Alta",
+        "reason": "A continuação E em 2026? não preserva corretamente a consulta anterior. Retorna erro genérico em vez de listar as campanhas de 2026 do mesmo shopping."
+      }
+    },
+    {
+      "id": "D12",
+      "question": "Compare a campanha de pais com a campanha de mães do Buriti Shopping em 2025.",
+      "kind": "comparison_year",
+      "seconds": 1.08,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": [
+        {
+          "nm_promocao": "Promoção Natal 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 22476361.12,
+          "quantidade_compras": 61724,
+          "clientes_unicos": 18801,
+          "ticket_medio_por_compra": 364.14297712397126,
+          "ticket_medio_por_cliente": 1195.4875336418277
+        },
+        {
+          "nm_promocao": "Promoção Pais 2025",
+          "nm_empreendimento": "Buriti Shopping",
+          "faturamento": 4225462.69,
+          "quantidade_compras": 11825,
+          "clientes_unicos": 5196,
+          "ticket_medio_por_compra": 357.3329970401692,
+          "ticket_medio_por_cliente": 813.2145284834489
+        }
+      ],
+      "result": {
+        "question": "Compare a campanha de pais com a campanha de mães do Buriti Shopping em 2025.",
+        "answer": "Análise solicitada: não foi possível concluir esta análise.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "title": "Análise solicitada",
+            "status": "failed",
+            "data": []
+          }
+        ],
+        "metadata": {
+          "response_type": "analysis_failed",
+          "goal": "Responder ao recorte solicitado",
+          "analysis_questions": [
+            "Compare a campanha de pais com a campanha de mães do Buriti Shopping em 2025."
+          ],
+          "successful_analyses": 0,
+          "failed_analyses": 1,
+          "pending_analyses": 0,
+          "session_id": "director-eval-D12",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": null,
+            "ultima_pergunta": "Compare a campanha de pais com a campanha de mães do Buriti Shopping em 2025.",
+            "ultima_resposta": "Análise solicitada: não foi possível concluir esta análise.",
+            "filtros": {},
+            "entidades": {},
+            "intencao": null,
+            "dimensao": null
+          }
+        },
+        "warnings": [
+          "Análise solicitada: não foi possível concluir esta análise."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 0,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Média",
+        "reason": "Não conclui a comparação nem esclarece a ausência de campanha de Mães 2025 do Buriti na base. Deveria informar o que encontrou e qual parte ficou sem dados, preservando o ano solicitado."
+      }
+    },
+    {
+      "id": "D13",
+      "question": "Qual campanha teve o maior ROI? Considere o investimento de marketing e o retorno incremental.",
+      "kind": "limits",
+      "seconds": 2.32,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": null,
+      "result": {
+        "question": "Qual campanha teve o maior ROI? Considere o investimento de marketing e o retorno incremental.",
+        "answer": "Não há dados suficientes para sustentar uma resposta confiável.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "derived_metric",
+            "sort",
+            "limit"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 123.172,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 0,
+              "duration_ms": 89.652,
+              "field": "nm_empreendimento",
+              "operator": "equals",
+              "requested_value": "Buriti Shopping Bay Marketing",
+              "resolved_value": null
+            },
+            {
+              "index": 2,
+              "operation": "group_by",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 0.024
+            },
+            {
+              "index": 3,
+              "operation": "aggregate",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 2.14
+            },
+            {
+              "index": 4,
+              "operation": "derived_metric",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 0.431
+            },
+            {
+              "index": 5,
+              "operation": "derived_metric",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 0.292
+            },
+            {
+              "index": 6,
+              "operation": "sort",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 0.113
+            },
+            {
+              "index": 7,
+              "operation": "limit",
+              "rows_before": 0,
+              "rows_after": 0,
+              "duration_ms": 0.119
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "faturamento",
+          "executed_limit": 1,
+          "rows_available_before_limit": 0,
+          "question": "Qual campanha teve o maior ROI? Considere o investimento de marketing e o retorno incremental.",
+          "selected_table": "Dados_copiloto",
+          "ranking": {
+            "requested_limit": null,
+            "planned_limit": 1,
+            "executed_limit": 1,
+            "order": "desc",
+            "order_by": "faturamento"
+          },
+          "verification": {
+            "passed": false,
+            "checks": {
+              "has_rows": false,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 0,
+          "columns": [],
+          "session_id": "director-eval-D13",
+          "rewritten_question": "Qual campanha teve o maior ROI? Considere o investimento de marketing e o retorno incremental.",
+          "conversation_summary": "",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": "Buriti Shopping Bay Marketing",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": null,
+            "periodo_fim": null,
+            "metrica": "faturamento",
+            "ultima_pergunta": "Qual campanha teve o maior ROI? Considere o investimento de marketing e o retorno incremental.",
+            "ultima_resposta": "Não há dados suficientes para sustentar uma resposta confiável.",
+            "filtros": {
+              "nm_empreendimento": "Buriti Shopping Bay Marketing"
+            },
+            "entidades": {},
+            "intencao": "ranking",
+            "dimensao": "promocao"
+          }
+        },
+        "warnings": [
+          "A direção conversacional ficou indisponível; usei o planejamento padrão."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Parcial",
+        "priority": "Média",
+        "reason": "Corretamente não inventa ROI, mas responde apenas que faltam dados. Deveria especificar investimento/custos e retorno incremental, distinguindo valor das compras registradas de retorno atribuível à campanha."
+      }
+    },
+    {
+      "id": "D14",
+      "question": "Por que a campanha de Mães 2026 do Shopping Sul vendeu mais? Foi a mídia que causou esse resultado?",
+      "kind": "causality",
+      "seconds": 5.02,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": null,
+      "result": {
+        "question": "Por que a campanha de Mães 2026 do Shopping Sul vendeu mais? Foi a mídia que causou esse resultado?",
+        "answer": "As 10 campanhas com maior faturamento foram:\n\n1. Promoção Natal 2025 — Buriti Shopping — Valor das compras: R$ 22.476.361,12; Quantidade de compras: 61.724; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Valor das compras: R$ 10.470.179,98; Quantidade de compras: 28.115; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Valor das compras: R$ 8.285.361,41; Quantidade de compras: 24.455; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Valor das compras: R$ 4.562.298,01; Quantidade de compras: 14.727; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Mães 2026 — Brasil Park Shopping — Valor das compras: R$ 3.177.673,70; Quantidade de compras: 6.456; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Valor das compras: R$ 2.491.903,54; Quantidade de compras: 6.931; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Shopping Sul — Valor das compras: R$ 1.923.898,90; Quantidade de compras: 6.135; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n8. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Valor das compras: R$ 1.856.641,11; Quantidade de compras: 5.687; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75\n9. Promoção Verão no Arca Parque 2026 — Buriti Shopping — Valor das compras: R$ 1.585.499,68; Quantidade de compras: 5.030; Clientes únicos: 2.386; Ticket médio por compra: R$ 315,21; Ticket médio por cliente: R$ 664,50\n10. Promoção Mães e Namorados 2026 — Buriti Shopping Guará — Valor das compras: R$ 1.488.938,78; Quantidade de compras: 5.250; Clientes únicos: 1.820; Ticket médio por compra: R$ 283,61; Ticket médio por cliente: R$ 818,10",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 22476361.12,
+            "quantidade_compras": 61724,
+            "clientes_unicos": 18801,
+            "ticket_medio_por_compra": 364.14297712397126,
+            "ticket_medio_por_cliente": 1195.4875336418277
+          },
+          {
+            "nm_promocao": "Promoção Mães E Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 10470179.98,
+            "quantidade_compras": 28115,
+            "clientes_unicos": 7800,
+            "ticket_medio_por_compra": 372.4054767917482,
+            "ticket_medio_por_cliente": 1342.3307666666667
+          },
+          {
+            "nm_promocao": "Promoção Natal 2025",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 8285361.41,
+            "quantidade_compras": 24455,
+            "clientes_unicos": 10005,
+            "ticket_medio_por_compra": 338.80030300552033,
+            "ticket_medio_por_cliente": 828.12207996002
+          },
+          {
+            "nm_promocao": "Promoção Pais 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 4562298.01,
+            "quantidade_compras": 14727,
+            "clientes_unicos": 5081,
+            "ticket_medio_por_compra": 309.791404223535,
+            "ticket_medio_por_cliente": 897.9134048415666
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Brasil Park Shopping",
+            "faturamento": 3177673.7,
+            "quantidade_compras": 6456,
+            "clientes_unicos": 3193,
+            "ticket_medio_por_compra": 492.20472428748457,
+            "ticket_medio_por_cliente": 995.2000313185093
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Rio Verde",
+            "faturamento": 2491903.54,
+            "quantidade_compras": 6931,
+            "clientes_unicos": 2922,
+            "ticket_medio_por_compra": 359.5301601500505,
+            "ticket_medio_por_cliente": 852.8075085557837
+          },
+          {
+            "nm_promocao": "Promoção Mães 2026",
+            "nm_empreendimento": "Shopping Sul",
+            "faturamento": 1923898.9,
+            "quantidade_compras": 6135,
+            "clientes_unicos": 2996,
+            "ticket_medio_por_compra": 313.5939527302363,
+            "ticket_medio_por_cliente": 642.1558411214953
+          },
+          {
+            "nm_promocao": "No Pelo 360 com Hugo e Guilherme e Buriti Shopping",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1856641.11,
+            "quantidade_compras": 5687,
+            "clientes_unicos": 2576,
+            "ticket_medio_por_compra": 326.4710937225251,
+            "ticket_medio_por_cliente": 720.745772515528
+          },
+          {
+            "nm_promocao": "Promoção Verão no Arca Parque 2026",
+            "nm_empreendimento": "Buriti Shopping",
+            "faturamento": 1585499.68,
+            "quantidade_compras": 5030,
+            "clientes_unicos": 2386,
+            "ticket_medio_por_compra": 315.20868389662024,
+            "ticket_medio_por_cliente": 664.5011232187761
+          },
+          {
+            "nm_promocao": "Promoção Mães e Namorados 2026",
+            "nm_empreendimento": "Buriti Shopping Guará",
+            "faturamento": 1488938.78,
+            "quantidade_compras": 5250,
+            "clientes_unicos": 1820,
+            "ticket_medio_por_compra": 283.6073866666667,
+            "ticket_medio_por_cliente": 818.0982307692308
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "filter",
+            "group_by",
+            "aggregate",
+            "derived_metric",
+            "derived_metric",
+            "sort",
+            "limit"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 122.583,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 207950,
+              "duration_ms": 1067.095,
+              "field": "sk_dtinicio",
+              "operator": "year_overlap",
+              "requested_value": 2026,
+              "resolved_value": null
+            },
+            {
+              "index": 2,
+              "operation": "group_by",
+              "rows_before": 207950,
+              "rows_after": 207950,
+              "duration_ms": 0.024
+            },
+            {
+              "index": 3,
+              "operation": "aggregate",
+              "rows_before": 207950,
+              "rows_after": 31,
+              "duration_ms": 920.618
+            },
+            {
+              "index": 4,
+              "operation": "derived_metric",
+              "rows_before": 31,
+              "rows_after": 31,
+              "duration_ms": 0.929
+            },
+            {
+              "index": 5,
+              "operation": "derived_metric",
+              "rows_before": 31,
+              "rows_after": 31,
+              "duration_ms": 0.431
+            },
+            {
+              "index": 6,
+              "operation": "sort",
+              "rows_before": 31,
+              "rows_after": 31,
+              "duration_ms": 0.326
+            },
+            {
+              "index": 7,
+              "operation": "limit",
+              "rows_before": 31,
+              "rows_after": 10,
+              "duration_ms": 0.097
+            }
+          ],
+          "group_by_fields": [
+            "nm_promocao",
+            "nm_empreendimento"
+          ],
+          "order": "desc",
+          "order_by": "faturamento",
+          "executed_limit": 10,
+          "rows_available_before_limit": 31,
+          "question": "Por que a campanha de Mães 2026 do Shopping Sul vendeu mais? Foi a mídia que causou esse resultado?",
+          "selected_table": "Dados_copiloto",
+          "ranking": {
+            "requested_limit": null,
+            "planned_limit": 10,
+            "executed_limit": 10,
+            "order": "desc",
+            "order_by": "faturamento"
+          },
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 10,
+          "columns": [
+            "nm_promocao",
+            "nm_empreendimento",
+            "faturamento",
+            "quantidade_compras",
+            "clientes_unicos",
+            "ticket_medio_por_compra",
+            "ticket_medio_por_cliente"
+          ],
+          "narrative_provider": "deterministic_ranking",
+          "session_id": "director-eval-D14",
+          "rewritten_question": "Por que a campanha de Mães 2026 do Shopping Sul vendeu mais? Foi a mídia que causou esse resultado?",
+          "conversation_summary": "",
+          "session_state": {
+            "campanha": "Promoção Natal 2025",
+            "empreendimento": "Buriti Shopping",
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": "2026",
+            "periodo_fim": null,
+            "metrica": "faturamento",
+            "ultima_pergunta": "Por que a campanha de Mães 2026 do Shopping Sul vendeu mais? Foi a mídia que causou esse resultado?",
+            "ultima_resposta": "As 10 campanhas com maior faturamento foram:\n\n1. Promoção Natal 2025 — Buriti Shopping — Valor das compras: R$ 22.476.361,12; Quantidade de compras: 61.724; Clientes únicos: 18.801; Ticket médio por compra: R$ 364,14; Ticket médio por cliente: R$ 1.195,49\n2. Promoção Mães E Namorados 2026 — Buriti Shopping — Valor das compras: R$ 10.470.179,98; Quantidade de compras: 28.115; Clientes únicos: 7.800; Ticket médio por compra: R$ 372,41; Ticket médio por cliente: R$ 1.342,33\n3. Promoção Natal 2025 — Brasil Park Shopping — Valor das compras: R$ 8.285.361,41; Quantidade de compras: 24.455; Clientes únicos: 10.005; Ticket médio por compra: R$ 338,80; Ticket médio por cliente: R$ 828,12\n4. Promoção Pais 2026 — Buriti Shopping — Valor das compras: R$ 4.562.298,01; Quantidade de compras: 14.727; Clientes únicos: 5.081; Ticket médio por compra: R$ 309,79; Ticket médio por cliente: R$ 897,91\n5. Promoção Mães 2026 — Brasil Park Shopping — Valor das compras: R$ 3.177.673,70; Quantidade de compras: 6.456; Clientes únicos: 3.193; Ticket médio por compra: R$ 492,20; Ticket médio por cliente: R$ 995,20\n6. Promoção Mães e Namorados 2026 — Buriti Shopping Rio Verde — Valor das compras: R$ 2.491.903,54; Quantidade de compras: 6.931; Clientes únicos: 2.922; Ticket médio por compra: R$ 359,53; Ticket médio por cliente: R$ 852,81\n7. Promoção Mães 2026 — Shopping Sul — Valor das compras: R$ 1.923.898,90; Quantidade de compras: 6.135; Clientes únicos: 2.996; Ticket médio por compra: R$ 313,59; Ticket médio por cliente: R$ 642,16\n8. No Pelo 360 com Hugo e Guilherme e Buriti Shopping — Buriti Shopping — Valor das compras: R$ 1.856.641,11; Quantidade de compras: 5.687; Clientes únicos: 2.576; Ticket médio por compra: R$ 326,47; Ticket médio por cliente: R$ 720,75\n9. Promoção Verão no Arca Parque 2026 — Buriti Shopping — Valor das compras: R$ 1.585.499,68; Quantidade de compras: 5.030; Clientes únicos: 2.386; Ticket médio por compra: R$ 315,21; Ticket médio por cliente: R$ 664,50\n10. Promoção Mães e Namorados 2026 — Buriti Shopping Guará — Valor das compras: R$ 1.488.938,78; Quantidade de compras: 5.250; Clientes únicos: 1.820; Ticket médio por compra: R$ 283,61; Ticket médio por cliente: R$ 818,10",
+            "filtros": {},
+            "entidades": {
+              "nm_promocao": "Promoção Natal 2025",
+              "nm_empreendimento": "Buriti Shopping"
+            },
+            "intencao": "ranking",
+            "dimensao": "promocao"
+          }
+        },
+        "warnings": [
+          "A direção conversacional ficou indisponível; usei o planejamento padrão."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Alta",
+        "reason": "Pedi explicação causal para Mães 2026 / Shopping Sul. Retorna ranking de campanhas de vários shoppings, não responde sobre causalidade e perde o recorte. Deveria dizer que compras registradas, isoladamente, não demonstram efeito da mídia."
+      }
+    },
+    {
+      "id": "D15",
+      "question": "Qual foi o faturamento das campanhas do Shopping Inexistente XYZ em 2026?",
+      "kind": "unknown",
+      "seconds": 4.87,
+      "checks": {},
+      "automatic_pass": null,
+      "expected": null,
+      "result": {
+        "question": "Qual foi o faturamento das campanhas do Shopping Inexistente XYZ em 2026?",
+        "answer": "O faturamento foi de R$ 72.510.620,96.",
+        "highlights": [],
+        "insights": [],
+        "recommendations": [],
+        "data": [
+          {
+            "faturamento": 72510620.96000001
+          }
+        ],
+        "metadata": {
+          "plan_version": "1.0",
+          "operations": [
+            "filter",
+            "filter",
+            "aggregate",
+            "select"
+          ],
+          "operation_trace": [
+            {
+              "index": 0,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 236728,
+              "duration_ms": 126.785,
+              "field": "cd_promocao",
+              "operator": "not_null",
+              "requested_value": null,
+              "resolved_value": null
+            },
+            {
+              "index": 1,
+              "operation": "filter",
+              "rows_before": 236728,
+              "rows_after": 207950,
+              "duration_ms": 1072.596,
+              "field": "sk_dtinicio",
+              "operator": "year_overlap",
+              "requested_value": 2026,
+              "resolved_value": null
+            },
+            {
+              "index": 2,
+              "operation": "aggregate",
+              "rows_before": 207950,
+              "rows_after": 1,
+              "duration_ms": 763.167
+            },
+            {
+              "index": 3,
+              "operation": "select",
+              "rows_before": 1,
+              "rows_after": 1,
+              "duration_ms": 0.527
+            }
+          ],
+          "question": "Qual foi o faturamento das campanhas do Shopping Inexistente XYZ em 2026?",
+          "selected_table": "Dados_copiloto",
+          "verification": {
+            "passed": true,
+            "checks": {
+              "has_rows": true,
+              "filters_preserved": true,
+              "percentages_valid": true,
+              "dominant_values_valid": true,
+              "comparison_cardinality_valid": true,
+              "comparison_entities_distinct": true
+            }
+          },
+          "rows_returned": 1,
+          "columns": [
+            "faturamento"
+          ],
+          "session_id": "director-eval-D15",
+          "rewritten_question": "Qual foi o faturamento das campanhas do Shopping Inexistente XYZ em 2026?",
+          "conversation_summary": "",
+          "session_state": {
+            "campanha": null,
+            "empreendimento": null,
+            "loja": null,
+            "segmento": null,
+            "periodo_inicio": "2026",
+            "periodo_fim": null,
+            "metrica": "faturamento",
+            "ultima_pergunta": "Qual foi o faturamento das campanhas do Shopping Inexistente XYZ em 2026?",
+            "ultima_resposta": "O faturamento foi de R$ 72.510.620,96.",
+            "filtros": {},
+            "entidades": {},
+            "intencao": "metric_query",
+            "dimensao": "promocao"
+          }
+        },
+        "warnings": [
+          "A direção conversacional ficou indisponível; usei o planejamento padrão."
+        ],
+        "assumptions": [],
+        "suggestions": []
+      },
+      "director_calls": {
+        "attempted": 1,
+        "received": 0
+      },
+      "assessment": {
+        "verdict": "Não atende",
+        "priority": "Crítica",
+        "reason": "Retorna R$ 72.510.620,96 para Shopping Inexistente XYZ. O rastreio mostra filtros de campanha e ano, mas nenhum filtro de shopping. Esse valor é agregado do recorte geral, não do shopping solicitado; deveria pedir esclarecimento ou informar entidade não encontrada."
+      }
+    }
+  ],
+  "executive_summary": {
+    "Não atende": 8,
+    "Parcial": 4,
+    "De acordo": 3
+  },
+  "oracle_recheck": {
+    "source_rows_unchanged": true,
+    "source_total_unchanged": true,
+    "details": "director-evaluation-2026-09-30-oracle.json"
+  }
+}
