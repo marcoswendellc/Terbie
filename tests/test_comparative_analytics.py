@@ -9,12 +9,12 @@ from app.compiler.models import CompilerRequest
 from app.core.config import Settings
 from app.core.dependencies import provide_execution_service
 from app.entity_resolution.entity_resolver import EntityResolver
-from app.executor.engine import PandasExecutionEngine
 from app.executor.context import ExecutionContext
+from app.executor.engine import PandasExecutionEngine
+from app.executor.executor import TerbieExecutor
 from app.executor.operations.campaign_context_comparison import (
     CampaignContextComparisonOperation,
 )
-from app.executor.executor import TerbieExecutor
 from app.executor.pipeline import PipelineExecutor
 from app.executor.registry import OperationRegistry
 from app.knowledge.knowledge_service import KnowledgeService
@@ -22,8 +22,8 @@ from app.main import app
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
 from app.narrator.narrator import TerbieNarrator
-from app.planner.optimizer import PlanOptimizer
 from app.planner.models import PlanOperation
+from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.semantic.resolver import SemanticResolver
 from app.services.execution_service import ExecutionService

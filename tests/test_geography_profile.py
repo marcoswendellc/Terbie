@@ -163,3 +163,35 @@ def test_profile_birth_dates_preserve_iso_month_and_day():
     today = pd.Timestamp.now()
     expected = today.year - 2000 - int((today.month, today.day) < (10, 5))
     assert result.iloc[0]["idade"] == expected
+
+
+@pytest.mark.parametrize("with_director", [False, True])
+def test_home_campaign_participant_profile_is_recognized_and_scoped(with_director):
+    from test_conversational_analysis import DirectorProvider
+
+    from app.conversation.models import AnalysisDecision, AnalysisQuestion
+
+    dataset = frame()
+    dataset["cd_promocao"] = None
+    dataset.loc[:5, "cd_promocao"] = "campaign"
+    provider = (
+        DirectorProvider(
+            AnalysisDecision(
+                analyses=[
+                    AnalysisQuestion(
+                        title="Incorrect rewrite", question="Qual o faturamento total?"
+                    )
+                ]
+            )
+        )
+        if with_director
+        else None
+    )
+    result = service(provider, dataset).execute_question(
+        question="Qual é o perfil dos participantes das campanhas?",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert result.data, result.answer
+    assert result.data[0]["clientes_unicos"] == 6
+    assert "genero_predominante" in result.data[0]
+    assert "registrad" in result.answer.lower()

@@ -445,6 +445,12 @@ class TerbieCompiler:
         )
         is_comparison = has_plural_shoppings and (has_comparison_term or has_each_term)
 
+        filters = list(hypothesis.filters)
+        if re.search(r"\b(?:campanhas?|promocao|promocoes)\b", normalized):
+            campaign_filter = {"type": "filter", "field": "cd_promocao", "operator": "not_null"}
+            if campaign_filter not in filters:
+                filters.append(campaign_filter)
+
         warnings = [
             warning
             for warning in hypothesis.warnings
@@ -457,6 +463,7 @@ class TerbieCompiler:
         return hypothesis.model_copy(
             update={
                 "analysis_type": "persona_comparison" if is_comparison else "persona",
+                "filters": filters,
                 "business_entity": "empreendimento" if is_comparison else "genero",
                 "metric": "clientes_unicos",
                 "metrics": ["clientes_unicos"],

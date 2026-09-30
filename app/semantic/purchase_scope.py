@@ -52,4 +52,9 @@ def ticket_geography(question: str) -> dict | None:
 
 
 def is_customer_profile(question: str) -> bool:
-    return bool(re.search(r"\bperfil\s+(?:dos?\s+)?clientes\b", normalize_temporal_text(question)))
+    return bool(
+        re.search(
+            r"\bperfil\s+(?:dos?\s+)?(?:clientes|participantes)\b",
+            normalize_temporal_text(question),
+        )
+    )
