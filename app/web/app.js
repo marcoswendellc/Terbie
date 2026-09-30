@@ -16,6 +16,34 @@ const logoutButton = document.querySelector("[data-logout]");
 const newChatButton = document.querySelector("[data-new-chat]");
 const welcome = document.querySelector("[data-welcome]");
 const menuButton = document.querySelector("[data-menu]");
+const REMEMBER_KEY = "terbie.remembered_session";
+
+function rememberedSession() {
+  try {
+    const value = JSON.parse(localStorage.getItem(REMEMBER_KEY) || "null");
+    if (value?.token && value.expiresAt > Date.now()) return value;
+    localStorage.removeItem(REMEMBER_KEY);
+  } catch (_) { /* Storage can be unavailable in private browsing. */ }
+  return null;
+}
+
+const remembered = rememberedSession();
+if (remembered) {
+  sessionStorage.setItem(SESSION_KEY, "true");
+  sessionStorage.setItem(TOKEN_KEY, remembered.token);
+}
+
+document.querySelector("[data-toggle-password]").addEventListener("click", () => {
+  const input = document.querySelector("#login-password");
+  const visible = input.type === "password";
+  input.type = visible ? "text" : "password";
+  const button = document.querySelector("[data-toggle-password]");
+  button.setAttribute("aria-label", visible ? "Ocultar senha" : "Mostrar senha");
+  button.setAttribute("aria-pressed", String(visible));
+});
+document.querySelector("[data-forgot-password]").addEventListener("click", () => {
+  document.querySelector("[data-recovery-help]").classList.remove("is-hidden");
+});
 
 function closeMenu() {
   chatView.classList.remove("menu-open");
@@ -394,7 +422,19 @@ loginForm.addEventListener("submit", async (event) => {
 
     sessionStorage.setItem(SESSION_KEY, "true");
     if (result.access_token) sessionStorage.setItem(TOKEN_KEY, result.access_token);
+    try {
+      localStorage.removeItem(REMEMBER_KEY);
+      if (document.querySelector("[data-remember]").checked && result.access_token && result.expires_in > 0) {
+        localStorage.setItem(REMEMBER_KEY, JSON.stringify({
+          token: result.access_token,
+          expiresAt: Date.now() + result.expires_in * 1000,
+        }));
+      }
+    } catch (_) { /* Keep the current session if persistent storage is unavailable. */ }
     loginForm.reset();
+    document.querySelector("#login-password").type = "password";
+    document.querySelector("[data-toggle-password]").setAttribute("aria-label", "Mostrar senha");
+    document.querySelector("[data-toggle-password]").setAttribute("aria-pressed", "false");
     showChat();
   } catch (_error) {
     loginError.textContent = "Nao foi possivel validar o acesso agora. Tente novamente.";
@@ -461,6 +501,7 @@ messageInput.addEventListener("keydown", (event) => {
 });
 
 logoutButton.addEventListener("click", () => {
+  try { localStorage.removeItem(REMEMBER_KEY); } catch (_) { /* Storage unavailable. */ }
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
   sessionStorage.setItem(CHAT_SESSION_KEY, crypto.randomUUID());

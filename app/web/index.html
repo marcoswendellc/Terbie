@@ -11,26 +11,34 @@
   <main class="app-shell">
     <section class="login-view" data-view="login" aria-labelledby="login-title">
       <div class="login-main">
-        <div class="wordmark" aria-label="Terbie">terbie<span>.</span><small>YOUR DATA COMPASS</small></div>
+        <img class="login-logo" src="/ui/assets/terbie-logo.png" alt="TERBIE" />
         <form class="login-card" data-login-form>
-          <h1 id="login-title">Transforme informação em <em>direção.</em></h1>
+          <h1 id="login-title">Transforme informação<br>em <em>direção.</em></h1>
           <p class="login-intro">Seu copiloto para analisar dados, encontrar respostas e apoiar decisões.</p>
-          <label><span>Usuário</span><input name="username" type="text" autocomplete="username" placeholder="Digite seu usuário" required /></label>
-          <label><span>Senha</span><input name="password" type="password" autocomplete="current-password" placeholder="Digite sua senha" required /></label>
+          <label for="login-username">E-mail corporativo</label>
+          <div class="login-input-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>
+            <input id="login-username" name="username" type="text" autocomplete="username" placeholder="E-mail corporativo" required />
+          </div>
+          <label for="login-password">Senha</label>
+          <div class="login-input-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Senha" required />
+            <button class="password-toggle" type="button" data-toggle-password aria-label="Mostrar senha" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          </div>
+          <label class="remember-login"><input type="checkbox" data-remember checked /> Manter conectado</label>
           <p class="error-message" data-login-error role="alert"></p>
-          <button class="primary-button" type="submit">Entrar no Terbie <span aria-hidden="true">→</span></button>
-          <p class="login-note">Acesso às informações de acordo com suas permissões.</p>
+          <button class="primary-button" type="submit" aria-label="Entrar no Terbie">Entrar</button>
+          <button class="forgot-password" type="button" data-forgot-password>Esqueci minha senha</button>
+          <p class="recovery-help is-hidden" data-recovery-help role="status">Para redefinir sua senha, entre em contato com o administrador do Terbie na Terral.</p>
         </form>
-        <footer class="login-footer"><strong>TERRAL</strong><span>Shopping Centers</span></footer>
+        <footer class="login-footer"><img src="/ui/assets/terral-logo.png" alt="Terral" /><p>Ambiente corporativo Terral.<br>Acesso restrito a usuários autorizados.</p></footer>
       </div>
-      <aside class="brand-panel" aria-label="Copiloto de dados Terral">
-        <div class="brand-orbit" aria-hidden="true"><span>t.</span></div>
-        <div class="brand-copy"><p class="eyebrow">INTELIGÊNCIA QUE APONTA CAMINHOS</p><h2>Seus dados.<br>Novas perspectivas.</h2><p>Encontre respostas. Explore possibilidades.<br>Transforme informação em decisão.</p></div>
-      </aside>
+      <aside class="login-photo"><img src="/ui/assets/login-terral.png" alt="Recepção corporativa Terral com ambiente iluminado em tons quentes" /></aside>
     </section>
     <section class="chat-view is-hidden" data-view="chat" aria-label="Chat Terbie">
       <aside class="sidebar" id="navigation">
-        <div class="sidebar-brand"><div class="wordmark">terbie<span>.</span><small>YOUR DATA COMPASS</small></div></div>
+        <div class="sidebar-brand"><img class="sidebar-logo" src="/ui/assets/terbie-logo.png" alt="TERBIE" /></div>
         <button class="new-chat-button" type="button" data-new-chat><span aria-hidden="true">＋</span> Nova conversa</button>
         <button class="nav-home" type="button" data-home><span aria-hidden="true">⌂</span> Início</button>
         <div class="sidebar-section"><p class="eyebrow">CONVERSA ATUAL</p><button class="current-chat" type="button" data-chat-title>Nova conversa</button><p class="sidebar-hint">Explore seus dados em uma conversa com o Terbie.</p></div>

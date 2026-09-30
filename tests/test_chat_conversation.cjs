@@ -50,6 +50,31 @@ test('response displays analytical assumptions without technical metadata', () =
   assert.doesNotMatch(answer, /secret/);
 });
 
+test('password visibility can be toggled and announces its state', () => {
+  const {nodes} = harness();
+  // The input is queried lazily by the event handler.
+  const button = nodes.get('[data-toggle-password]');
+  button.listeners.click();
+  const password = nodes.get('#login-password');
+  password.type = 'password';
+  button.listeners.click();
+  assert.equal(password.type, 'text');
+  assert.equal(button['aria-pressed'], 'true');
+  button.listeners.click();
+  assert.equal(password.type, 'password');
+  assert.equal(button['aria-pressed'], 'false');
+});
+
+test('remembered sessions restore valid tokens and discard expired tokens', () => {
+  const {context} = harness();
+  let value = JSON.stringify({token: 'signed-token', expiresAt: Date.now() + 60000});
+  context.localStorage = {getItem: () => value, removeItem: () => { value = null; }};
+  assert.equal(context.rememberedSession().token, 'signed-token');
+  value = JSON.stringify({token: 'expired-token', expiresAt: Date.now() - 1});
+  assert.equal(context.rememberedSession(), null);
+  assert.equal(value, null);
+});
+
 test('suggestion buttons submit the full scoped question and use safe text', () => {
   const {context, nodes, Element} = harness();
   const message = new Element();
