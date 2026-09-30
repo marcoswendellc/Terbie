@@ -92,7 +92,7 @@ class ComparativeDataService:
                         "tx_cep": "74200-000",
                     },
                 ],
-            ),
+            ).assign(nm_empreendimento="Buriti Shopping"),
         }
 
 
@@ -372,7 +372,7 @@ def test_comparison_plan_uses_default_campaign_metrics() -> None:
 
     assert response.analytical_plan.intent == "comparison"
     assert response.analytical_plan.entities == ["promocao"]
-    assert response.analytical_plan.dimensions == ["nm_promocao"]
+    assert response.analytical_plan.dimensions == ["nm_promocao", "nm_empreendimento"]
     assert response.analytical_plan.metrics == [
         "faturamento",
         "quantidade_compras",

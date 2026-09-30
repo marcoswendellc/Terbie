@@ -149,6 +149,7 @@ class ContextResolver:
     def explicit_grouping(self, question: str) -> list[ResolvedDimension]:
         normalized = self._normalize_text(question)
         fields = {
+            "promocao": ("campanhas?|promocoes|promocao|nm_promocao", "nm_promocao"),
             "loja": ("lojas?|nm_fantasa", "nm_fantasa"),
             "segmento": ("segmentos?|nm_segmento", "nm_segmento"),
             "bairro": ("bairros?", "bairro"),

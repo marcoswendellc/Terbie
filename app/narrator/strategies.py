@@ -440,6 +440,9 @@ class RankingStrategy(ResponseStrategy):
 
             return f"A melhor campanha, considerando faturamento, foi {dimension}{location}."
 
+        shopping = self._shopping_from_row(context.top_row or {})
+        if dimension_column == "nm_promocao" and shopping:
+            dimension += f" — {shopping}"
         return (
             f"{article} {label} com {objective}{context_text} foi {dimension}, com {metric_phrase}."
         )
@@ -556,6 +559,8 @@ class RankingStrategy(ResponseStrategy):
                 dimension_column,
                 row.get(dimension_column),
             )
+            if dimension_column == "nm_promocao" and row.get("nm_empreendimento"):
+                dimension_value += f" — {row['nm_empreendimento']}"
             if len(context.metric_columns) > 1:
                 metric_values = "; ".join(
                     f"{self._metric_label(column)}: "
@@ -775,7 +780,10 @@ class ComparisonStrategy(ResponseStrategy):
         ]
 
         for row in context.data:
-            lines.append(self._metric_row(self._cell(row.get(label_column)), row, metrics))
+            label = self._cell(row.get(label_column))
+            if label_column == "nm_promocao" and row.get("nm_empreendimento"):
+                label += " — " + self._cell(row["nm_empreendimento"])
+            lines.append(self._metric_row(label, row, metrics))
 
         comparable_metrics = [
             metric

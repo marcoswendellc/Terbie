@@ -62,6 +62,7 @@ class TerbieNarrator:
                 "cidade": "Cidade",
                 "faixa_etaria": "Faixa etária",
                 "nm_empreendimento": "Shopping",
+                "nm_promocao": "Campanha",
                 **ComparisonStrategy._METRIC_LABELS,
             }
             lines = [

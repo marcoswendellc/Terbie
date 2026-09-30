@@ -20,6 +20,12 @@ class AnalyticalPlanner:
         )
         if hypothesis.analysis_type == "metric_query":
             dimensions = hypothesis.dimensions
+        if hypothesis.analysis_type in {"metric_query", "ranking", "comparison"} and any(
+            dimension in {"nm_promocao", "promocao"} for dimension in dimensions
+        ):
+            dimensions = list(dimensions)
+            if "nm_empreendimento" not in dimensions:
+                dimensions.append("nm_empreendimento")
         demographic_dimensions = {"genero", "idade", "faixa_etaria"}
         if demographic_dimensions.intersection(dimensions):
             entities = [

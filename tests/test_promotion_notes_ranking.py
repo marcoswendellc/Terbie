@@ -73,12 +73,15 @@ def test_promotion_notes_ranking_counts_unique_notes_and_reports_short_result() 
             pipeline_executor=PipelineExecutor(registry=OperationRegistry()),
         ),
     ).execute(
-        dataframe=pd.DataFrame(rows),
+        dataframe=pd.DataFrame(rows).assign(nm_empreendimento="Shopping A"),
         plan=plan,
         knowledge_context=KnowledgeService().get_context(),
     )
 
-    assert result.data == [
+    assert [
+        {key: value for key, value in row.items() if key != "nm_empreendimento"}
+        for row in result.data
+    ] == [
         {"nm_promocao": "Promoção A", "quantidade_compras": 4},
         {"nm_promocao": "Promoção B", "quantidade_compras": 3},
         {"nm_promocao": "Promoção C", "quantidade_compras": 2},
@@ -104,5 +107,5 @@ def test_promotion_notes_ranking_counts_unique_notes_and_reports_short_result() 
         "de 10 solicitadas:",
     )
     assert "Contagem: notas únicas cadastradas (cd_compra distinto)." in response.answer
-    assert "1. Promoção A — 4" in response.answer
+    assert "1. Promoção A — Shopping A — 4" in response.answer
     assert "Resposta alterada pelo modelo" not in response.answer

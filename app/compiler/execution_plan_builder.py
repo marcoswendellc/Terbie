@@ -217,6 +217,15 @@ class ExecutionPlanBuilder:
             if operation is not None:
                 operations.append(operation)
 
+        if (
+            analytical_plan.intent == "metric_query"
+            and any(field in {"nm_promocao", "promocao"} for field in group_fields)
+            and metric is not None
+            and "mes" not in group_fields
+        ):
+            operations.append(
+                PlanOperation(type="sort", field=metric.name, parameters={"direction": "desc"})
+            )
         if "mes" in group_fields:
             operations.append(
                 PlanOperation(type="sort", field="mes", parameters={"direction": "asc"})

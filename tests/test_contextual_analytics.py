@@ -122,7 +122,7 @@ def test_top_campaign_ranking_understands_limit_metric_and_year() -> None:
 
     assert response.hypothesis.analysis_type == "ranking"
     assert response.analytical_plan.metrics == ["faturamento"]
-    assert response.analytical_plan.dimensions == ["nm_promocao"]
+    assert response.analytical_plan.dimensions == ["nm_promocao", "nm_empreendimento"]
     assert response.analytical_plan.time_scope == "2025"
     assert _operation(response, "limit").parameters["value"] == 10
     assert _operation(response, "sort", "faturamento").parameters["direction"] == "desc"
