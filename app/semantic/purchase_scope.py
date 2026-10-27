@@ -58,3 +58,14 @@ def is_customer_profile(question: str) -> bool:
             normalize_temporal_text(question),
         )
     )
+
+
+def customer_profile_campaign(question: str) -> str | None:
+    if not is_customer_profile(question):
+        return None
+    match = re.search(
+        r"\b(?:campanha|promocao)\s+(?:de\s+)?(.+?)"
+        r"(?=\s+(?:no|na|do|da)\b|[?;!]|$)",
+        normalize_temporal_text(question),
+    )
+    return match.group(1).strip(' ."') if match else None

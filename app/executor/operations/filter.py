@@ -65,10 +65,37 @@ class FilterOperation(BaseOperation):
                 )
             ]
 
-        if operator == "entity_match":
+        if operator in {"entity_match", "campaign_match"}:
             context.metadata.setdefault("resolved_entities", {}).pop(field, None)
             requested = self._normalize(str(value))
             candidates = dataframe[field].dropna().astype("string").unique().tolist()
+            if operator == "campaign_match":
+                tokens = set(self._match_text(requested, "nm_promocao").split())
+                candidates = [
+                    candidate for candidate in candidates
+                    if tokens and tokens.issubset(
+                        self._match_text(self._normalize(candidate), "nm_promocao").split()
+                    )
+                ]
+                exact = [
+                    candidate for candidate in candidates
+                    if self._match_text(self._normalize(candidate), "nm_promocao")
+                    == self._match_text(requested, "nm_promocao")
+                ]
+                if exact:
+                    candidates = exact
+                if len(candidates) > 1:
+                    context.warnings.append(
+                        f"Mais de uma campanha corresponde a {value}: "
+                        + "; ".join(candidates)
+                        + ". Informe o nome completo da campanha."
+                    )
+                    return dataframe.iloc[0:0]
+                if not candidates:
+                    return dataframe.iloc[0:0]
+                selected = candidates[0]
+                context.metadata.setdefault("resolved_entities", {})[field] = selected
+                return dataframe[dataframe[field].astype("string") == selected]
             if field == "nm_promocao":
                 requested_years = set(re.findall(r"\b(?:19|20)\d{2}\b", requested))
                 if requested_years:

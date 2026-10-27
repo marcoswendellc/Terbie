@@ -24,7 +24,12 @@ from app.reasoning.models import ReasoningContext
 from app.semantic.campaign_comparison import expand_campaign_year_comparison
 from app.semantic.explicit_query import is_explicit_query, is_month_ranking
 from app.semantic.models import SemanticResolution
-from app.semantic.purchase_scope import is_customer_profile, purchase_period, ticket_geography
+from app.semantic.purchase_scope import (
+    customer_profile_campaign,
+    is_customer_profile,
+    purchase_period,
+    ticket_geography,
+)
 from app.semantic.temporal import TemporalSelection
 
 logger = logging.getLogger(__name__)
@@ -114,6 +119,18 @@ class TerbieCompiler:
             question=request.question,
             hypothesis=hypothesis,
         )
+        profile_campaign = customer_profile_campaign(request.question)
+        if profile_campaign:
+            hypothesis = hypothesis.model_copy(update={
+                "filters": [
+                    item for item in hypothesis.filters if item.get("field") != "nm_promocao"
+                ] + [{
+                    "type": "filter",
+                    "field": "nm_promocao",
+                    "operator": "campaign_match",
+                    "value": profile_campaign,
+                }],
+            })
         hypothesis = self._normalize_campaign_ranking_with_shopping(
             question=request.question,
             hypothesis=hypothesis,

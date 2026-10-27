@@ -224,6 +224,11 @@ class PersonaStrategy(ResponseStrategy):
                 f"{self._integer(row.get('clientes_unicos'))} clientes únicos e "
                 f"{self._integer(row.get('quantidade_compras'))} compras."
             ]
+            resolved_campaign = context.execution_metadata.get("resolved_entities", {}).get(
+                "nm_promocao"
+            )
+            if resolved_campaign:
+                lines.append(f"Campanha analisada: {resolved_campaign}.")
             if row.get("ticket_medio_por_compra") is not None:
                 ticket = self._formatter.value(
                     "ticket_medio_por_compra", row["ticket_medio_por_compra"]
