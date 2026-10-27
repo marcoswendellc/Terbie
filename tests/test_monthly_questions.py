@@ -117,3 +117,100 @@ def test_monthly_respects_named_month_interval():
         knowledge_context=KnowledgeService().get_context(),
     )
     assert [row.get("mes") for row in response.data] == ["2026-02", "2026-08"]
+
+
+@pytest.mark.parametrize("question", [
+    "Qual foi o total de vendas por mês?",
+    "qual foi o mês de maior faturamento ?",
+])
+def test_monthly_sales_cannot_be_redirected_to_a_campaign(question):
+    from test_conversational_analysis import DirectorProvider
+
+    from app.conversation.models import AnalysisDecision, AnalysisQuestion
+
+    provider = DirectorProvider(AnalysisDecision(analyses=[AnalysisQuestion(
+        title="Campanha", question="Faturamento por mês da campanha No Pelo 360"
+    )]))
+    instance = service(provider, monthly_frame())
+    response = instance.execute_question(
+        question=question, knowledge_context=KnowledgeService().get_context(),
+        session_id="monthly-sales",
+    )
+    if "maior" in question:
+        assert response.data == [{"mes": "2025-01", "faturamento": 999999.0}]
+        assert "mês" in response.answer.lower()
+        assert "evolução mensal" not in response.answer.lower()
+    else:
+        assert [row["mes"] for row in response.data] == [
+            "2025-01", "2026-01", "2026-02", "2026-08", "2027-01"
+        ]
+        assert sum(row["faturamento"] for row in response.data) == 2007798
+    assert not any("No Pelo" in str(row) for row in response.data)
+
+
+def test_monthly_sales_sequence_keeps_global_scope():
+    instance = service(frame=monthly_frame())
+    knowledge = KnowledgeService().get_context()
+    answers = []
+    for question in [
+        "Qual foi o total de vendas por mês?",
+        "Quais campanhas tiveram o melhor desempenho?",
+        "qual foi o mês de maior faturamento ?",
+        "Qual foi o total de vendas por mês?",
+    ]:
+        answers.append(instance.execute_question(
+            question=question, knowledge_context=knowledge, session_id="sequence-sales"
+        ))
+    assert answers[0].data == answers[-1].data
+    assert answers[2].data == [{"mes": "2025-01", "faturamento": 999999.0}]
+
+
+def test_highest_month_preserves_explicit_year():
+    response = service(frame=monthly_frame()).execute_question(
+        question="Qual foi o mês de maior faturamento em 2026?",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert response.data == [{"mes": "2026-08", "faturamento": 5600.0}]
+
+
+@pytest.mark.parametrize("question", [
+    "Qual foi o mês de maior faturamento entre fevereiro e agosto de 2026?",
+    "Qual foi o mês de maior faturamento nas campanhas em 2026?",
+])
+def test_highest_month_preserves_requested_purchase_scope(question):
+    frame = monthly_frame()
+    frame.loc[frame.cd_promocao.isna(), "vl_compra"] = 100000
+    response = service(frame=frame).execute_question(
+        question=question, knowledge_context=KnowledgeService().get_context(),
+    )
+    assert response.data == [{"mes": "2026-08", "faturamento": 5600.0}]
+
+
+def test_highest_month_preserves_explicit_purchase_count():
+    response = service(frame=monthly_frame()).execute_question(
+        question="Qual foi o mês com maior quantidade de vendas em 2026?",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert response.data == [{"mes": "2026-08", "quantidade_compras": 7}]
+
+
+@pytest.mark.parametrize("metric", ["vendas", "faturamento"])
+def test_explicit_monthly_query_drops_previous_campaign_but_keeps_requested_campaign(metric):
+    frame = monthly_frame()
+    frame["nm_promocao"] = "No Pelo 360 com Hugo e Guilherme e Buriti Shopping"
+    other = frame.iloc[[0]].copy()
+    other["nm_promocao"] = "Outra campanha"
+    other["vl_compra"] = 50000
+    frame = pd.concat([frame, other], ignore_index=True)
+    instance = service(frame=frame)
+    knowledge = KnowledgeService().get_context()
+    scoped = instance.execute_question(
+        question=f"Total de {metric} por mês da campanha No Pelo 360 em 2026",
+        knowledge_context=knowledge, session_id="campaign-scope",
+    )
+    assert sum(row["faturamento"] for row in scoped.data) == 6900
+    global_result = instance.execute_question(
+        question=f"Total de {metric} por mês em 2026",
+        knowledge_context=knowledge, session_id="campaign-scope",
+    )
+    assert sum(row["faturamento"] for row in global_result.data) == 57800

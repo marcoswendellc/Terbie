@@ -7,6 +7,14 @@ from app.semantic.purchase_scope import is_customer_profile, ticket_geography
 from app.semantic.temporal import is_campaign_listing, normalize_temporal_text
 
 
+def is_month_ranking(question: str) -> bool:
+    normalized = normalize_temporal_text(question)
+    return bool(
+        re.search(r"\bmes\b.*\b(maior|melhor)\b", normalized)
+        and re.search(r"\b(faturamento|receita|vendas?)\b", normalized)
+    )
+
+
 def is_explicit_query(question: str) -> bool:
     normalized = normalize_temporal_text(question)
     if is_campaign_listing(question):
@@ -20,9 +28,13 @@ def is_explicit_query(question: str) -> bool:
         return True
     if is_customer_profile(question) or ticket_geography(question):
         return True
+    if is_month_ranking(question):
+        return True
     if re.search(r"\b(compare|comparar|comparacao)\b", normalized):
         return False
-    metric = re.search(r"\b(faturamento|receita|compras|notas|clientes|ticket)\b", normalized)
+    metric = re.search(
+        r"\b(faturamento|receita|vendas?|compras|notas|clientes|ticket)\b", normalized
+    )
     if not metric:
         return False
     return bool(

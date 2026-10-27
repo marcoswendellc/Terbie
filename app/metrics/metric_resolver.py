@@ -14,6 +14,7 @@ class MetricResolver:
                 "volume de notas",
                 "quantidade de notas",
                 "quantas vendas",
+                "quantidade de vendas",
                 "numero de vendas",
                 "qtd notas",
                 "notas",

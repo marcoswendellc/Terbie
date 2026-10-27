@@ -356,6 +356,7 @@ class RankingStrategy(ResponseStrategy):
         "o que percebe",
     )
     _DIMENSION_LABELS = {
+        "mes": ("O", "mês"),
         "bairro": ("O", "bairro"),
         "cidade": ("A", "cidade"),
         "genero": ("O", "gênero"),
@@ -428,6 +429,8 @@ class RankingStrategy(ResponseStrategy):
         context_text = self._campaign_context(context.question)
         objective = self._objective_phrase(metric_column)
         metric_phrase = self._metric_phrase(metric_column=metric_column, metric=metric)
+        if dimension_column == "mes" and metric_column == "faturamento":
+            return f"O mês de maior faturamento foi {dimension}, com {metric}."
         if self._is_best_campaign_question(context.question, dimension_column, metric_column):
             period = self._year_from_question(context.question)
             shopping = self._shopping_from_row(context.top_row or {})

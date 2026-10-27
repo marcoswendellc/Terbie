@@ -21,7 +21,7 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
-from app.semantic.explicit_query import is_explicit_query
+from app.semantic.explicit_query import is_explicit_query, is_month_ranking
 from app.semantic.models import SemanticResolution
 from app.semantic.purchase_scope import is_customer_profile, purchase_period, ticket_geography
 from app.semantic.temporal import TemporalSelection
@@ -152,7 +152,8 @@ class TerbieCompiler:
         normalized = self._context_resolver._normalize_text(request.question)
         if hypothesis.analysis_type == "ranking" and "bairro" in hypothesis.dimensions:
             hypothesis.filters.append({"type": "filter", "field": "bairro", "operator": "not_null"})
-        if re.search(r"\b(por mes|mensal|mensais|mes a mes)\b", normalized):
+        month_ranking = is_month_ranking(request.question)
+        if month_ranking or re.search(r"\b(por mes|mensal|mensais|mes a mes)\b", normalized):
             metrics = [
                 m
                 for m in hypothesis.metrics
@@ -207,6 +208,18 @@ class TerbieCompiler:
                             "end": months.index(mentioned[-1].group()) + 1,
                         }
                     )
+        if month_ranking:
+            resolved_metrics = self._context_resolver.resolve(request.question).metrics
+            metric = resolved_metrics[0].name if resolved_metrics else "faturamento"
+            hypothesis = hypothesis.model_copy(update={
+                "analysis_type": "ranking",
+                "business_entity": "mes",
+                "dimensions": ["mes"],
+                "metric": metric,
+                "metrics": [metric],
+                "filters": [item for item in hypothesis.filters if item.get("type") != "limit"]
+                + [{"type": "limit", "value": 1}],
+            })
         period = purchase_period(request.question)
         if "mes" not in hypothesis.dimensions:
             if period is None and not re.search(r"\b(campanhas?|promocao|promocoes)\b", normalized):
