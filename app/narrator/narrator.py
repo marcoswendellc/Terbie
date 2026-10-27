@@ -51,7 +51,14 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
-        if context.intent == "metric_query" and context.dimension_columns:
+        campaign_performance_ranking = (
+            context.intent == "ranking"
+            and {"nm_promocao", "nm_empreendimento"}.issubset(context.dimension_columns)
+            and any(term in context.question.lower() for term in ("desempenho", "performance"))
+        )
+        if (context.intent == "metric_query" or campaign_performance_ranking) and (
+            context.dimension_columns
+        ):
             columns = [*context.dimension_columns, *context.metric_columns]
             labels = {
                 "mes": "Mês",

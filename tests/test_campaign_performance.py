@@ -27,7 +27,7 @@ def test_campaign_performance_separates_shoppings_and_sorts_each_metric(metric, 
         )
     )
     response = service(provider, pd.DataFrame(rows)).execute_question(
-        question="Quais campanhas tiveram o melhor desempenho?",
+        question=f"Quais campanhas tiveram o melhor desempenho por {metric}?",
         knowledge_context=KnowledgeService().get_context(),
         session_id="campaign-ranking",
     )

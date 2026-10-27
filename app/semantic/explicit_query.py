@@ -32,6 +32,11 @@ def is_explicit_query(question: str) -> bool:
         return True
     if re.search(r"\b(compare|comparar|comparacao)\b", normalized):
         return False
+    context = ContextResolver().resolve(question)
+    if context.intent == "ranking" and any(
+        dimension.field == "nm_promocao" for dimension in context.dimensions
+    ):
+        return True
     metric = re.search(
         r"\b(faturamento|receita|vendas?|compras|notas|clientes|ticket)\b", normalized
     )
