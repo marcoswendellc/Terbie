@@ -3,6 +3,7 @@
 import re
 
 from app.context_resolution.context_resolver import ContextResolver
+from app.semantic.campaign_comparison import expand_campaign_year_comparison
 from app.semantic.purchase_scope import is_customer_profile, ticket_geography
 from app.semantic.temporal import is_campaign_listing, normalize_temporal_text
 
@@ -18,6 +19,8 @@ def is_month_ranking(question: str) -> bool:
 def is_explicit_query(question: str) -> bool:
     normalized = normalize_temporal_text(question)
     if is_campaign_listing(question):
+        return True
+    if expand_campaign_year_comparison(question):
         return True
     if re.search(
         r"\bcompare(?:\s+em\s+(?:uma\s+)?tabela)?\s+a\s+"

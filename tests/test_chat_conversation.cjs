@@ -3,14 +3,23 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const test = require('node:test');
 
-function harness() {
+function harness({mobile = false} = {}) {
   class Element {
     constructor() {
       this.children = [];
       this.dataset = {};
       this.listeners = {};
       this.style = {};
-      this.classList = {add() {}, remove() {}};
+      const classes = new Set();
+      this.classList = {
+        add(...names) { names.forEach(name => classes.add(name)); },
+        remove(...names) { names.forEach(name => classes.delete(name)); },
+        contains(name) { return classes.has(name); },
+        toggle(name) {
+          if (classes.has(name)) { classes.delete(name); return false; }
+          classes.add(name); return true;
+        },
+      };
     }
     append(...children) { this.children.push(...children); }
     appendChild(child) { this.children.push(child); }
@@ -33,12 +42,41 @@ function harness() {
     querySelectorAll: () => [],
   };
   const context = vm.createContext({
+    window: {matchMedia: () => ({matches: mobile, addEventListener() {}})},
     document, sessionStorage: {getItem() { return null; }, setItem() {}},
     crypto: {randomUUID: () => 'session'}, console,
   });
   vm.runInContext(fs.readFileSync('app/web/app.js', 'utf8'), context);
   return {context, nodes, Element};
 }
+
+test('desktop sidebar collapses and reopens without resetting conversation', () => {
+  const {context, nodes} = harness();
+  const chat = nodes.get('[data-view="chat"]');
+  const menu = nodes.get('[data-menu]');
+  assert.equal(menu['aria-expanded'], 'true');
+  menu.listeners.click();
+  assert.equal(chat.classList.contains('sidebar-collapsed'), true);
+  assert.equal(menu['aria-expanded'], 'false');
+  context.closeMenu();
+  assert.equal(chat.classList.contains('sidebar-collapsed'), true);
+  menu.listeners.click();
+  assert.equal(chat.classList.contains('sidebar-collapsed'), false);
+  assert.equal(menu['aria-expanded'], 'true');
+});
+
+test('mobile sidebar opens and closes with Escape', () => {
+  const {nodes} = harness({mobile: true});
+  const chat = nodes.get('[data-view="chat"]');
+  const menu = nodes.get('[data-menu]');
+  assert.equal(menu['aria-expanded'], 'false');
+  menu.listeners.click();
+  assert.equal(chat.classList.contains('menu-open'), true);
+  assert.equal(menu['aria-expanded'], 'true');
+  chat.listeners.keydown({key: 'Escape'});
+  assert.equal(chat.classList.contains('menu-open'), false);
+  assert.equal(menu['aria-expanded'], 'false');
+});
 
 test('response displays analytical assumptions without technical metadata', () => {
   const {context} = harness();

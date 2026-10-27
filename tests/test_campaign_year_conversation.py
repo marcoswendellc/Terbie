@@ -14,6 +14,40 @@ from app.semantic.temporal import resolve_temporal_reference
 QUESTION = "compare a campanha de pais de 2025 com a campanha de pais de 2026 do buriti shopping"
 
 
+@pytest.mark.parametrize("connector", ["x", "vs", "versus", "e"])
+@pytest.mark.parametrize("with_director", [False, True])
+def test_abbreviated_comparison_keeps_event_years_and_shopping(connector, with_director):
+    frame = campaign_frame()
+    christmas = frame.iloc[[0]].copy()
+    christmas["nm_promocao"] = "Promoção Natal 2025"
+    christmas["vl_compra"] = 99999
+    frame = pd.concat([frame, christmas], ignore_index=True)
+    provider = DirectorProvider(AnalysisDecision(analyses=[AnalysisQuestion(
+        title="Reescrita incorreta",
+        question="Compare o desempenho das campanhas do Buriti Shopping",
+    )])) if with_director else None
+    response = service(provider, frame).execute_question(
+        question=f"compare as campanhas de pais 2025 {connector} 2026 do buriti shopping",
+        knowledge_context=KnowledgeService().get_context(), session_id="short-comparison",
+    )
+    assert [row["faturamento"] for row in response.data] == [100, 250]
+    assert [row["campanha_contexto"] for row in response.data] == [
+        "Promoção Pais 2025 — Buriti Shopping", "Promoção Pais 2026 — Buriti Shopping",
+    ]
+    assert "Natal" not in response.answer
+    assert "150,00%" in response.answer
+
+
+def test_abbreviated_comparison_does_not_substitute_a_missing_year():
+    response = service(frame=campaign_frame()).execute_question(
+        question="compare as campanhas de pais 2025 x 2027 do buriti shopping",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert [row["faturamento"] for row in response.data] == [100, None]
+    assert "2027" in response.data[1]["campanha_contexto"]
+    assert "Variação percentual" not in response.answer
+
+
 def campaign_frame():
     return pd.DataFrame(
         [

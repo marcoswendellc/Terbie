@@ -16,6 +16,7 @@ const logoutButton = document.querySelector("[data-logout]");
 const newChatButton = document.querySelector("[data-new-chat]");
 const welcome = document.querySelector("[data-welcome]");
 const menuButton = document.querySelector("[data-menu]");
+const mobileSidebar = window.matchMedia("(max-width: 760px)");
 const REMEMBER_KEY = "terbie.remembered_session";
 
 function rememberedSession() {
@@ -45,10 +46,18 @@ document.querySelector("[data-forgot-password]").addEventListener("click", () =>
   document.querySelector("[data-recovery-help]").classList.remove("is-hidden");
 });
 
+function syncMenuButton() {
+  const open = mobileSidebar.matches
+    ? chatView.classList.contains("menu-open")
+    : !chatView.classList.contains("sidebar-collapsed");
+  menuButton.setAttribute("aria-expanded", String(open));
+  menuButton.setAttribute("aria-label", open ? "Recolher menu" : "Abrir menu");
+  menuButton.title = open ? "Recolher menu" : "Abrir menu";
+}
+
 function closeMenu() {
   chatView.classList.remove("menu-open");
-  menuButton.setAttribute("aria-expanded", "false");
-  menuButton.setAttribute("aria-label", "Abrir menu");
+  syncMenuButton();
 }
 
 function showWelcome() {
@@ -528,10 +537,11 @@ document.querySelectorAll("[data-suggestion]").forEach((button) => {
   });
 });
 menuButton.addEventListener("click", () => {
-  const open = chatView.classList.toggle("menu-open");
-  menuButton.setAttribute("aria-expanded", String(open));
-  menuButton.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+  chatView.classList.toggle(mobileSidebar.matches ? "menu-open" : "sidebar-collapsed");
+  syncMenuButton();
 });
+mobileSidebar.addEventListener("change", closeMenu);
+syncMenuButton();
 chatView.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeMenu();
 });

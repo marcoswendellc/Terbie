@@ -21,6 +21,7 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
+from app.semantic.campaign_comparison import expand_campaign_year_comparison
 from app.semantic.explicit_query import is_explicit_query, is_month_ranking
 from app.semantic.models import SemanticResolution
 from app.semantic.purchase_scope import is_customer_profile, purchase_period, ticket_geography
@@ -495,6 +496,7 @@ class TerbieCompiler:
         question: str,
         hypothesis: AnalyticalHypothesis,
     ) -> AnalyticalHypothesis:
+        question = expand_campaign_year_comparison(question) or question
         match = re.search(
             r"\bcompare(?:\s+em\s+(?:uma\s+)?tabela)?\s+a\s+"
             r"(?:(?:promocao|promoção|campanha)\s+)?(.+?)\s+"
@@ -525,6 +527,17 @@ class TerbieCompiler:
                 (shared_match.group(1).strip(), shopping),
                 (shared_match.group(2).strip(), shopping),
             ]
+
+        # A trailing shared period belongs to both campaigns, not to the shopping name.
+        scoped_pairs = []
+        for promotion, shopping in pairs:
+            shared_year = re.search(r"\s+em\s+((?:19|20)\d{2})\s*$", shopping, re.IGNORECASE)
+            if shared_year:
+                shopping = shopping[:shared_year.start()].strip()
+                if not re.search(r"\b(?:19|20)\d{2}\b", promotion):
+                    promotion = f"{promotion} {shared_year.group(1)}"
+            scoped_pairs.append((promotion, shopping))
+        pairs = scoped_pairs
 
         contexts = [
             {
