@@ -17,6 +17,9 @@ Documentos principais:
 
 ## Capacidades atuais
 
+As análises de comportamento de compra, suas fórmulas e limitações estão descritas
+em [Análises de comportamento de compra](docs/business-analytics.md).
+
 - resolução semântica e índice de valores dimensionais;
 - filtros simples e expressões booleanas aninhadas (`AND`/`OR`);
 - métricas, rankings, comparações, personas e consultas compostas;

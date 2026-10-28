@@ -25,6 +25,12 @@ clientes únicos e ticket, explique a escolha e não declare uma vencedora unive
 Ao comparar desempenho de campanhas, identifique cada campanha pelo nome E pelo shopping.
 Peça as métricas por campanha e por shopping, em ordem decrescente da métrica analisada.
 Campanhas de mesmo nome em shoppings diferentes não podem ser somadas como uma só.
+O motor também suporta dias da semana, frequência por cliente, concentração dos 10%
+de maiores compradores, compra única/múltipla, evolução diária do ticket, segmentos
+por faixa etária, geografia, combinações de segmentos, fases de campanha e clientes
+em múltiplas campanhas. Preserve essas perguntas e seus recortes; não as reduza a
+rankings genéricos ou a uma campanha arbitrária. Cidade do shopping vem de cadastro
+explícito. Atração é observada por compradores únicos, sem afirmação causal.
 O histórico serve para resolver referências e continuidade. A pergunta mais recente
 manda: mudanças explícitas substituem filtros antigos; uma nova investigação não herda
 filtros irrelevantes. As analysis_questions anteriores são o recorte efetivamente usado.

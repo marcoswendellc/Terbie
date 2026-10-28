@@ -36,12 +36,15 @@ class FilterOperation(BaseOperation):
                 dataframe[field].notna() & ~text.isin(["", "null", "none", "nan", "não informado"])
             ]
         if operator == "normalized_equals":
+
+            def normalized(value):
+                text = str(value)
+                if field in {"cd_promocao", "cd_empreendimento", "sk_loja", "cd_compra"}:
+                    text = re.sub(r"\.0$", "", text.strip())
+                return self._normalize(text)
+
             return dataframe[
-                dataframe[field]
-                .astype("string")
-                .fillna("")
-                .map(self._normalize)
-                .eq(self._normalize(str(value)))
+                dataframe[field].astype("string").fillna("").map(normalized).eq(normalized(value))
             ]
         if operator == "date_between":
             dates = date_series(dataframe[field]).dt.normalize()
@@ -52,6 +55,31 @@ class FilterOperation(BaseOperation):
         if value is None:
             context.warnings.append("Filtro sem valor definido.")
             return dataframe
+
+        if operator == "shopping_match":
+
+            def tokens(text):
+                return set(self._normalize(str(text)).split()) - {"shopping", "empreendimento"}
+
+            requested = tokens(value)
+            candidates = [
+                candidate
+                for candidate in dataframe[field].dropna().unique()
+                if requested and requested.issubset(tokens(candidate))
+            ]
+            exact = [candidate for candidate in candidates if tokens(candidate) == requested]
+            if exact:
+                candidates = exact
+            normalized_candidates = {self._normalize(str(candidate)) for candidate in candidates}
+            if len(normalized_candidates) != 1:
+                context.warnings.append("Shopping não identificado de forma única: " + str(value))
+                return dataframe.iloc[0:0]
+            selected = candidates[0]
+            context.metadata.setdefault("resolved_entities", {})[field] = selected
+            return dataframe[
+                dataframe[field].astype("string").fillna("").map(self._normalize)
+                == self._normalize(str(selected))
+            ]
 
         if operator == "contains":
             return dataframe[
@@ -72,19 +100,23 @@ class FilterOperation(BaseOperation):
             if operator == "campaign_match":
                 tokens = set(self._match_text(requested, "nm_promocao").split())
                 candidates = [
-                    candidate for candidate in candidates
-                    if tokens and tokens.issubset(
+                    candidate
+                    for candidate in candidates
+                    if tokens
+                    and tokens.issubset(
                         self._match_text(self._normalize(candidate), "nm_promocao").split()
                     )
                 ]
                 exact = [
-                    candidate for candidate in candidates
+                    candidate
+                    for candidate in candidates
                     if self._match_text(self._normalize(candidate), "nm_promocao")
                     == self._match_text(requested, "nm_promocao")
                 ]
                 if exact:
                     candidates = exact
-                if len(candidates) > 1:
+                normalized_candidates = {self._normalize(candidate) for candidate in candidates}
+                if len(normalized_candidates) > 1:
                     context.warnings.append(
                         f"Mais de uma campanha corresponde a {value}: "
                         + "; ".join(candidates)
@@ -95,7 +127,10 @@ class FilterOperation(BaseOperation):
                     return dataframe.iloc[0:0]
                 selected = candidates[0]
                 context.metadata.setdefault("resolved_entities", {})[field] = selected
-                return dataframe[dataframe[field].astype("string") == selected]
+                return dataframe[
+                    dataframe[field].astype("string").fillna("").map(self._normalize)
+                    == self._normalize(selected)
+                ]
             if field == "nm_promocao":
                 requested_years = set(re.findall(r"\b(?:19|20)\d{2}\b", requested))
                 if requested_years:

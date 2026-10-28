@@ -3,7 +3,9 @@
 import re
 
 from app.context_resolution.context_resolver import ContextResolver
+from app.semantic.business_analysis import business_analysis_mode
 from app.semantic.campaign_comparison import expand_campaign_year_comparison
+from app.semantic.gender_comparison import is_gender_purchase_comparison
 from app.semantic.purchase_scope import is_customer_profile, ticket_geography
 from app.semantic.temporal import is_campaign_listing, normalize_temporal_text
 
@@ -17,6 +19,10 @@ def is_month_ranking(question: str) -> bool:
 
 
 def is_explicit_query(question: str) -> bool:
+    if business_analysis_mode(question):
+        return True
+    if is_gender_purchase_comparison(question):
+        return True
     normalized = normalize_temporal_text(question)
     if is_campaign_listing(question):
         return True

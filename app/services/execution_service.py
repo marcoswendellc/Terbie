@@ -724,7 +724,7 @@ class ExecutionService:
         )
         for table_name, dataframe in ordered_tables:
             if required_columns.issubset(set(dataframe.columns)):
-                selected = dataframe.copy()
+                selected = self._governance_policy.scope_source(dataframe.copy())
                 selected.attrs["table_name"] = table_name
                 return selected
 

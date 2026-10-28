@@ -1,6 +1,8 @@
 import re
 import unicodedata
 
+import pandas as pd
+
 
 class DataGovernancePolicy:
     """Applies output-level privacy and sensitive-column controls."""
@@ -43,6 +45,20 @@ class DataGovernancePolicy:
                 },
             )
         return sanitized
+
+    def scope_source(self, dataframe: pd.DataFrame) -> pd.DataFrame:
+        """Restrict source rows before calculating aggregates."""
+        if not self._allowed_shoppings:
+            return dataframe
+        column = next(
+            (name for name in ("nm_empreendimento", "shopping") if name in dataframe),
+            None,
+        )
+        if column is None:
+            return dataframe.iloc[:0].copy()
+        allowed = {value.strip() for value in self._allowed_shoppings}
+        mask = dataframe[column].astype("string").str.strip().str.casefold().isin(allowed)
+        return dataframe.loc[mask].copy()
 
     def _is_sensitive(self, field: str) -> bool:
         normalized = "".join(

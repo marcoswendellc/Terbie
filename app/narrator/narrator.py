@@ -1,5 +1,7 @@
+from app.narrator.business_analysis import business_analysis_answer
 from app.narrator.context_builder import NarrativeContextBuilder
 from app.narrator.formatter import NarrativeFormatter
+from app.narrator.gender_comparison import gender_comparison_answer
 from app.narrator.intelligence import BaseNarrativeProvider
 from app.narrator.models import NarratorRequest, NarratorResponse
 from app.narrator.strategies import (
@@ -51,6 +53,20 @@ class TerbieNarrator:
                 metadata=self._metadata(context),
             )
 
+        if context.intent == "business_analysis":
+            return NarratorResponse(
+                answer=business_analysis_answer(context, self._formatter),
+                summary=None, highlights=[], warnings=context.warnings,
+                metadata={
+                    **self._metadata(context), "narrative_provider": "deterministic_business",
+                },
+            )
+        if context.intent == "gender_purchase_comparison":
+            return NarratorResponse(
+                answer=gender_comparison_answer(context, self._formatter),
+                summary=None, highlights=[], warnings=context.warnings,
+                metadata={**self._metadata(context), "narrative_provider": "deterministic_gender"},
+            )
         campaign_performance_ranking = (
             context.intent == "ranking"
             and {"nm_promocao", "nm_empreendimento"}.issubset(context.dimension_columns)

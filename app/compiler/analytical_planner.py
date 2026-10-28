@@ -69,6 +69,10 @@ class AnalyticalPlanner:
         comparison_entities: list[dict[str, object]],
     ) -> list[str]:
         filter_operations = ["filter"] if self._has_executable_filters(filters) else []
+        if analysis_type == "business_analysis":
+            return [*filter_operations, "business_analysis"]
+        if analysis_type == "gender_purchase_comparison":
+            return [*filter_operations, "gender_purchase_comparison"]
 
         if analysis_type == "temporal_lookup":
             return [*filter_operations, "select", "distinct", "sort", "limit"]

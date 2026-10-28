@@ -1,5 +1,6 @@
 from app.executor.operations.aggregate import AggregateOperation
 from app.executor.operations.base import BaseOperation
+from app.executor.operations.business_analysis import BusinessAnalysisOperation
 from app.executor.operations.campaign_context_comparison import (
     CampaignContextComparisonOperation,
 )
@@ -10,6 +11,7 @@ from app.executor.operations.derived_metric import DerivedMetricOperation
 from app.executor.operations.distinct import DistinctOperation
 from app.executor.operations.filter import FilterOperation
 from app.executor.operations.filter_group import FilterGroupOperation
+from app.executor.operations.gender_comparison import GenderPurchaseComparisonOperation
 from app.executor.operations.group_by import GroupByOperation
 from app.executor.operations.limit import LimitOperation
 from app.executor.operations.persona_profile import (
@@ -42,6 +44,8 @@ class OperationRegistry:
         self.register(SortOperation())
         self.register(LimitOperation())
         self.register(StatisticsOperation())
+        self.register(GenderPurchaseComparisonOperation())
+        self.register(BusinessAnalysisOperation())
 
     def register(self, operation: BaseOperation) -> None:
         self._operations[operation.operation_type] = operation

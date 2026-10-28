@@ -27,6 +27,8 @@ class PlanValidator:
         "campaign_context_comparison",
         "filter_group",
         "statistics",
+        "gender_purchase_comparison",
+        "business_analysis",
     }
 
     def validate(self, plan: ExecutionPlan) -> PlanValidationResult:

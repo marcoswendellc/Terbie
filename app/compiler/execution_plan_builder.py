@@ -88,6 +88,20 @@ class ExecutionPlanBuilder:
         distinct_fields = self._distinct_fields(analytical_plan)
 
         operations.extend(self._filter_operations(analytical_plan.filters))
+        if analytical_plan.intent == "business_analysis":
+            return [*operations, PlanOperation(
+                type="business_analysis", parameters={
+                    "fields": ["cd_compra", "vl_compra"], "scope": analytical_plan.filters,
+                },
+            )]
+        if analytical_plan.intent == "gender_purchase_comparison":
+            return [*operations, PlanOperation(
+                type="gender_purchase_comparison",
+                parameters={
+                    "fields": ["sk_cliente", "cd_compra", "vl_compra", "cd_sexo"],
+                    "scope": analytical_plan.filters,
+                },
+            )]
 
         if analytical_plan.intent == "temporal_lookup":
             fields = ["nm_promocao", "nm_empreendimento", "sk_dtinicio", "sk_dtfim"]

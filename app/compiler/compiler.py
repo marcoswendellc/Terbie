@@ -21,8 +21,10 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
+from app.semantic.business_analysis import business_analysis_mode, explicit_business_scope
 from app.semantic.campaign_comparison import expand_campaign_year_comparison
 from app.semantic.explicit_query import is_explicit_query, is_month_ranking
+from app.semantic.gender_comparison import is_gender_purchase_comparison, requested_campaign
 from app.semantic.models import SemanticResolution
 from app.semantic.purchase_scope import (
     customer_profile_campaign,
@@ -301,11 +303,78 @@ class TerbieCompiler:
                     ],
                 }
             )
+        if is_gender_purchase_comparison(request.question):
+            campaign = requested_campaign(request.question)
+            filters = [
+                item for item in hypothesis.filters
+                if item.get("type") == "filter" and item.get("field") != "nm_promocao"
+            ]
+            if campaign:
+                filters.append({"type": "filter", "field": "nm_promocao",
+                                "operator": "campaign_match", "value": campaign})
+            hypothesis = hypothesis.model_copy(update={
+                "analysis_type": "gender_purchase_comparison", "business_entity": "genero",
+                "dimensions": ["genero"], "metric": "faturamento",
+                "metrics": ["faturamento", "quantidade_compras", "clientes_unicos"],
+                "filters": filters, "comparison_entities": [], "warnings": [],
+                "time_scope": None if campaign else hypothesis.time_scope,
+            })
+        business_mode = business_analysis_mode(request.question)
+        if business_mode:
+            scope = explicit_business_scope(request.question)
+            filters = [
+                item for item in hypothesis.filters
+                if item.get("type") == "filter"
+                and item.get("field") in {"dt_registro_mos", "uf", "cidade", "bairro",
+                                          "nm_segmento", "nm_fantasa", "sk_loja"}
+                and not re.match(r"(?:onde|qual|quais|que|com|maior)\b",
+                                 str(item.get("value", "")), re.IGNORECASE)
+            ]
+            if scope["shopping"]:
+                filters.append({"type": "filter", "field": "nm_empreendimento",
+                                "operator": "shopping_match", "value": scope["shopping"]})
+            else:
+                filters.extend(item for item in hypothesis.filters
+                               if item.get("field") == "nm_empreendimento")
+            if scope["campaign"]:
+                numeric_id = scope["campaign"].isdigit()
+                filters.append({"type": "filter",
+                                "field": "cd_promocao" if numeric_id else "nm_promocao",
+                                "operator": "normalized_equals" if numeric_id else "campaign_match",
+                                "value": scope["campaign"]})
+            year = re.search(r"\bem\s+((?:19|20)\d{2})\b", request.question, re.IGNORECASE)
+            if year and not purchase_period(request.question):
+                filters = [item for item in filters if item.get("field") != "dt_registro_mos"]
+                filters.append({"type": "filter", "field": "dt_registro_mos",
+                                "operator": "date_between", "value": f"{year.group(1)}-01-01",
+                                "end_value": f"{year.group(1)}-12-31"})
+            hypothesis = hypothesis.model_copy(update={
+                "analysis_type": "business_analysis", "business_entity": None, "dimensions": [],
+                "metric": "faturamento", "metrics": ["faturamento", "quantidade_compras"],
+                "filters": self._deduplicate_filters(filters), "comparison_entities": [],
+                "time_scope": None, "warnings": [], "items": [],
+                "goal": business_mode,
+            })
         analytical_plan = self._analytical_planner.build(
             hypothesis=hypothesis,
             knowledge_context=knowledge_context,
         )
         execution_plan = self._execution_plan_builder.build(analytical_plan)
+        if business_mode:
+            execution_plan = execution_plan.model_copy(update={"operations": [
+                operation.model_copy(update={"parameters": {
+                    **operation.parameters, "mode": business_mode,
+                    "limit": explicit_business_scope(request.question)["limit"],
+                    "by_campaign": bool(re.search(
+                        r"\b(?:campanhas?|promocao|promocoes)\b",
+                        self._context_resolver._normalize_text(request.question),
+                    )) if business_mode == "frequency" else bool(re.search(
+                        r"\bpor\s+campanha\b",
+                        self._context_resolver._normalize_text(request.question),
+                    )),
+                }}) if operation.type == "business_analysis" else operation
+                for operation in execution_plan.operations
+            ]})
         optimized_plan = self._optimizer.optimize(execution_plan)
         clarification = (
             temporal.clarification(request.question, hypothesis.filters) if temporal else None
