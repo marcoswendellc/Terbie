@@ -1,6 +1,19 @@
 from app.knowledge.models import BusinessRule
+from app.knowledge.shopping_aliases import SHOPPING_ALIASES
 
 BUSINESS_RULES: list[BusinessRule] = [
+    BusinessRule(
+        code="shopping_nicknames",
+        description=(
+            "Apelidos oficiais dos shoppings: "
+            + "; ".join(f"{alias} = {name}" for alias, name in SHOPPING_ALIASES.items())
+            + ". Use o nome completo nos filtros de nm_empreendimento. "
+            "POR identifica Portal Shopping apenas em maiúsculas; "
+            "a preposição por não identifica um shopping."
+        ),
+        fields=["nm_empreendimento"],
+        concepts=["empreendimento", "apelido"],
+    ),
     BusinessRule(
         code="purchase_date",
         description="dt_registro_mos é a data da compra.",

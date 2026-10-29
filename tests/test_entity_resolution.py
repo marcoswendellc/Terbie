@@ -11,6 +11,68 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.semantic.resolver import SemanticResolver
 
+SHOPPING_NICKNAMES = [
+    ("ALS", "Águas Lindas Shopping"),
+    ("BPS", "Brasil Park Shopping"),
+    ("BUR", "Buriti Shopping"),
+    ("BRV", "Buriti Shopping Rio Verde"),
+    ("GUA", "Buriti Shopping Guará"),
+    ("MOG", "Buriti Shopping Mogi Guaçu"),
+    ("POR", "Portal Shopping"),
+    ("SHS", "Shopping Sul"),
+]
+
+
+@pytest.mark.parametrize("nickname,name", SHOPPING_NICKNAMES)
+def test_shopping_nicknames_resolve_to_canonical_names(nickname, name):
+    result = EntityResolver().resolve(f"Qual o faturamento do {nickname}?")
+    assert not result.is_ambiguous
+    assert [(match.field, match.value) for match in result.matches] == [
+        ("nm_empreendimento", name),
+    ]
+
+
+def test_preposition_por_does_not_select_portal_shopping():
+    assert not EntityResolver().resolve_many("Compras por cliente por shopping").matches
+
+
+def test_shopping_nicknames_are_available_in_knowledge_context():
+    rules = KnowledgeService().get_context().rules
+    description = next(rule.description for rule in rules if rule.code == "shopping_nicknames")
+    for nickname, name in SHOPPING_NICKNAMES:
+        assert nickname in description
+        assert name in description
+
+
+@pytest.mark.parametrize("nickname,name", SHOPPING_NICKNAMES)
+@pytest.mark.parametrize("template", [
+    "Qual a frequência de compras por cliente no {nickname}?",
+    "Liste as campanhas do {nickname}",
+])
+def test_shopping_nickname_filters_only_the_requested_shopping(nickname, name, template):
+    import pandas as pd
+    from test_business_analysis_flow import business_frame
+    from test_recent_campaign import service
+
+    frame = business_frame().iloc[:2].copy()
+    frame["nm_empreendimento"] = name
+    other = frame.copy()
+    other["nm_empreendimento"] = "Shopping sem apelido"
+    other["cd_compra"] += "-other"
+    other["nm_promocao"] = "Campanha de outro shopping"
+    response = service(frame=pd.concat([frame, other], ignore_index=True)).execute_question(
+        question=template.format(nickname=nickname),
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert response.data, response.answer
+    if "frequência" in template:
+        assert len(response.data) == 1
+        assert response.data[0]["quantidade_compras"] == 2
+        assert response.data[0]["frequencia_media"] == 1
+    else:
+        assert {row["nm_empreendimento"] for row in response.data} == {name}
+    assert "Campanha de outro shopping" not in response.answer
+
 
 @pytest.mark.parametrize(
     ("mention", "field", "value"),

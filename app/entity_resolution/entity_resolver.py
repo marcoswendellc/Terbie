@@ -4,6 +4,7 @@ from app.entity_resolution.models import (
     EntityMatch,
     EntityResolutionResult,
 )
+from app.knowledge.shopping_aliases import SHOPPING_ALIASES, mentioned_shoppings
 
 
 class EntityResolver:
@@ -18,6 +19,14 @@ class EntityResolver:
         matcher: EntityMatcher | None = None,
     ) -> None:
         self._candidates = candidates or self._default_candidates()
+        if candidates is None:
+            registered = {candidate.value for candidate in self._candidates}
+            self._candidates.extend(
+                EntityCandidate(
+                    field="nm_empreendimento", value=name, entity_type="empreendimento",
+                )
+                for name in SHOPPING_ALIASES.values() if name not in registered
+            )
         self._matcher = matcher or EntityMatcher()
 
     def resolve(self, question: str) -> EntityResolutionResult:
@@ -72,6 +81,13 @@ class EntityResolver:
             for candidate in self._candidates
             if (match := self._matcher.match(query=question, candidate=candidate)) is not None
         ]
+        matches.extend(
+            EntityMatch(
+                field="nm_empreendimento", value=name, entity_type="empreendimento",
+                confidence=1.0, strategy="shopping_alias",
+            )
+            for name in mentioned_shoppings(question)
+        )
         return self._deduplicate(matches)
 
     def _ambiguous_result(self, matches: list[EntityMatch]) -> EntityResolutionResult:

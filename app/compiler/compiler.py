@@ -16,6 +16,7 @@ from app.context_resolution.models import ResolvedContext
 from app.entity_resolution.entity_resolver import EntityResolver
 from app.entity_resolution.models import EntityMatch
 from app.knowledge.models import KnowledgeContext
+from app.knowledge.shopping_aliases import expand_shopping_aliases
 from app.planner.models import PlanParameter
 from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
@@ -67,6 +68,10 @@ class TerbieCompiler:
         )
 
     def compile(self, request: CompilerRequest) -> CompilerResponse:
+        original_question = request.question
+        request = request.model_copy(update={
+            "question": expand_shopping_aliases(request.question),
+        })
         semantic_resolution = (
             request.semantic_resolution
             if isinstance(request.semantic_resolution, SemanticResolution)
@@ -405,7 +410,7 @@ class TerbieCompiler:
         )
 
         return CompilerResponse(
-            question=request.question,
+            question=original_question,
             hypothesis=hypothesis,
             analytical_plan=analytical_plan,
             execution_plan=optimized_plan,
