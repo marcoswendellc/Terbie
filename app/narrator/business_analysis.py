@@ -165,7 +165,11 @@ def _leaders(mode, rows):
         )
         title = names.get(metric, LABELS.get(metric, metric.replace("_", " ")).lower())
         tie = f" (empate entre {len(labels)} grupos)" if len(labels) > 1 else ""
-        descriptions.append(f"Maior {title}: " + "; ".join(labels[:5]) + tie + ".")
+        value = (
+            " — " + f"{float(maximum):.2f}".replace(".", ",") + " compras por cliente"
+            if mode == "neighborhood_frequency" and metric == "frequencia_media" else ""
+        )
+        descriptions.append(f"Maior {title}: " + "; ".join(labels[:5]) + value + tie + ".")
     return descriptions
 
 
@@ -201,6 +205,9 @@ def business_analysis_answer(context, formatter):
                 f"({first['participacao_multicampanha'] * 100:.2f}%).".replace(".", ",", 1)
             )
     columns = list(dict.fromkeys(key for row in context.data for key in row if key not in HIDDEN))
+    if mode == "neighborhood_frequency" and "frequencia_media" in columns:
+        first = [key for key in ("uf", "cidade", "bairro", "frequencia_media") if key in columns]
+        columns = [*first, *[key for key in columns if key not in first]]
 
     def cell(column, value):
         if value is None:
@@ -211,6 +218,8 @@ def business_analysis_answer(context, formatter):
             )
         if column in MONEY:
             return formatter.value("faturamento", value)
+        if column == "frequencia_media":
+            return f"{float(value):.2f}".replace(".", ",")
         if (
             column.startswith("proporcao_")
             or column.startswith("participacao_")

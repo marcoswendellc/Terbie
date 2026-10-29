@@ -251,6 +251,32 @@ def test_missing_required_age_data_is_explained():
     assert "dt_nascimento" in response.answer or "nascimento" in response.answer.lower()
 
 
+def test_neighborhood_frequency_is_prominent_and_present_in_every_row():
+    base = business_frame().iloc[[0]].copy()
+    rows = []
+    for neighborhood, purchase_count in [("Loteamento Morada dos Sonhos", 102),
+                                     ("Campos Elíseos", 14)]:
+        for index in range(purchase_count):
+            row = base.copy()
+            row["bairro"] = neighborhood
+            row["sk_cliente"] = neighborhood
+            row["cd_compra"] = f"{neighborhood}-{index}"
+            rows.append(row)
+    response = service(frame=pd.concat(rows, ignore_index=True)).execute_question(
+        question="Quais bairros apresentam maior frequência de compras por cliente?",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    by_neighborhood = {row["bairro"]: row for row in response.data}
+    assert by_neighborhood["Campos Elíseos"]["frequencia_media"] == 14
+    assert "102,00 compras por cliente" in response.answer
+    table = [line for line in response.answer.splitlines() if line.startswith("|")]
+    headers = [cell.strip() for cell in table[0].strip("|").split("|")]
+    frequency = headers.index("Compras por cliente")
+    assert frequency == headers.index("Bairro") + 1
+    last = [cell.strip() for cell in table[-1].strip("|").split("|")]
+    assert last[frequency] == "14,00"
+
+
 @pytest.mark.parametrize("question,expected", [
     ("Quais segmentos de lojas são mais consumidos por cada faixa etária?", 5),
     ("Qual top 3 de segmentos de lojas são mais consumidos por cada faixa etária?", 3),
