@@ -192,3 +192,45 @@ test('campaign listing keeps four separate headers and shopping and dates in eac
   assert.equal(rows[1].children[1].textContent, 'Shopping Sul');
   assert.equal(rows[1].children[3].textContent, '11/08/2026');
 });
+
+test('collapsed markdown tables render as rows instead of pipe text', () => {
+  const {context, Element} = harness();
+  const content = new Element();
+  context.renderMessageContent(content,
+    '| Loja | Faturamento ||---|---:|| SUPERMERCADO TATICO | R$ 362.155,21 || FLAVIOS | R$ 228.710,56 |',
+    'assistant');
+  const wrapper = content.children.find(child => child.className === 'table-scroll');
+  assert.ok(wrapper);
+  const table = wrapper.children[0];
+  assert.equal(table.children[1].children.length, 2);
+  assert.equal(table.children[1].children[0].children[0].textContent, 'SUPERMERCADO TATICO');
+  assert.equal(table.children[1].children[0].children[1].className, 'numeric-cell');
+  assert.equal(wrapper.tabIndex, 0);
+});
+
+test('analysis scope is separate and collapsible while answer remains visible', () => {
+  const {context, Element} = harness();
+  const content = new Element();
+  context.renderMessageContent(content,
+    'A loja líder foi Tatico.\n\nRecorte considerado: Campanha de mães de 2026 no Portal Shopping.',
+    'assistant');
+  assert.equal(content.children[0].textContent, 'A loja líder foi Tatico.');
+  const scope = content.children.find(child => child.className === 'analysis-scope');
+  assert.ok(scope);
+  assert.equal(scope.children[0].textContent, 'Recorte da análise');
+  assert.match(scope.children[1].textContent, /Portal Shopping/);
+  assert.equal(scope.open, undefined);
+});
+
+test('table cell content is rendered as text and user messages are not interpreted', () => {
+  const {context, Element} = harness();
+  const content = new Element();
+  context.renderMessageContent(content,
+    '| Loja | Compras |\n|---|---:|\n| <img src=x onerror=alert(1)> | 2 |', 'assistant');
+  const table = content.children[0].children[0];
+  assert.equal(table.children[1].children[0].children[0].textContent,
+    '<img src=x onerror=alert(1)>');
+  context.renderMessageContent(content, '| Loja | Compras ||---|---|| A | 2 |', 'user');
+  assert.equal(content.children.length, 0);
+  assert.match(content.textContent, /\| Loja/);
+});

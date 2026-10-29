@@ -94,25 +94,34 @@ function isTableSeparator(line) {
 function buildTable(headerLine, bodyLines) {
   const wrapper = document.createElement("div");
   wrapper.className = "table-scroll";
+  wrapper.tabIndex = 0;
+  wrapper.setAttribute("role", "region");
+  wrapper.setAttribute("aria-label", `Tabela de resultados: ${bodyLines.length} registros. Role para ver todas as colunas.`);
 
   const table = document.createElement("table");
   table.className = "analytics-table";
+  const rows = bodyLines.map(markdownCells);
+  const numeric = value => /^(?:R\$\s*)?[-+−]?\d[\d.,\s]*(?:%)?$/.test(value);
   const head = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  markdownCells(headerLine).forEach((value) => {
+  markdownCells(headerLine).forEach((value, index) => {
     const cell = document.createElement("th");
     cell.scope = "col";
     cell.textContent = value;
+    if (rows.length && rows.every(row => numeric(row[index] || ""))) {
+      cell.className = "numeric-cell";
+    }
     headerRow.appendChild(cell);
   });
   head.appendChild(headerRow);
 
   const body = document.createElement("tbody");
-  bodyLines.forEach((line) => {
+  rows.forEach((values) => {
     const row = document.createElement("tr");
-    markdownCells(line).forEach((value) => {
+    values.forEach((value) => {
       const cell = document.createElement("td");
       cell.textContent = value;
+      if (numeric(value)) cell.className = "numeric-cell";
       row.appendChild(cell);
     });
     body.appendChild(row);
@@ -120,7 +129,22 @@ function buildTable(headerLine, bodyLines) {
 
   table.append(head, body);
   wrapper.appendChild(table);
+  const caption = document.createElement("div");
+  caption.className = "table-caption";
+  caption.textContent = `${rows.length} ${rows.length === 1 ? "registro exibido" : "registros exibidos"}`;
+  wrapper.appendChild(caption);
   return wrapper;
+}
+
+function normalizeTableBreaks(text) {
+  return String(text || "").split(/\r?\n/).map(line => {
+    // Some responses join Markdown rows with || instead of a newline.
+    // Only repair lines containing a table separator, preserving ordinary prose.
+    if (/\|\s*:?-{3,}:?\s*\|/.test(line)) {
+      return line.replace(/\|[ \t]*\|/g, "|\n|");
+    }
+    return line;
+  }).join("\n");
 }
 
 function renderMessageContent(container, text, role) {
@@ -130,7 +154,7 @@ function renderMessageContent(container, text, role) {
     return;
   }
 
-  const lines = String(text || "").split(/\r?\n/);
+  const lines = normalizeTableBreaks(text).split("\n");
   let paragraphLines = [];
   const flushParagraph = () => {
     if (!paragraphLines.length) return;
@@ -141,6 +165,27 @@ function renderMessageContent(container, text, role) {
   };
 
   for (let index = 0; index < lines.length; index += 1) {
+    if (!lines[index].trim()) {
+      flushParagraph();
+      continue;
+    }
+    if (/^Recorte considerado:/i.test(lines[index].trim())) {
+      flushParagraph();
+      const scopeLines = [lines[index].trim().replace(/^Recorte considerado:\s*/i, "")];
+      while (index + 1 < lines.length && lines[index + 1].trim() &&
+             !lines[index + 1].trim().startsWith("|")) {
+        scopeLines.push(lines[++index]);
+      }
+      const details = document.createElement("details");
+      details.className = "analysis-scope";
+      const summary = document.createElement("summary");
+      summary.textContent = "Recorte da análise";
+      const description = document.createElement("p");
+      description.textContent = scopeLines.join("\n");
+      details.append(summary, description);
+      container.appendChild(details);
+      continue;
+    }
     const hasTable =
       lines[index].includes("|") &&
       index + 1 < lines.length &&
@@ -151,13 +196,16 @@ function renderMessageContent(container, text, role) {
     }
 
     flushParagraph();
+    const headerLine = lines[index];
+    const columnCount = markdownCells(headerLine).length;
     const bodyLines = [];
     index += 2;
-    while (index < lines.length && lines[index].includes("|")) {
+    while (index < lines.length && lines[index].trim().startsWith("|") &&
+           markdownCells(lines[index]).length === columnCount) {
       if (lines[index].trim()) bodyLines.push(lines[index]);
       index += 1;
     }
-    container.appendChild(buildTable(lines[index - bodyLines.length - 2], bodyLines));
+    container.appendChild(buildTable(headerLine, bodyLines));
     index -= 1;
   }
   flushParagraph();
