@@ -78,6 +78,19 @@ test('mobile sidebar opens and closes with Escape', () => {
   assert.equal(menu['aria-expanded'], 'false');
 });
 
+test('mobile menu closes using its close button or backdrop', () => {
+  const {nodes} = harness({mobile: true});
+  const chat = nodes.get('[data-view="chat"]');
+  const menu = nodes.get('[data-menu]');
+  menu.listeners.click();
+  nodes.get('[data-close-menu]').listeners.click();
+  assert.equal(chat.classList.contains('menu-open'), false);
+  menu.listeners.click();
+  nodes.get('[data-menu-backdrop]').listeners.click();
+  assert.equal(chat.classList.contains('menu-open'), false);
+  assert.equal(menu['aria-expanded'], 'false');
+});
+
 test('response displays analytical assumptions without technical metadata', () => {
   const {context} = harness();
   const answer = context.formatExecuteResponse({

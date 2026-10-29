@@ -16,7 +16,7 @@ const logoutButton = document.querySelector("[data-logout]");
 const newChatButton = document.querySelector("[data-new-chat]");
 const welcome = document.querySelector("[data-welcome]");
 const menuButton = document.querySelector("[data-menu]");
-const mobileSidebar = window.matchMedia("(max-width: 760px)");
+const mobileSidebar = window.matchMedia("(max-width: 1023px)");
 const REMEMBER_KEY = "terbie.remembered_session";
 
 function rememberedSession() {
@@ -53,6 +53,8 @@ function syncMenuButton() {
   menuButton.setAttribute("aria-expanded", String(open));
   menuButton.setAttribute("aria-label", open ? "Recolher menu" : "Abrir menu");
   menuButton.title = open ? "Recolher menu" : "Abrir menu";
+  document.querySelector(".conversation-shell").inert = mobileSidebar.matches && open;
+  document.querySelector(".sidebar").setAttribute("aria-hidden", String(!open));
 }
 
 function closeMenu() {
@@ -587,11 +589,34 @@ document.querySelectorAll("[data-suggestion]").forEach((button) => {
 menuButton.addEventListener("click", () => {
   chatView.classList.toggle(mobileSidebar.matches ? "menu-open" : "sidebar-collapsed");
   syncMenuButton();
+  if (mobileSidebar.matches && chatView.classList.contains("menu-open")) {
+    document.querySelector("[data-close-menu]").focus();
+  }
+});
+function dismissMenu() {
+  closeMenu();
+  menuButton.focus();
+}
+document.querySelector("[data-close-menu]").addEventListener("click", dismissMenu);
+document.querySelector("[data-menu-backdrop]").addEventListener("click", dismissMenu);
+document.querySelector(".sidebar").addEventListener("keydown", (event) => {
+  if (event.key !== "Tab" || !mobileSidebar.matches) return;
+  const controls = Array.from(document.querySelector(".sidebar").querySelectorAll("button:not(:disabled)"));
+  if (!controls.length) return;
+  const first = controls[0];
+  const last = controls[controls.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 });
 mobileSidebar.addEventListener("change", closeMenu);
 syncMenuButton();
 chatView.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeMenu();
+  if (event.key === "Escape" && chatView.classList.contains("menu-open")) dismissMenu();
 });
 
 if (sessionStorage.getItem(SESSION_KEY) === "true") {

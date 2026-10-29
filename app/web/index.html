@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#ee7629" />
   <title>TERBIE — Copiloto de Dados da Terral</title>
   <link rel="stylesheet" href="/ui/styles.css" />
@@ -38,12 +38,13 @@
     </section>
     <section class="chat-view is-hidden" data-view="chat" aria-label="Chat Terbie">
       <aside class="sidebar" id="navigation">
-        <div class="sidebar-brand"><img class="sidebar-logo" src="/ui/assets/terbie-logo.png" alt="TERBIE" /></div>
+        <div class="sidebar-brand"><img class="sidebar-logo" src="/ui/assets/terbie-logo.png" alt="TERBIE" /><button class="close-menu-button" type="button" data-close-menu aria-label="Fechar menu">×</button></div>
         <button class="new-chat-button" type="button" data-new-chat><span aria-hidden="true">＋</span> Nova conversa</button>
         <button class="nav-home" type="button" data-home><span aria-hidden="true">⌂</span> Início</button>
         <div class="sidebar-section"><p class="eyebrow">CONVERSA ATUAL</p><button class="current-chat" type="button" data-chat-title>Nova conversa</button><p class="sidebar-hint">Explore seus dados em uma conversa com o Terbie.</p></div>
         <div class="sidebar-bottom"><span class="account-avatar" aria-hidden="true">T</span><div><strong>Terral</strong><small>Copiloto de dados</small></div><button class="ghost-button" type="button" data-logout>Sair</button></div>
       </aside>
+      <button class="menu-backdrop" type="button" data-menu-backdrop aria-label="Fechar menu" tabindex="-1"></button>
       <div class="conversation-shell">
         <header class="chat-header"><button class="menu-button" type="button" data-menu aria-label="Abrir menu" aria-controls="navigation" aria-expanded="false">☰</button><span class="header-label">Copiloto de dados</span><span class="access-badge"><span aria-hidden="true">◈</span> Acesso corporativo</span></header>
         <div class="conversation-body">
