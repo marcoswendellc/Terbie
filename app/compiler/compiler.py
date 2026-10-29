@@ -21,7 +21,11 @@ from app.planner.optimizer import PlanOptimizer
 from app.planner.validator import PlanValidator
 from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
-from app.semantic.business_analysis import business_analysis_mode, explicit_business_scope
+from app.semantic.business_analysis import (
+    business_analysis_mode,
+    explicit_business_scope,
+    frequency_breakdown,
+)
 from app.semantic.campaign_comparison import expand_campaign_year_comparison
 from app.semantic.explicit_query import is_explicit_query, is_month_ranking
 from app.semantic.gender_comparison import is_gender_purchase_comparison, requested_campaign
@@ -364,6 +368,8 @@ class TerbieCompiler:
             execution_plan = execution_plan.model_copy(update={"operations": [
                 operation.model_copy(update={"parameters": {
                     **operation.parameters, "mode": business_mode,
+                    **(frequency_breakdown(request.question)
+                       if business_mode == "frequency" else {}),
                     "limit": explicit_business_scope(request.question)["limit"],
                     "by_campaign": bool(re.search(
                         r"\b(?:campanhas?|promocao|promocoes)\b",

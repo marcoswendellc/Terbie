@@ -3,6 +3,7 @@
 from app.semantic.business_analysis import TITLES
 
 LABELS = {
+    "mes": "Mês",
     "nm_promocao": "Campanha",
     "nm_empreendimento": "Shopping",
     "nm_fantasa": "Loja",

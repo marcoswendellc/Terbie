@@ -55,6 +55,10 @@ class BusinessAnalysisOperation(BaseOperation):
             required.append("bairro")
         if mode in {"weekday", "ticket_evolution", "campaign_phases"}:
             required.append("dt_registro_mos")
+        if mode == "frequency" and operation.parameters.get("by_month"):
+            required.append("dt_registro_mos")
+        if mode == "frequency" and operation.parameters.get("by_shopping"):
+            required.append("nm_empreendimento")
         if (
             mode
             in {

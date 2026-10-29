@@ -23,6 +23,23 @@ def analyze(data, mode, context, options) -> pd.DataFrame:
         )
     identified = data[data["sk_cliente"].notna()]
     if mode == "frequency":
+        if options.get("by_shopping"):
+            keys = list(dict.fromkeys(keys + [
+                field for field in ("cd_empreendimento", "nm_empreendimento") if field in data
+            ]))
+        if options.get("by_month"):
+            identified = identified.copy()
+            missing_dates = int(identified.loc[
+                identified.dt_registro_mos.isna(), "__purchase"
+            ].nunique())
+            if missing_dates:
+                note(context, f"Excluídas {missing_dates} compras sem data válida "
+                     "do recorte mensal.")
+            identified = identified[identified.dt_registro_mos.notna()].copy()
+            identified["mes"] = identified.dt_registro_mos.dt.strftime("%Y-%m")
+            keys = ["mes", *keys]
+            note(context, "Frequência mensal calculada com compras e clientes únicos "
+                 "de cada mês e grupo.")
         return summarize(identified, keys)
     if mode == "concentration":
         rows = []

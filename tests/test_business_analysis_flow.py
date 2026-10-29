@@ -74,6 +74,34 @@ QUESTIONS = [
 ]
 
 
+@pytest.mark.parametrize("question,monthly", [
+    ("qual a frequencia de compras por shopping?", False),
+    ("qual a frequencia de compras por pessoa por mês aberta por shopping?", True),
+    ("quantas compras por clientes tem cada shopping?", False),
+])
+def test_customer_frequency_by_shopping_and_month(question, monthly):
+    frame = business_frame().iloc[:6].copy()
+    frame["cd_compra"] = [str(i) for i in range(6)]
+    frame["sk_cliente"] = ["a", "a", "b", "a", "a", None]
+    frame["nm_empreendimento"] = ["Shopping A"] * 4 + ["Shopping B"] * 2
+    frame["dt_registro_mos"] = ["2026-05-01"] * 3 + ["2026-06-01"] * 3
+    response = service(frame=frame).execute_question(
+        question=question, knowledge_context=KnowledgeService().get_context(),
+    )
+    assert response.metadata.get("business_analysis", {}).get("mode") == "frequency"
+    rows = {(row.get("mes"), row["nm_empreendimento"]): row for row in response.data}
+    if monthly:
+        assert set(rows) == {("2026-05", "Shopping A"), ("2026-06", "Shopping A"),
+                             ("2026-06", "Shopping B")}
+        assert rows[("2026-05", "Shopping A")]["frequencia_media"] == 1.5
+        assert rows[("2026-06", "Shopping A")]["frequencia_media"] == 1
+    else:
+        assert set(rows) == {(None, "Shopping A"), (None, "Shopping B")}
+        assert rows[(None, "Shopping A")]["frequencia_media"] == 2
+    assert rows[("2026-06" if monthly else None, "Shopping B")]["frequencia_media"] == 1
+    assert "Compras por cliente" in response.answer
+
+
 def business_frame():
     first = purchases()
     first["dt_nascimento"] = ["1990-01-01" if i % 2 else "2005-01-01" for i in range(len(first))]

@@ -48,9 +48,21 @@ def business_analysis_mode(question):
         ("campaign_frequency", r"campanhas.*frequencia.*ticket"),
         ("campaign_ranking", r"campanhas.*faturamento.*(?:quantidade de )?compras.*clientes"),
         ("ticket_evolution", r"ticket.*(?:evolui|evolucao|ao longo)"),
-        ("frequency", r"frequencia.*compras.*cliente"),
+        ("frequency", r"\bfrequencia\b.*\bcompras\b|"
+                      r"\bcompras\s+por\s+(?:clientes?|pessoas?|consumidores?)\b"),
     ]
     return next((mode for mode, pattern in rules if re.search(pattern, text)), None)
+
+
+def frequency_breakdown(question):
+    text = normalize_temporal_text(question)
+    return {
+        "by_shopping": bool(re.search(
+            r"\b(?:(?:por|cada)\s+(?:shopping|empreendimento)s?|"
+            r"(?:shoppings|empreendimentos))\b", text,
+        )),
+        "by_month": bool(re.search(r"\b(?:por mes|mensal|mensalmente|mes a mes)\b", text)),
+    }
 
 
 def explicit_business_scope(question):
