@@ -3,6 +3,12 @@
 from app.semantic.business_analysis import TITLES
 
 LABELS = {
+    "quantidade_campanhas": "Campanhas",
+    "cliente": "Cliente",
+    "score": "Score",
+    "percentil_faturamento": "Percentil faturamento",
+    "percentil_compras": "Percentil compras",
+    "percentil_ticket": "Percentil ticket",
     "mes": "Mês",
     "nm_promocao": "Campanha",
     "nm_empreendimento": "Shopping",
@@ -185,6 +191,15 @@ def business_analysis_answer(context, formatter):
     ]
     if scope:
         parts.append("Recorte: " + " — ".join(scope) + ".")
+    if mode == "campaign_count":
+        total = context.data[0]["quantidade_campanhas"]
+        years = [item["value"] for item in metadata.get("scope", [])
+                 if item.get("operator") == "year_overlap"]
+        period = f" em {years[0]}" if years else " no recorte solicitado"
+        return "\n\n".join([
+            f"Foram identificadas {total} campanhas{period}.",
+            *parts[1:], *metadata.get("notes", []),
+        ])
     for item in metadata.get("scope", []):
         if item.get("field") == "dt_registro_mos":
             parts.append(f"Compras de {item['value']} a {item.get('end_value', item['value'])}.")
@@ -195,7 +210,21 @@ def business_analysis_answer(context, formatter):
     for row in context.data:
         if row.get("detail"):
             parts.append(row["detail"])
-    parts.extend(_leaders(mode, context.data))
+    if mode == "entity_ranking":
+        metric = metadata["ranking_metric"]
+        eligible = [row for row in context.data if isinstance(row.get(metric), int | float)]
+        if eligible:
+            maximum = max(row[metric] for row in eligible)
+            keys = {"loja": ("nm_empreendimento", "nm_fantasa"),
+                    "cliente": ("cliente",), "bairro": ("uf", "cidade", "bairro")}
+            leaders = [" — ".join(str(row[key]) for key in keys[metadata["ranking_entity"]]
+                                  if row.get(key) is not None)
+                       for row in eligible if row[metric] == maximum]
+            parts.append("Maior " + LABELS.get(metric, metric).lower() + ": "
+                         + "; ".join(leaders[:5]) + " ("
+                         + f"{float(maximum):.2f}".replace(".", ",") + ").")
+    else:
+        parts.extend(_leaders(mode, context.data))
     if mode == "campaign_retention" and context.data:
         first = context.data[0]
         if first.get("participacao_multicampanha") is not None:
@@ -205,6 +234,11 @@ def business_analysis_answer(context, formatter):
                 f"({first['participacao_multicampanha'] * 100:.2f}%).".replace(".", ",", 1)
             )
     columns = list(dict.fromkeys(key for row in context.data for key in row if key not in HIDDEN))
+    if mode == "entity_ranking":
+        first = [key for key in ("nm_empreendimento", "nm_fantasa", "cliente", "uf", "cidade",
+                                "bairro", "score", "faturamento", "quantidade_compras",
+                                "ticket_medio_por_compra") if key in columns]
+        columns = [*first, *[key for key in columns if key not in first]]
     if mode == "neighborhood_frequency" and "frequencia_media" in columns:
         first = [key for key in ("uf", "cidade", "bairro", "frequencia_media") if key in columns]
         columns = [*first, *[key for key in columns if key not in first]]

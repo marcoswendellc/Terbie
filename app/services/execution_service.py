@@ -341,6 +341,18 @@ class ExecutionService:
                 response_type="analysis_failed",
             )
         dataframes = dataframes if dataframes is not None else self._load_dataframes()
+        if any(operation.type == "business_analysis"
+               and operation.parameters.get("mode") == "entity_ranking"
+               for operation in planner_response.plan.operations):
+            planner_response = planner_response.model_copy(update={
+                "plan": planner_response.plan.model_copy(update={"operations": [
+                    operation.model_copy(update={"parameters": {
+                        **operation.parameters,
+                        "minimum_group_size": self._governance_policy.minimum_group_size,
+                    }}) if operation.type == "business_analysis" else operation
+                    for operation in planner_response.plan.operations
+                ]}),
+            })
         try:
             dataframe = self._select_dataframe(
                 dataframes=dataframes,

@@ -5,10 +5,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from app.executor.operations import business_customers, business_segments, business_temporal
+from app.executor.operations import (
+    business_customers,
+    business_score,
+    business_segments,
+    business_temporal,
+)
 from app.executor.operations.base import BaseOperation
 from app.executor.operations.business_common import note, prepare
 from app.executor.operations.business_demographics import derive_age_groups
+from app.executor.operations.campaign_count import count_campaigns
 
 CUSTOMERS = {
     "frequency",
@@ -42,6 +48,13 @@ class BusinessAnalysisOperation(BaseOperation):
             "notes": [],
             "scope": operation.parameters.get("scope", []),
         }
+        if mode == "entity_ranking":
+            context.metadata["business_analysis"].update({
+                "ranking_metric": operation.parameters.get("ranking_metric", "score"),
+                "ranking_entity": operation.parameters["ranking_entity"],
+            })
+        if mode == "campaign_count":
+            return count_campaigns(dataframe, context)
         required = []
         if mode not in {"weekday", "ticket_evolution", "segment_share"}:
             required.append("sk_cliente")
@@ -51,6 +64,10 @@ class BusinessAnalysisOperation(BaseOperation):
             required.append("nm_segmento")
         if mode == "store_customers":
             required.append("nm_fantasa")
+        if mode == "entity_ranking":
+            required.append({"loja": "nm_fantasa", "bairro": "bairro", "cliente": "sk_cliente"}[
+                operation.parameters["ranking_entity"]
+            ])
         if mode == "neighborhood_frequency":
             required.append("bairro")
         if mode in {"weekday", "ticket_evolution", "campaign_phases"}:
@@ -102,6 +119,9 @@ class BusinessAnalysisOperation(BaseOperation):
         if path.exists():
             options["shopping_cities"] = json.loads(path.read_text(encoding="utf-8"))
         handler = (
+            business_score
+            if mode == "entity_ranking"
+            else
             business_customers
             if mode in CUSTOMERS
             else business_segments

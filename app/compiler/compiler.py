@@ -38,6 +38,7 @@ from app.semantic.purchase_scope import (
     purchase_period,
     ticket_geography,
 )
+from app.semantic.scoring import entity_ranking_options, ranking_scope_filters
 from app.semantic.temporal import TemporalSelection
 
 logger = logging.getLogger(__name__)
@@ -332,6 +333,7 @@ class TerbieCompiler:
         business_mode = business_analysis_mode(request.question)
         if business_mode:
             scope = explicit_business_scope(request.question)
+            ranking_options = entity_ranking_options(request.question)
             filters = [
                 item for item in hypothesis.filters
                 if item.get("type") == "filter"
@@ -340,6 +342,14 @@ class TerbieCompiler:
                 and not re.match(r"(?:onde|qual|quais|que|com|maior)\b",
                                  str(item.get("value", "")), re.IGNORECASE)
             ]
+            if ranking_options and ranking_options["ranking_entity"] == "bairro":
+                if not re.search(r"\b(?:no|do|na|da)\s+bairro\b", normalized):
+                    filters = [item for item in filters if item.get("field") != "bairro"]
+            if ranking_options:
+                explicit_filters = ranking_scope_filters(request.question)
+                explicit_fields = {item["field"] for item in explicit_filters}
+                filters = [item for item in filters if item.get("field") not in explicit_fields]
+                filters.extend(explicit_filters)
             if scope["shopping"]:
                 filters.append({"type": "filter", "field": "nm_empreendimento",
                                 "operator": "shopping_match", "value": scope["shopping"]})
@@ -352,15 +362,24 @@ class TerbieCompiler:
                                 "field": "cd_promocao" if numeric_id else "nm_promocao",
                                 "operator": "normalized_equals" if numeric_id else "campaign_match",
                                 "value": scope["campaign"]})
-            year = re.search(r"\bem\s+((?:19|20)\d{2})\b", request.question, re.IGNORECASE)
+            year = re.search(r"\b(?:em|de)\s+((?:19|20)\d{2})\b", request.question, re.IGNORECASE)
             if year and not purchase_period(request.question):
                 filters = [item for item in filters if item.get("field") != "dt_registro_mos"]
                 filters.append({"type": "filter", "field": "dt_registro_mos",
                                 "operator": "date_between", "value": f"{year.group(1)}-01-01",
                                 "end_value": f"{year.group(1)}-12-31"})
+            if business_mode == "campaign_count":
+                filters = [item for item in filters if item.get("field") != "dt_registro_mos"]
+                if year:
+                    filters.append({"type": "filter", "field": "sk_dtinicio",
+                                    "operator": "year_overlap", "value": int(year.group(1)),
+                                    "end_field": "sk_dtfim"})
             hypothesis = hypothesis.model_copy(update={
                 "analysis_type": "business_analysis", "business_entity": None, "dimensions": [],
-                "metric": "faturamento", "metrics": ["faturamento", "quantidade_compras"],
+                "metric": "quantidade_campanhas" if business_mode == "campaign_count"
+                else "faturamento",
+                "metrics": ["quantidade_campanhas"] if business_mode == "campaign_count"
+                else ["faturamento", "quantidade_compras"],
                 "filters": self._deduplicate_filters(filters), "comparison_entities": [],
                 "time_scope": None, "warnings": [], "items": [],
                 "goal": business_mode,
@@ -374,6 +393,12 @@ class TerbieCompiler:
             execution_plan = execution_plan.model_copy(update={"operations": [
                 operation.model_copy(update={"parameters": {
                     **operation.parameters, "mode": business_mode,
+                    **({"fields": ["cd_promocao", "nm_empreendimento"]}
+                       if business_mode == "campaign_count" else {}),
+                    **(ranking_options or {}),
+                    **({"fields": ["cd_compra", "vl_compra", {
+                        "loja": "nm_fantasa", "cliente": "sk_cliente", "bairro": "bairro",
+                    }[ranking_options["ranking_entity"]]]} if ranking_options else {}),
                     **(frequency_breakdown(request.question)
                        if business_mode == "frequency" else {}),
                     **(campaign_ranking_options(request.question)

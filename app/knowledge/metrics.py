@@ -2,6 +2,17 @@ from app.knowledge.models import BusinessMetric
 
 BUSINESS_METRICS: list[BusinessMetric] = [
     BusinessMetric(
+        name="quantidade_campanhas",
+        formula="count_distinct(shopping, cd_promocao)",
+        synonyms=["quantas campanhas", "quantas promoções", "número de campanhas"],
+    ),
+    BusinessMetric(
+        name="score",
+        formula="weighted_mean(percentile(faturamento), percentile(quantidade_compras), "
+                "percentile(ticket_medio_por_compra))",
+        synonyms=["score de representatividade", "score de engajamento"],
+    ),
+    BusinessMetric(
         name="faturamento",
         column="vl_compra",
         aggregation="sum",

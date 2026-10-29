@@ -2,6 +2,7 @@
 
 import re
 
+from app.semantic.scoring import entity_ranking_options
 from app.semantic.temporal import normalize_temporal_text
 
 TITLES = {
@@ -24,11 +25,23 @@ TITLES = {
     "campaign_frequency": "Frequência e gasto por cliente em cada campanha",
     "campaign_phases": "Participação no início, meio e fim da campanha",
     "campaign_retention": "Participação de clientes em múltiplas campanhas",
+    "entity_ranking": "Ranking de compras registradas",
+    "campaign_count": "Quantidade de campanhas",
 }
 
 
 def business_analysis_mode(question):
+    if entity_ranking_options(question):
+        return "entity_ranking"
     text = normalize_temporal_text(question)
+    if re.search(
+        r"\bquantas\s+(?:campanhas|promocoes)\b|"
+        r"\b(?:numero|quantidade|total)\s+(?:de|das)\s+(?:campanhas|promocoes)\b", text,
+    ) and not re.search(
+        r"\b(?:faturamento|receita|compras|clientes|ticket|maior|menor|mais|menos|acima|abaixo)\b",
+        text,
+    ):
+        return "campaign_count"
     rules = [
         ("weekday", r"\bdias? da semana\b"),
         ("concentration", r"10\s*%.*clientes|clientes.*10\s*%"),

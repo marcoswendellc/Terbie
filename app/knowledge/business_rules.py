@@ -3,6 +3,24 @@ from app.knowledge.shopping_aliases import SHOPPING_ALIASES
 
 BUSINESS_RULES: list[BusinessRule] = [
     BusinessRule(
+        code="purchasing_percentile_score",
+        description=(
+            "Para lojas, clientes e bairros mais representativos ou engajados, sem critério "
+            "explícito, usar score composto pela média ponderada dos percentis de faturamento, "
+            "quantidade de compras únicas e ticket médio por compra, com pesos iguais por padrão. "
+            "Métrica explícita prevalece sobre score implícito. Aplicar shopping, campanha, "
+            "período e permissões antes de calcular; top N somente depois dos percentis de toda "
+            "a população elegível. Percentil = 100 * (posição média - 1) / (n - 1); "
+            "empates recebem a posição média; apenas uma entidade tem score indefinido. "
+            "Score é pontuação relativa de 0 a 100, não participação ou probabilidade. "
+            "Ticket = faturamento/compras: componentes relacionados. Para clientes, descrever "
+            "engajamento em compras registradas e usar referências anônimas do recorte. "
+            "Mostrar indicadores, percentis, pesos e tamanho da população."
+        ),
+        fields=["vl_compra", "cd_compra", "sk_cliente", "nm_fantasa", "bairro"],
+        concepts=["score", "representatividade", "engajamento"],
+    ),
+    BusinessRule(
         code="shopping_nicknames",
         description=(
             "Apelidos oficiais dos shoppings: "

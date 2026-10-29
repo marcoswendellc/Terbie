@@ -21,6 +21,10 @@ class DataGovernancePolicy:
         self._minimum_group_size = max(minimum_group_size, 1)
         self._allowed_shoppings = {value.casefold() for value in (allowed_shoppings or set())}
 
+    @property
+    def minimum_group_size(self) -> int:
+        return self._minimum_group_size
+
     def sanitize(self, rows: list[dict[str, object]]) -> list[dict[str, object]]:
         sanitized: list[dict[str, object]] = []
         for row in rows:
