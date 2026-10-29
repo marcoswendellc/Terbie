@@ -47,6 +47,8 @@ def business_analysis_mode(question):
         ("geo_ticket", r"regioes.*ticket"),
         ("campaign_frequency", r"campanhas.*frequencia.*ticket"),
         ("campaign_ranking", r"campanhas.*faturamento.*(?:quantidade de )?compras.*clientes"),
+        ("campaign_ranking", r"\b(?:campanhas?|promocoes|promocao)\b.*"
+                             r"\brepresentatividade\b"),
         ("ticket_evolution", r"ticket.*(?:evolui|evolucao|ao longo)"),
         ("frequency", r"\bfrequencia\b.*\bcompras\b|"
                       r"\bcompras\s+por\s+(?:clientes?|pessoas?|consumidores?)\b"),
@@ -62,6 +64,20 @@ def frequency_breakdown(question):
             r"(?:shoppings|empreendimentos))\b", text,
         )),
         "by_month": bool(re.search(r"\b(?:por mes|mensal|mensalmente|mes a mes)\b", text)),
+    }
+
+
+def campaign_ranking_options(question):
+    text = normalize_temporal_text(question)
+    metric = (
+        "quantidade_compras" if re.search(r"\b(?:compras?|notas?|volume)\b", text)
+        else "clientes_unicos" if re.search(r"\bclientes?\b", text)
+        else "ticket_medio_por_compra" if re.search(r"\bticket\b", text)
+        else "faturamento"
+    )
+    return {
+        "ranking_metric": metric,
+        "campaign_shares": "representatividade" in text,
     }
 
 

@@ -24,6 +24,7 @@ from app.reasoning.base import BaseReasoningProvider
 from app.reasoning.models import ReasoningContext
 from app.semantic.business_analysis import (
     business_analysis_mode,
+    campaign_ranking_options,
     explicit_business_scope,
     frequency_breakdown,
 )
@@ -375,6 +376,8 @@ class TerbieCompiler:
                     **operation.parameters, "mode": business_mode,
                     **(frequency_breakdown(request.question)
                        if business_mode == "frequency" else {}),
+                    **(campaign_ranking_options(request.question)
+                       if business_mode == "campaign_ranking" else {}),
                     "limit": explicit_business_scope(request.question)["limit"],
                     "by_campaign": bool(re.search(
                         r"\b(?:campanhas?|promocao|promocoes)\b",
@@ -766,10 +769,13 @@ class TerbieCompiler:
         hypothesis: AnalyticalHypothesis,
     ) -> AnalyticalHypothesis:
         normalized = self._context_resolver._normalize_text(question)
+        best_campaign = bool(re.search(
+            r"\b(?:melhor|melhores)\s+(?:campanhas?|promocoes|promocao)\b", normalized,
+        ))
         asks_for_campaign_ranking = (
-            hypothesis.analysis_type == "ranking"
+            best_campaign or (hypothesis.analysis_type == "ranking"
             and hypothesis.business_entity == "promocao"
-            and bool(re.search(r"\b(campanha|promocao)\b", normalized))
+            and bool(re.search(r"\b(campanha|promocao)\b", normalized)))
         )
         if not asks_for_campaign_ranking:
             return hypothesis
@@ -781,7 +787,7 @@ class TerbieCompiler:
         elif re.search(r"\bticket\s+medio\b", normalized):
             primary_metric = "ticket_medio"
         else:
-            primary_metric = hypothesis.metric or "faturamento"
+            primary_metric = "faturamento" if best_campaign else hypothesis.metric or "faturamento"
         campaign_metrics = [
             primary_metric,
             *[
@@ -798,9 +804,21 @@ class TerbieCompiler:
         ]
         return hypothesis.model_copy(
             update={
+                "analysis_type": "ranking",
+                "business_entity": "promocao",
                 "dimensions": ["nm_promocao", "nm_empreendimento"],
                 "metric": primary_metric,
                 "metrics": campaign_metrics,
+                "filters": [
+                    item for item in hypothesis.filters
+                    if not (best_campaign and item.get("field") == "nm_promocao")
+                ],
+                "metric_source": (
+                    "explicit" if re.search(
+                        r"\b(?:compras?|notas?|clientes?|ticket|faturamento|receita|vendas?)\b",
+                        normalized,
+                    ) else "business_default"
+                ) if best_campaign else hypothesis.metric_source,
             },
         )
 

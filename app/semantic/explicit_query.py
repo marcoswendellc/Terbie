@@ -24,6 +24,8 @@ def is_explicit_query(question: str) -> bool:
     if is_gender_purchase_comparison(question):
         return True
     normalized = normalize_temporal_text(question)
+    if re.search(r"\b(?:melhor|melhores)\s+(?:campanhas?|promocoes|promocao)\b", normalized):
+        return True
     if is_campaign_listing(question):
         return True
     if expand_campaign_year_comparison(question):

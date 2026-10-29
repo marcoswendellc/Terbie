@@ -120,6 +120,66 @@ def business_frame():
     return pd.concat([first, second], ignore_index=True)
 
 
+@pytest.mark.parametrize("question", [
+    "qual promoção teve a maior representatividade no BUR?",
+    "qual foi a melhor promoção que ocorreu no BUR?",
+])
+def test_campaign_performance_question_does_not_depend_on_model_or_previous_winner(question):
+    frame = business_frame().iloc[:4].copy()
+    frame["cd_compra"] = ["a", "b", "c", "d"]
+    frame["cd_promocao"] = ["p1", "p1", "p1", "p2"]
+    frame["nm_promocao"] = ["Volume"] * 3 + ["Receita"]
+    frame["vl_compra"] = [10, 10, 10, 90]
+    other = frame.copy()
+    other["nm_empreendimento"] = "Shopping Sul"
+    other["vl_compra"] = 10000
+    provider = DirectorProvider(AnalysisDecision(
+        clarification="A análise anterior não retornou dados",
+    ))
+    instance = service(provider, pd.concat([frame, other], ignore_index=True))
+    for _ in range(2):
+        response = instance.execute_question(
+            question=question, knowledge_context=KnowledgeService().get_context(),
+            session_id="campaign-performance",
+        )
+        assert {row["nm_empreendimento"] for row in response.data} == {"Buriti Shopping"}
+        if "representatividade" in question:
+            assert response.metadata.get("business_analysis", {}).get("mode") == "campaign_ranking"
+            assert {row["nm_promocao"] for row in response.data} == {"Volume", "Receita"}
+            assert "Maior faturamento: Receita" in response.answer
+            assert "Maior compras: Volume" in response.answer
+            rows = {row["nm_promocao"]: row for row in response.data}
+            assert rows["Volume"]["participacao_compras_pct"] == 75
+            assert rows["Receita"]["participacao_faturamento_pct"] == 75
+        else:
+            assert len(response.data) == 1
+            assert response.data[0]["nm_promocao"] == "Receita"
+            assert "faturamento" in response.answer
+
+
+@pytest.mark.parametrize("criterion,expected", [("compras", "Volume"),
+                                              ("faturamento", "Receita")])
+def test_campaign_share_uses_requested_metric_and_denominator_before_limit(criterion, expected):
+    frame = business_frame().iloc[:4].copy()
+    frame["cd_compra"] = ["a", "b", "c", "d"]
+    frame["cd_promocao"] = ["p1", "p1", "p1", "p2"]
+    frame["nm_promocao"] = ["Volume"] * 3 + ["Receita"]
+    frame["vl_compra"] = [10, 10, 10, 90]
+    unassigned = frame.iloc[[0]].copy()
+    unassigned["cd_compra"] = "unassigned"
+    unassigned["cd_promocao"] = None
+    unassigned["nm_promocao"] = None
+    unassigned["vl_compra"] = 9999
+    response = service(frame=pd.concat([frame, unassigned], ignore_index=True)).execute_question(
+        question=f"Qual promoção teve maior representatividade em {criterion} no BUR? Top 1",
+        knowledge_context=KnowledgeService().get_context(),
+    )
+    assert len(response.data) == 1
+    row = response.data[0]
+    assert row["nm_promocao"] == expected
+    assert row[f"participacao_{criterion}_pct"] == 75
+
+
 @pytest.mark.parametrize("question,mode", QUESTIONS)
 def test_all_twenty_questions_have_deterministic_supported_routes(question, mode):
     provider = DirectorProvider(

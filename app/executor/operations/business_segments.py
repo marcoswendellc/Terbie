@@ -82,6 +82,33 @@ def analyze(data, mode, context, options):
     else:
         raise ValueError(f"Modo de análise desconhecido: {mode}")
     result = summarize(data, groups)
+    if mode == "campaign_ranking" and options.get("ranking_metric"):
+        criterion = {
+            "faturamento": "faturamento",
+            "quantidade_compras": "quantidade de compras",
+            "clientes_unicos": "clientes únicos",
+            "ticket_medio_por_compra": "ticket por compra",
+        }[options["ranking_metric"]]
+        note(context, "Campanhas comparadas por faturamento, compras e clientes únicos; "
+             "os líderes podem ser diferentes conforme o indicador. "
+             "A tabela é ordenada por " + criterion + ".")
+    if mode == "campaign_ranking" and options.get("campaign_shares"):
+        shopping = [
+            field for field in ("cd_empreendimento", "nm_empreendimento") if field in result
+        ]
+        for metric, column in (
+            ("faturamento", "participacao_faturamento_pct"),
+            ("quantidade_compras", "participacao_compras_pct"),
+        ):
+            denominator = (
+                result.groupby(shopping, dropna=False)[metric].transform("sum")
+                if shopping else pd.Series(result[metric].sum(), index=result.index)
+            )
+            result[column] = result[metric] / denominator.where(denominator.gt(0)) * 100
+        note(context, "Representatividade = valor da campanha dividido pelo total das "
+             "campanhas identificadas do mesmo shopping e período, em percentual. "
+             "Compras sem campanha não entram nesse denominador. "
+             "São mostradas as participações em faturamento e compras separadamente.")
     if mode == "segment_share":
         revenue = data.vl_compra.sum()
         purchases = data.__purchase.nunique()
@@ -111,4 +138,6 @@ def analyze(data, mode, context, options):
         "segment_recurrence": "ticket_medio_por_compra",
         "campaign_frequency": "frequencia_media",
     }.get(mode, "faturamento")
+    if mode == "campaign_ranking":
+        metric = options.get("ranking_metric", metric)
     return _rank(result, metric, groups, options)
