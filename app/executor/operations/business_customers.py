@@ -146,9 +146,24 @@ def analyze(data, mode, context, options) -> pd.DataFrame:
             drop=True
         )
     elif mode == "age_segments":
+        segment = "nm_segmento" if "nm_segmento" in result else "segmento"
         result = result.sort_values(
-            ["faixa_etaria", "quantidade_compras"], ascending=[True, False], kind="stable"
+            [*keys, "faixa_etaria", "quantidade_compras", segment],
+            ascending=[True] * (len(keys) + 1) + [False, True], kind="stable",
         ).reset_index(drop=True)
+        limit = options.get("limit")
+        if limit is not None:
+            if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+                raise ValueError("limit deve ser um inteiro positivo.")
+            result = result.groupby(
+                [*keys, "faixa_etaria"], dropna=False, sort=False,
+            ).head(limit).reset_index(drop=True)
+            note(context, f"Até {limit} segmentos por faixa etária em cada recorte; "
+                 "ordenados por quantidade de compras. "
+                 "Empates são ordenados pelo nome do segmento.")
+        else:
+            note(context, "Segmentos ordenados por quantidade de compras dentro de cada "
+                 "faixa etária, sem limite de segmentos solicitado.")
     if mode in ("geo_ranking", "geo_ticket", "neighborhood_frequency", "age_segments"):
         note(
             context,

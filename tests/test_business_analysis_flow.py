@@ -251,6 +251,27 @@ def test_missing_required_age_data_is_explained():
     assert "dt_nascimento" in response.answer or "nascimento" in response.answer.lower()
 
 
+@pytest.mark.parametrize("question,expected", [
+    ("Quais segmentos de lojas são mais consumidos por cada faixa etária?", 5),
+    ("Qual top 3 de segmentos de lojas são mais consumidos por cada faixa etária?", 3),
+    ("Quais segmentos de lojas são mais consumidos por cada faixa etária? Limite a 2.", 2),
+    ("Quais segmentos de lojas são mais consumidos por cada faixa etária? Mostre apenas 1.", 1),
+    ("Quais segmentos de lojas são mais consumidos por cada faixa etária? Limite de 4.", 4),
+    ("Quais segmentos de lojas são mais consumidos por cada faixa etária? Mostre 2.", 2),
+])
+def test_age_segment_question_honors_only_requested_limits(question, expected):
+    frame = business_frame().iloc[:10].copy().drop(columns="dt_nascimento")
+    frame["sk_cliente"] = [f"client-{i}" for i in range(10)]
+    frame["cd_compra"] = [f"purchase-{i}" for i in range(10)]
+    frame["faixa_etaria"] = ["18-24"] * 5 + ["60+"] * 5
+    frame["nm_segmento"] = ["A", "B", "C", "D", "E"] * 2
+    response = service(frame=frame).execute_question(
+        question=question, knowledge_context=KnowledgeService().get_context(),
+    )
+    counts = pd.DataFrame(response.data).groupby("faixa_etaria").size().to_dict()
+    assert counts == {"18-24": expected, "60+": expected}
+
+
 @pytest.mark.parametrize("index", [0, 1, 16, 17, 18, 19])
 def test_explicit_year_never_includes_purchases_from_another_year(index):
     response = service(frame=business_frame()).execute_question(

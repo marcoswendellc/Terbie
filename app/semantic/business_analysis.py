@@ -108,7 +108,12 @@ def explicit_business_scope(question):
         )[0].strip()
     if campaign in {"promocional", "atual", "analisada", "selecionada"}:
         campaign = None
-    limit = re.search(r"\btop\s+(\d+)\b", text)
+    limit = re.search(
+        r"\b(?:top\s+|limit(?:e|ar)\s+(?:(?:a|de|em|para)\s+)?|"
+        r"(?:mostre|mostrar|exiba|exibir|traga|trazer)\s+(?:(?:apenas|somente|so)\s+)?|"
+        r"(?:apenas|somente)\s+)"
+        r"([1-9]\d*)\b", text,
+    )
     return {
         "campaign": campaign,
         "shopping": shopping,

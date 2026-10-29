@@ -45,6 +45,22 @@ def test_age_metrics_counts_unique_clients_within_age():
     assert young["ticket_medio_por_compra"] == 75
 
 
+@pytest.mark.parametrize("limit,expected", [(None, 4), (1, 1), (3, 3), (10, 4)])
+def test_age_segment_limit_is_optional_and_applies_within_each_age(limit, expected):
+    rows = [
+        [f"{age}-{segment}-{i}", 10, "X", "Centro", age, segment]
+        for age in ["18-24", "35-44", "60+"]
+        for segment, count in [("Moda", 4), ("Alimentacao", 3), ("Calcados", 2), ("Outros", 1)]
+        for i in range(count)
+    ]
+    result, _ = run("age_segments", rows=rows, by_campaign=False, limit=limit)
+    assert result.groupby("faixa_etaria").size().to_dict() == {
+        "18-24": expected, "35-44": expected, "60+": expected,
+    }
+    for _, group in result.groupby("faixa_etaria"):
+        assert group.quantidade_compras.tolist() == [4, 3, 2, 1][:expected]
+
+
 def test_repeat_distinguishes_single_and_multiple_purchase_clients():
     result, _ = run("purchase_repeat")
     counts = result.set_index("perfil_compra")["clientes"].to_dict()
